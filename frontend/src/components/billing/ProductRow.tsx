@@ -39,12 +39,14 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         itemType: 'PRODUCT',
         partNumber: '',
         unit: 'PCS',
+        gstRate: 18,
       });
     } else {
       onUpdate({
         itemType: 'LABOUR',
         partNumber: 'LABOUR',
-        hsn: row.hsn || '9987',
+        hsn: 'N/A',
+        gstRate: 0,
         unit: 'JOB',
         name: row.name || 'Labour Charges',
       });
@@ -230,19 +232,21 @@ export const ProductRow: React.FC<ProductRowProps> = ({
               className="w-full px-2 py-1.5 text-xs text-right font-mono font-bold rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
             />
           </div>
-          {/* Inclusive / Exclusive Tax Toggle Button */}
-          <button
-            type="button"
-            onClick={toggleTaxMode}
-            className={`w-full text-[9px] font-bold py-0.5 px-1 rounded uppercase tracking-wider transition ${
-              isInclusive
-                ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700'
-            }`}
-            title="Click to toggle between Tax Inclusive (Owner overall price) and Tax Exclusive"
-          >
-            {isInclusive ? 'Incl GST (Overall)' : 'Excl GST'}
-          </button>
+          {/* Inclusive / Exclusive Tax Toggle Button (Hardware Products Only) */}
+          {!isLabour && (
+            <button
+              type="button"
+              onClick={toggleTaxMode}
+              className={`w-full text-[9px] font-bold py-0.5 px-1 rounded uppercase tracking-wider transition ${
+                isInclusive
+                  ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700'
+              }`}
+              title="Click to toggle between Tax Inclusive (Owner overall price) and Tax Exclusive"
+            >
+              {isInclusive ? 'Incl GST (Overall)' : 'Excl GST'}
+            </button>
+          )}
         </div>
       </td>
 
@@ -265,24 +269,32 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         />
       </td>
 
-      {/* GST % with CGST & SGST Split Indicator */}
+      {/* GST % Column */}
       <td className="px-1.5 py-1.5 w-24">
         <div className="space-y-1 text-center">
-          <select
-            value={row.gstRate}
-            onChange={(e) => onUpdate({ gstRate: parseFloat(e.target.value) })}
-            className="w-full px-1 py-1 text-xs font-mono font-bold rounded border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-sky-500"
-          >
-            <option value={0}>0% GST</option>
-            <option value={5}>5% GST</option>
-            <option value={12}>12% GST</option>
-            <option value={18}>18% GST</option>
-            <option value={28}>28% GST</option>
-          </select>
-          {row.gstRate > 0 && (
-            <div className="text-[9px] font-mono text-slate-500 dark:text-slate-400 font-semibold">
-              C:{cgst}% + S:{sgst}%
+          {isLabour ? (
+            <div className="text-[10px] font-bold font-mono text-slate-500 dark:text-slate-400 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 select-none">
+              0% (No GST)
             </div>
+          ) : (
+            <>
+              <select
+                value={row.gstRate}
+                onChange={(e) => onUpdate({ gstRate: parseFloat(e.target.value) })}
+                className="w-full px-1 py-1 text-xs font-mono font-bold rounded border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-sky-500"
+              >
+                <option value={0}>0% GST</option>
+                <option value={5}>5% GST</option>
+                <option value={12}>12% GST</option>
+                <option value={18}>18% GST</option>
+                <option value={28}>28% GST</option>
+              </select>
+              {row.gstRate > 0 && (
+                <div className="text-[9px] font-mono text-slate-500 dark:text-slate-400 font-semibold">
+                  C:{cgst}% + S:{sgst}%
+                </div>
+              )}
+            </>
           )}
         </div>
       </td>
