@@ -52,38 +52,35 @@ export const BillingHeader: React.FC = () => {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 mb-4 transition-colors">
       {/* Top Title Banner */}
-      <div className="flex flex-wrap items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4 gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4 gap-3">
         <div className="flex items-center space-x-2">
-          <Building2 className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-          <span className="font-bold text-slate-800 dark:text-slate-100 text-base tracking-wide">
+          <Building2 className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0" />
+          <span className="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base tracking-wide">
             OWSHIKA ENTERPRISES
-          </span>
-          <span className="text-xs bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 font-semibold px-2 py-0.5 rounded-full border border-sky-200 dark:border-sky-800">
-            Tax Invoice Module
           </span>
         </div>
 
         {/* Invoice Meta: Number & Date */}
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
-            <Hash className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Inv No:</span>
+        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto">
+          <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+            <Hash className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Inv:</span>
             <input
               type="text"
               value={header.invoiceNumber}
               onChange={(e) => setHeaderField('invoiceNumber', e.target.value)}
-              className="bg-transparent font-mono font-bold text-sm text-sky-700 dark:text-sky-400 w-32 focus:outline-none"
+              className="bg-transparent font-mono font-bold text-xs sm:text-sm text-sky-700 dark:text-sky-400 w-full focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
-            <Calendar className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Date:</span>
+          <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+            <Calendar className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Date:</span>
             <input
               type="date"
               value={header.invoiceDate}
               onChange={(e) => setHeaderField('invoiceDate', e.target.value)}
-              className="bg-transparent font-medium text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+              className="bg-transparent font-medium text-xs text-slate-800 dark:text-slate-200 w-full focus:outline-none min-w-0"
             />
           </div>
         </div>
@@ -149,11 +146,11 @@ export const BillingHeader: React.FC = () => {
         </div>
 
         {/* Payment Mode Selector Bar */}
-        <div className="md:col-span-12 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2">
+        <div className="md:col-span-12 pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
             Payment Mode:
           </span>
-          <div className="flex items-center space-x-2">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
             {paymentModes.map((mode) => {
               const Icon = mode.icon;
               const isSelected = header.paymentMode === mode.id;
@@ -162,13 +159,13 @@ export const BillingHeader: React.FC = () => {
                   key={mode.id}
                   type="button"
                   onClick={() => setHeaderField('paymentMode', mode.id)}
-                  className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex items-center justify-center space-x-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${
                     isSelected
                       ? 'bg-sky-600 text-white shadow-sm ring-2 ring-sky-300 dark:ring-sky-800'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
-                  <Icon className="h-3.5 w-3.5" />
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
                   <span>{mode.label}</span>
                 </button>
               );

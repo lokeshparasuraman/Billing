@@ -19,25 +19,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
   return (
     <nav className="bg-slate-900 dark:bg-slate-950 text-white border-b border-slate-800 dark:border-slate-850 sticky top-0 z-40 shadow-md no-print">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-2">
           {/* Brand Logo & Name */}
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-sky-500/30">
+          <div className="flex items-center space-x-2.5 flex-shrink-0">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center font-bold text-base sm:text-xl text-white shadow-lg shadow-sky-500/30">
               OE
             </div>
             <div>
-              <span className="font-extrabold text-lg tracking-tight text-white block leading-tight">
-                OWSHIKA ENTERPRISES
+              <span className="font-extrabold text-sm sm:text-lg tracking-tight text-white block leading-tight">
+                OWSHIKA
+                <span className="hidden xs:inline"> ENTERPRISES</span>
               </span>
-              <span className="text-xs text-sky-400 font-medium tracking-wider uppercase">
-                Commercial Billing System
+              <span className="text-[10px] sm:text-xs text-sky-400 font-medium tracking-wider uppercase block">
+                Billing System
               </span>
             </div>
           </div>
 
           {/* Navigation Links & Controls */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1 sm:space-x-3">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -45,14 +46,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-sky-600 text-white shadow-md'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800 dark:hover:bg-slate-900'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">{item.label}</span>
                 </Link>
               );
             })}
@@ -61,18 +62,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 dark:bg-slate-900 text-slate-300 hover:bg-slate-700 dark:hover:bg-slate-800 hover:text-white border border-slate-700 transition"
+              className="flex items-center justify-center p-2 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold bg-slate-800 dark:bg-slate-900 text-slate-300 hover:bg-slate-700 dark:hover:bg-slate-800 hover:text-white border border-slate-700 transition"
               title={`Switch to ${mode === 'light' ? 'Dark' : 'Light'} Mode`}
             >
               {mode === 'light' ? (
                 <>
-                  <Moon className="h-3.5 w-3.5 text-amber-400" />
-                  <span className="hidden sm:inline">Dark</span>
+                  <Moon className="h-4 w-4 sm:h-3.5 sm:w-3.5 text-amber-400 shrink-0" />
+                  <span className="hidden md:inline ml-1.5">Dark</span>
                 </>
               ) : (
                 <>
-                  <Sun className="h-3.5 w-3.5 text-sky-400" />
-                  <span className="hidden sm:inline">Light</span>
+                  <Sun className="h-4 w-4 sm:h-3.5 sm:w-3.5 text-sky-400 shrink-0" />
+                  <span className="hidden md:inline ml-1.5">Light</span>
                 </>
               )}
             </button>
@@ -82,11 +83,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               <button
                 type="button"
                 onClick={onOpenShortcuts}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 dark:bg-slate-900 text-slate-300 hover:bg-slate-700 dark:hover:bg-slate-800 hover:text-white border border-slate-700 transition"
+                className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 dark:bg-slate-900 text-slate-300 hover:bg-slate-700 dark:hover:bg-slate-800 hover:text-white border border-slate-700 transition"
                 title="Keyboard Shortcuts"
               >
-                <Keyboard className="h-3.5 w-3.5 text-sky-400" />
-                <span className="hidden sm:inline">Shortcuts</span>
+                <Keyboard className="h-3.5 w-3.5 text-sky-400 shrink-0" />
+                <span className="hidden md:inline">Shortcuts</span>
               </button>
             )}
           </div>

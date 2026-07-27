@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { SavedInvoice } from '../../types/billing';
 import { PrintableInvoice } from './PrintableInvoice';
@@ -24,86 +24,95 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
     documentTitle: invoice ? `Bill_${invoice.invoiceNumber}` : 'Owshika_BW_Invoice',
   });
 
+  // Auto set smaller zoom for mobile devices
+  useEffect(() => {
+    if (window.innerWidth < 640) {
+      setZoomLevel(60);
+    }
+  }, [isOpen]);
+
   if (!isOpen || !invoice) return null;
 
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(150, prev + 15));
-  const handleZoomOut = () => setZoomLevel((prev) => Math.max(50, prev - 15));
-  const handleResetZoom = () => setZoomLevel(100);
+  const handleZoomOut = () => setZoomLevel((prev) => Math.max(40, prev - 15));
+  const handleResetZoom = () => setZoomLevel(window.innerWidth < 640 ? 60 : 100);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-between p-2 sm:p-4 overflow-hidden no-print">
       {/* ------------------- MODAL TOP TOOLBAR ------------------- */}
-      <div className="w-full max-w-6xl bg-slate-900 dark:bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-white flex-shrink-0">
+      <div className="w-full max-w-6xl bg-slate-900 dark:bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-white flex-shrink-0">
         {/* Left: Title & Invoice Badge */}
-        <div className="flex items-center space-x-3">
-          <div className="h-9 w-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sky-400">
-            <FileText className="h-5 w-5" />
+        <div className="flex items-center space-x-2.5">
+          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sky-400 shrink-0">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="font-extrabold text-base tracking-wide text-white">
+              <h2 className="font-extrabold text-xs sm:text-base tracking-wide text-white">
                 A4 Printable Bill Preview
               </h2>
-              <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/30 uppercase tracking-wider">
-                Pure B&W Monochrome
+              <span className="hidden sm:inline bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/30 uppercase tracking-wider">
+                B&W Monochrome
               </span>
             </div>
-            <p className="text-xs text-slate-400 font-mono">
-              Invoice #{invoice.invoiceNumber} | Customer: {invoice.customerName}
+            <p className="text-[11px] sm:text-xs text-slate-400 font-mono truncate max-w-[200px] sm:max-w-none">
+              #{invoice.invoiceNumber} | {invoice.customerName}
             </p>
           </div>
         </div>
 
-        {/* Middle: Zoom Controls */}
-        <div className="flex items-center bg-slate-800/90 border border-slate-700 rounded-lg p-1 space-x-1">
-          <button
-            type="button"
-            onClick={handleZoomOut}
-            className="p-1.5 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition"
-            title="Zoom Out"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </button>
-          <span className="px-2 text-xs font-mono font-bold text-slate-200 min-w-[50px] text-center">
-            {zoomLevel}%
-          </span>
-          <button
-            type="button"
-            onClick={handleZoomIn}
-            className="p-1.5 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition"
-            title="Zoom In"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={handleResetZoom}
-            className="p-1.5 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition border-l border-slate-700 ml-1"
-            title="Reset Zoom to 100%"
-          >
-            <Maximize2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+        <div className="flex items-center justify-between sm:justify-end gap-2">
+          {/* Middle: Zoom Controls */}
+          <div className="flex items-center bg-slate-800/90 border border-slate-700 rounded-lg p-1 space-x-1">
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition"
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </button>
+            <span className="px-1.5 text-xs font-mono font-bold text-slate-200 min-w-[40px] text-center">
+              {zoomLevel}%
+            </span>
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition"
+              title="Zoom In"
+            >
+              <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleResetZoom}
+              className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition border-l border-slate-700 ml-0.5"
+              title="Reset Zoom"
+            >
+              <Maximize2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            </button>
+          </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center space-x-2">
-          <button
-            type="button"
-            onClick={() => handlePrint()}
-            className="bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-extrabold text-xs px-4 py-2 rounded-lg flex items-center space-x-2 shadow-lg shadow-sky-600/30 transition"
-          >
-            <Printer className="h-4 w-4" />
-            <span>Print Bill (A4 B&W)</span>
-          </button>
+          {/* Right: Actions */}
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => handlePrint()}
+              className="bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-extrabold text-xs px-3 sm:px-4 py-2 rounded-lg flex items-center space-x-1.5 shadow-lg shadow-sky-600/30 transition"
+            >
+              <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span>Print Bill</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
-            title="Close Preview"
-          >
-            <X className="h-5 w-5" />
-          </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              title="Close Preview"
+            >
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
+            </button>
+          </div>
         </div>
       </div>
 

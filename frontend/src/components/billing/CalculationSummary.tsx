@@ -2,7 +2,7 @@ import React from 'react';
 import { useBillingStore } from '../../store/useBillingStore';
 import { calculateInvoiceSummary, formatCurrency } from '../../utils/calculations';
 import { createInvoice, fetchNextInvoiceNumber } from '../../services/api';
-import { Printer, Save, RefreshCw, AlertCircle, Sparkles, FileSearch } from 'lucide-react';
+import { Printer, Save, RefreshCw, AlertCircle, FileSearch } from 'lucide-react';
 import { SavedInvoice } from '../../types/billing';
 
 export const CalculationSummary: React.FC = () => {
@@ -142,9 +142,8 @@ export const CalculationSummary: React.FC = () => {
       <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
         {/* Amount in Words Card */}
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-900 dark:to-slate-950 text-white rounded-xl p-4 shadow-sm border border-slate-700">
-          <div className="flex items-center space-x-2 text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <Sparkles className="h-4 w-4" />
-            <span>Amount In Words</span>
+          <div className="text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">
+            Amount In Words
           </div>
           <div className="text-sm font-semibold text-slate-100 italic leading-snug">
             "{summary.amountInWords}"
@@ -160,21 +159,21 @@ export const CalculationSummary: React.FC = () => {
         )}
 
         {/* Action Buttons Toolbar */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <button
             type="button"
             onClick={clearBillingForm}
-            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+            className="flex items-center justify-center space-x-1.5 px-3.5 py-2.5 sm:py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
           >
             <RefreshCw className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
             <span>Clear Form</span>
           </button>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handlePreviewWithoutSaving}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 transition shadow-sm"
+              className="flex items-center justify-center space-x-1.5 px-4 py-2.5 sm:py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 transition shadow-sm"
               title="Preview A4 Sheet Bill before saving or printing"
             >
               <FileSearch className="h-4 w-4 text-sky-600 dark:text-sky-400" />
@@ -185,7 +184,7 @@ export const CalculationSummary: React.FC = () => {
               type="button"
               disabled={isSaving}
               onClick={() => handleValidateAndSave(false)}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 transition shadow-sm"
+              className="flex items-center justify-center space-x-1.5 px-4 py-2.5 sm:py-2 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 transition shadow-sm"
             >
               <Save className="h-4 w-4 text-slate-700 dark:text-slate-300" />
               <span>Save Only</span>
@@ -195,7 +194,7 @@ export const CalculationSummary: React.FC = () => {
               type="button"
               disabled={isSaving}
               onClick={() => handleValidateAndSave(true)}
-              className="flex items-center space-x-2 px-5 py-2 rounded-lg text-xs font-extrabold text-white bg-sky-600 hover:bg-sky-500 transition shadow-md shadow-sky-600/30"
+              className="flex items-center justify-center space-x-2 px-5 py-2.5 sm:py-2 rounded-lg text-xs font-extrabold text-white bg-sky-600 hover:bg-sky-500 transition shadow-md shadow-sky-600/30"
               data-action="save-print"
             >
               <Printer className="h-4 w-4" />
@@ -209,7 +208,7 @@ export const CalculationSummary: React.FC = () => {
       <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 divide-y divide-slate-100 dark:divide-slate-800 text-xs">
         <div className="pb-2 font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-xs flex justify-between">
           <span>Billing Summary</span>
-          <span className="text-sky-600 dark:text-sky-400">Live Breakdown</span>
+          <span className="text-sky-600 dark:text-sky-400">Price Breakdown</span>
         </div>
 
         {/* Subtotal */}

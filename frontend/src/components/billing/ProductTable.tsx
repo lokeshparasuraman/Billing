@@ -105,9 +105,14 @@ export const ProductTable: React.FC = () => {
         </div>
       </div>
 
+      {/* Mobile Horizontal Scroll Hint */}
+      <div className="bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 text-[11px] font-semibold px-3 py-1 block sm:hidden text-center border-b border-sky-100 dark:border-sky-900">
+        👉 Swipe table horizontally to edit all columns (HSN, Price, Tax, Total)
+      </div>
+
       {/* Table Container */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto custom-scrollbar">
+        <table className="w-full min-w-[950px] text-left border-collapse">
           <thead>
             <tr className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               <th className="py-2.5 px-2 text-center w-10">#</th>
@@ -143,28 +148,8 @@ export const ProductTable: React.FC = () => {
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 px-4 py-2 flex flex-wrap justify-between items-center text-xs gap-2">
-        <div className="flex items-center space-x-3">
-          <button
-            type="button"
-            onClick={addRow}
-            className="text-sky-700 dark:text-sky-400 hover:text-sky-900 dark:hover:text-sky-300 font-bold flex items-center space-x-1 transition"
-          >
-            <Plus className="h-4 w-4" />
-            <span>+ Add Hardware Item</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => addLabourRow()}
-            className="text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 font-bold flex items-center space-x-1 transition border-l border-slate-300 dark:border-slate-700 pl-3"
-          >
-            <Wrench className="h-3.5 w-3.5" />
-            <span>+ Add Labour / Service Charge</span>
-          </button>
-        </div>
-
-        <span className="text-slate-500 dark:text-slate-400 font-mono">
+      <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 px-4 py-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <span className="font-mono">
           Tip: You can add both hardware parts and labour charges in the same invoice.
         </span>
       </div>

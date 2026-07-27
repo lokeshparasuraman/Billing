@@ -17,9 +17,32 @@ export const ProductCatalogPage: React.FC = () => {
     hsn: '',
     gst: 18,
     price: '',
-    unit: 'PCS',
+    unit: '',
     stock: 100,
   });
+
+  const resetForm = () => {
+    setNewProd({
+      partNumber: '',
+      name: '',
+      hsn: '',
+      gst: 18,
+      price: '',
+      unit: '',
+      stock: 100,
+    });
+    setFormError(null);
+  };
+
+  const handleOpenAddModal = () => {
+    resetForm();
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+    resetForm();
+  };
 
   useEffect(() => {
     loadCatalog();
@@ -53,12 +76,12 @@ export const ProductCatalogPage: React.FC = () => {
         hsn: newProd.hsn.trim(),
         gst: Number(newProd.gst),
         price: Number(newProd.price),
-        unit: newProd.unit.trim().toUpperCase(),
-        stock: Number(newProd.stock),
+        unit: newProd.unit.trim() ? newProd.unit.trim().toUpperCase() : 'PCS',
+        stock: Number(newProd.stock || 100),
       });
 
       setIsAddModalOpen(false);
-      setNewProd({ partNumber: '', name: '', hsn: '', gst: 18, price: '', unit: 'PCS', stock: 100 });
+      resetForm();
       loadCatalog();
     } catch (err: any) {
       console.error(err);
@@ -89,7 +112,7 @@ export const ProductCatalogPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center space-x-3 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
             {/* Search Bar */}
             <div className="relative w-full sm:w-64">
               <Search className="h-4 w-4 absolute left-3 top-3 text-slate-400" />
@@ -104,8 +127,8 @@ export const ProductCatalogPage: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow transition flex-shrink-0"
+              onClick={handleOpenAddModal}
+              className="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center justify-center space-x-1.5 shadow transition flex-shrink-0"
             >
               <Plus className="h-4 w-4" />
               <span>Add New Product</span>
@@ -125,7 +148,7 @@ export const ProductCatalogPage: React.FC = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[650px] text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-800 dark:bg-slate-950 text-white text-[11px] font-bold uppercase tracking-wider">
                     <th className="py-3 px-4">Part Number</th>
@@ -162,16 +185,16 @@ export const ProductCatalogPage: React.FC = () => {
 
       {/* Add Product Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 overflow-hidden">
-            <div className="bg-slate-800 dark:bg-slate-950 text-white px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="bg-slate-800 dark:bg-slate-950 text-white px-5 py-4 flex items-center justify-between shrink-0">
               <span className="font-bold text-base tracking-wide">Add Product to Catalog</span>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={handleCloseAddModal} className="text-slate-400 hover:text-white">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateProduct} className="p-6 space-y-4 text-xs">
+            <form onSubmit={handleCreateProduct} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto">
               {formError && (
                 <div className="bg-rose-50 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200 p-3 rounded-lg border border-rose-200 dark:border-rose-800 font-semibold">
                   {formError}
@@ -257,7 +280,7 @@ export const ProductCatalogPage: React.FC = () => {
               <div className="pt-4 flex justify-end space-x-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={handleCloseAddModal}
                   className="px-4 py-2 rounded-lg font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700"
                 >
                   Cancel

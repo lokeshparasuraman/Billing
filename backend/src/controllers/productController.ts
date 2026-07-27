@@ -64,31 +64,40 @@ export const createProduct = async (req: Request, res: Response) => {
     const { partNumber, name, hsn, gst, price, unit, stock } = req.body;
 
     if (!partNumber || !name || !hsn || gst === undefined || price === undefined || !unit) {
-      return res.status(400).json({ error: 'Missing required product fields' });
+      return res.status(400).json({ error: 'Missing required product fields (Part #, Name, HSN, Price, Unit).' });
     }
 
-    const existing = await prisma.product.findUnique({
-      where: { partNumber },
+    const uppercasePartNum = String(partNumber).trim().toUpperCase();
+
+    const existing = await prisma.product.findFirst({
+      where: {
+        partNumber: {
+          equals: uppercasePartNum,
+        },
+      },
     });
     if (existing) {
-      return res.status(400).json({ error: 'Product with this Part Number already exists' });
+      return res.status(400).json({ error: `Product with Part Number '${uppercasePartNum}' already exists.` });
     }
 
     const newProduct = await prisma.product.create({
       data: {
-        partNumber: String(partNumber).toUpperCase(),
-        name: String(name),
-        hsn: String(hsn),
+        partNumber: uppercasePartNum,
+        name: String(name).trim(),
+        hsn: String(hsn).trim(),
         gst: Number(gst),
         price: Number(price),
-        unit: String(unit).toUpperCase(),
+        unit: String(unit).trim().toUpperCase(),
         stock: Number(stock || 100),
       },
     });
 
     res.status(201).json(newProduct);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating product:', error);
-    res.status(500).json({ error: 'Failed to create product' });
+    if (error?.code === 'P2002') {
+      return res.status(400).json({ error: 'Product with this Part Number already exists' });
+    }
+    res.status(500).json({ error: error?.message || 'Failed to create product' });
   }
 };
