@@ -1,0 +1,81 @@
+// Prisma Schema for Owshika Enterprises Billing Application
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  partNumber  String   @unique
+  name        String
+  hsn         String
+  gst         Float    // GST percentage (e.g. 5, 12, 18, 28)
+  price       Float    // Selling price per unit
+  unit        String   // PCS, MTR, KG, BOX, SET, PKT, LTR
+  stock       Int      @default(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  invoiceItems InvoiceItem[]
+
+  @@index([partNumber])
+  @@index([name])
+}
+
+model Customer {
+  id        String    @id @default(uuid())
+  name      String
+  phone     String?
+  address   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  invoices  Invoice[]
+}
+
+model Invoice {
+  id              String        @id @default(uuid())
+  invoiceNumber   String        @unique // e.g. OE-2026-0001
+  invoiceDate     DateTime      @default(now())
+  customerName    String
+  customerPhone   String?
+  customerAddress String?
+  paymentMode     String        @default("CASH") // CASH, UPI, CARD, CREDIT
+  subtotal        Float
+  discountTotal   Float         @default(0)
+  cgstTotal       Float
+  sgstTotal       Float
+  igstTotal       Float         @default(0)
+  roundOff        Float         @default(0)
+  grandTotal      Float
+  amountInWords   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  customerId      String?
+  customer        Customer?     @relation(fields: [customerId], references: [id])
+  items           InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  partNumber  String
+  productName String
+  hsn         String
+  unit        String
+  quantity    Float
+  price       Float
+  discount    Float    @default(0) // Percentage or fixed discount
+  gstRate     Float    // GST percentage
+  gstAmount   Float
+  total       Float
+}

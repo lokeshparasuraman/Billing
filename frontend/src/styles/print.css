@@ -1,0 +1,91 @@
+/* A4 Monochrome Print Engine Stylesheet for Owshika Enterprises Billing */
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 10mm 12mm 10mm;
+  }
+
+  html, body {
+    width: 210mm;
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide screen-only elements */
+  .no-print, header, nav, .navbar, .action-bar, button, .MuiButton-root, .a4-modal-controls {
+    display: none !important;
+  }
+
+  /* Force pure black text and white background everywhere */
+  * {
+    color: #000000 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Exception for company logo badge background */
+  .print-invoice-wrapper .bg-black {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  .print-invoice-wrapper {
+    width: 100% !important;
+    margin: 0 auto !important;
+    background: #ffffff !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Repeat table header on every printed page */
+  .print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: 1px solid #000000 !important;
+    page-break-inside: auto !important;
+  }
+
+  .print-table thead {
+    display: table-header-group !important;
+  }
+
+  .print-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-table tbody tr {
+    border-bottom: 1px solid #000000 !important;
+  }
+
+  .print-table th, .print-table td {
+    padding: 5px 6px !important;
+    text-align: left !important;
+    vertical-align: middle !important;
+    border-color: #000000 !important;
+  }
+
+  .print-table th {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+    border-bottom: 2px solid #000000 !important;
+    text-transform: uppercase !important;
+    font-size: 10px !important;
+  }
+
+  /* Footer and totals section on final page */
+  .print-summary-footer {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-top: 15px !important;
+  }
+}
