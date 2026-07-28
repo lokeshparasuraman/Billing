@@ -130,51 +130,40 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
           </div>
         </div>
 
-        {/* BILLED TO / CUSTOMER & TRANSPORT DETAILS GRID */}
-        <div className="mt-3 grid grid-cols-2 divide-x-2 divide-black border border-black text-xs bg-white">
-          {/* BILLED TO / CUSTOMER DETAILS */}
-          <div className="p-3 space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider block text-gray-600 border-b border-gray-300 pb-0.5 mb-1">
-              Billed To / Customer Details:
+        {/* TRANSPORT DETAILS (ONLY DISPLAYED FOR TRANSPORT BILLS) */}
+        {invoice.billType === 'TRANSPORT' && (
+          <div className="mt-3 border-2 border-black p-3 text-xs bg-white space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider block text-gray-700 border-b border-black pb-1 mb-2">
+              Transport / Waybill Address &amp; Delivery Details:
             </span>
-            <h3 className="font-black text-black text-sm uppercase">{invoice.customerName || 'Walk-in Customer'}</h3>
-            {invoice.customerPhone && (
-              <p className="text-black text-xs font-mono">Contact: <strong className="font-bold">{invoice.customerPhone}</strong></p>
-            )}
-            <p className="text-black text-xs font-medium leading-relaxed whitespace-pre-line">
-              {invoice.customerAddress || 'Dharmapuri, Tamil Nadu'}
-            </p>
-          </div>
-
-          {/* DISPATCH / TRANSPORT DETAILS */}
-          <div className="p-3 space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider block text-gray-600 border-b border-gray-300 pb-0.5 mb-1">
-              Dispatch / Transport Details:
-            </span>
-            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div className="grid grid-cols-2 gap-4 text-xs font-mono">
               <div>
-                <span className="font-sans font-semibold text-gray-600 block text-[10px]">From Address:</span>
-                <strong className="font-sans font-bold text-black text-[11px] block leading-snug">
+                <span className="font-sans font-bold text-gray-700 block text-[10px] uppercase tracking-wider">From Address:</span>
+                <strong className="font-sans font-extrabold text-black text-xs block leading-snug whitespace-pre-line pt-0.5">
                   {invoice.transportDetails?.fromLocation || address}
                 </strong>
               </div>
               <div>
-                <span className="font-sans font-semibold text-gray-600 block text-[10px]">To Address:</span>
-                <strong className="font-sans font-bold text-black text-[11px] block leading-snug">
-                  {invoice.transportDetails?.toLocation || 'Dharmapuri'}
+                <span className="font-sans font-bold text-gray-700 block text-[10px] uppercase tracking-wider">To Address:</span>
+                <strong className="font-sans font-extrabold text-black text-xs block leading-snug whitespace-pre-line pt-0.5">
+                  {invoice.transportDetails?.toLocation || 'N/A'}
                 </strong>
               </div>
-              <div>
-                <span className="font-sans font-semibold text-gray-600 block text-[10px]">Vehicle / LR No:</span>
-                <strong className="font-black text-black text-xs">{invoice.transportDetails?.vehicleNumber || 'N/A'}</strong>
-              </div>
-              <div>
-                <span className="font-sans font-semibold text-gray-600 block text-[10px]">Transporter:</span>
-                <strong className="font-bold text-black text-xs">{invoice.transportDetails?.transporterName || 'Self Transport'}</strong>
-              </div>
+              {invoice.transportDetails?.vehicleNumber && (
+                <div>
+                  <span className="font-sans font-bold text-gray-700 block text-[10px] uppercase tracking-wider">Vehicle / LR No:</span>
+                  <strong className="font-black text-black text-xs pt-0.5 block">{invoice.transportDetails.vehicleNumber}</strong>
+                </div>
+              )}
+              {invoice.transportDetails?.transporterName && (
+                <div>
+                  <span className="font-sans font-bold text-gray-700 block text-[10px] uppercase tracking-wider">Transporter:</span>
+                  <strong className="font-bold text-black text-xs pt-0.5 block">{invoice.transportDetails.transporterName}</strong>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ------------------- PRODUCT & SERVICE ITEMS TABLE ------------------- */}

@@ -556,7 +556,7 @@ export const BillingHeader: React.FC = () => {
               <textarea
                 rows={2}
                 placeholder="Enter sender address..."
-                value={(header.transportDetails?.fromLocation && header.transportDetails.fromLocation !== 'Peenya, Bengaluru') ? header.transportDetails.fromLocation : (storeDetails.address || '')}
+                value={header.transportDetails?.fromLocation ?? storeDetails.address ?? ''}
                 onChange={(e) => setTransportField('fromLocation', e.target.value)}
                 className="w-full px-3.5 py-2 rounded-xl font-medium text-xs focus:outline-none leading-relaxed custom-scrollbar resize-none"
                 style={{ background: inputBg, color: cardStrong, border: `1px solid ${inputBorder}` }}
