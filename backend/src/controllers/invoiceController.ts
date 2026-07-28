@@ -1,12 +1,15 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { prisma } from '../db.js';
 import { numberToWordsIndian } from '../utils/numberToWords.js';
+import { AuthenticatedRequest } from '../middlewares/authMiddleware.js';
 
-export const getNextInvoiceNumber = async (req: Request, res: Response) => {
+export const getNextInvoiceNumber = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const year = new Date().getFullYear();
     const prefix = `OE-${year}-`;
     const invoices = await prisma.invoice.findMany({
+      where: { userId },
       select: { invoiceNumber: true },
     });
     let maxSeq = 0;
@@ -27,8 +30,9 @@ export const getNextInvoiceNumber = async (req: Request, res: Response) => {
   }
 };
 
-export const createInvoice = async (req: Request, res: Response) => {
+export const createInvoice = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const {
       invoiceNumber,
       invoiceDate,
@@ -45,7 +49,6 @@ export const createInvoice = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'At least one product item is required' });
     }
 
-    // Validate each item
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (!item.productName || item.productName.trim() === '') {
@@ -59,7 +62,6 @@ export const createInvoice = async (req: Request, res: Response) => {
       }
     }
 
-    // Perform server-side calculation verification
     let calculatedSubtotal = 0;
     let calculatedDiscountTotal = 0;
     let calculatedCgstTotal = 0;
@@ -107,7 +109,6 @@ export const createInvoice = async (req: Request, res: Response) => {
     const roundOff = Number((roundedGrandTotal - exactGrandTotal).toFixed(2));
     const amountInWords = numberToWordsIndian(roundedGrandTotal);
 
-    // Auto-register or update entered products into Product Catalog list
     for (const item of processedItems) {
       const pNum = String(item.partNumber || '').trim().toUpperCase();
       const pName = String(item.productName || '').trim();
@@ -122,7 +123,7 @@ export const createInvoice = async (req: Request, res: Response) => {
       if (!isSpecialRow && pName) {
         try {
           const existing = await prisma.product.findFirst({
-            where: { partNumber: pNum },
+            where: { partNumber: pNum, userId },
           });
 
           if (existing) {
@@ -138,6 +139,7 @@ export const createInvoice = async (req: Request, res: Response) => {
           } else {
             await prisma.product.create({
               data: {
+                userId,
                 partNumber: pNum,
                 name: pName,
                 hsn: item.hsn || 'N/A',
@@ -154,10 +156,9 @@ export const createInvoice = async (req: Request, res: Response) => {
       }
     }
 
-    // Save Customer if not exists or update phone/address
     let customerId: string | null = null;
     const existingCustomer = await prisma.customer.findFirst({
-      where: { name: finalCustomerName },
+      where: { name: finalCustomerName, userId },
     });
 
     if (existingCustomer) {
@@ -165,6 +166,7 @@ export const createInvoice = async (req: Request, res: Response) => {
     } else {
       const newCust = await prisma.customer.create({
         data: {
+          userId,
           name: finalCustomerName,
           phone: customerPhone || null,
           address: customerAddress || null,
@@ -173,16 +175,16 @@ export const createInvoice = async (req: Request, res: Response) => {
       customerId = newCust.id;
     }
 
-    // Handle invoice number collision gracefully
     let finalInvNum = invoiceNumber;
     if (!finalInvNum) {
       const year = new Date().getFullYear();
-      const count = await prisma.invoice.count();
+      const count = await prisma.invoice.count({ where: { userId } });
       finalInvNum = `OE-${year}-${(count + 1).toString().padStart(4, '0')}`;
     }
 
     const invoice = await prisma.invoice.create({
       data: {
+        userId,
         invoiceNumber: finalInvNum,
         invoiceDate: invoiceDate ? new Date(invoiceDate) : new Date(),
         customerName: finalCustomerName,
@@ -217,9 +219,11 @@ export const createInvoice = async (req: Request, res: Response) => {
   }
 };
 
-export const getInvoices = async (req: Request, res: Response) => {
+export const getInvoices = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const invoices = await prisma.invoice.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' },
       include: {
         _count: {
@@ -234,11 +238,12 @@ export const getInvoices = async (req: Request, res: Response) => {
   }
 };
 
-export const getInvoiceById = async (req: Request, res: Response) => {
+export const getInvoiceById = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
-    const invoice = await prisma.invoice.findUnique({
-      where: { id },
+    const invoice = await prisma.invoice.findFirst({
+      where: { id, userId },
       include: {
         items: true,
       },
@@ -255,26 +260,31 @@ export const getInvoiceById = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteInvoice = async (req: Request, res: Response) => {
+export const deleteInvoice = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
 
+    const existingInv = await prisma.invoice.findFirst({ where: { id, userId } });
+    if (!existingInv) {
+      return res.status(404).json({ error: 'Invoice not found or unauthorized' });
+    }
+
     await prisma.invoiceItem.deleteMany({
-      where: { invoiceId: id },
+      where: { invoiceId: existingInv.id },
     });
 
     await prisma.invoice.delete({
-      where: { id },
+      where: { id: existingInv.id },
     });
 
-    // Re-sequence remaining invoices for the current year to ensure contiguous invoice numbering
     const year = new Date().getFullYear();
     const remainingInvoices = await prisma.invoice.findMany({
+      where: { userId },
       orderBy: { createdAt: 'asc' },
       select: { id: true, invoiceNumber: true },
     });
 
-    // Pass 1: Add temp suffix to avoid unique constraint collisions
     for (const inv of remainingInvoices) {
       await prisma.invoice.update({
         where: { id: inv.id },
@@ -282,7 +292,6 @@ export const deleteInvoice = async (req: Request, res: Response) => {
       });
     }
 
-    // Pass 2: Assign clean sequential OE-YYYY-XXXX numbers
     for (let i = 0; i < remainingInvoices.length; i++) {
       const inv = remainingInvoices[i];
       const newInvNum = `OE-${year}-${String(i + 1).padStart(4, '0')}`;

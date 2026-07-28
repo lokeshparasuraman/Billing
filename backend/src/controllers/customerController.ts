@@ -1,11 +1,15 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { prisma } from '../db.js';
+import { AuthenticatedRequest } from '../middlewares/authMiddleware.js';
 
-export const searchCustomers = async (req: Request, res: Response) => {
+export const searchCustomers = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const query = String(req.query.q || '').trim();
+
     if (!query) {
       const topCustomers = await prisma.customer.findMany({
+        where: { userId },
         take: 10,
         orderBy: { name: 'asc' },
       });
@@ -14,9 +18,10 @@ export const searchCustomers = async (req: Request, res: Response) => {
 
     const customers = await prisma.customer.findMany({
       where: {
+        userId,
         OR: [
-          { name: { contains: query } },
-          { phone: { contains: query } },
+          { name: { contains: query, mode: 'insensitive' } },
+          { phone: { contains: query, mode: 'insensitive' } },
         ],
       },
       take: 10,
@@ -30,18 +35,21 @@ export const searchCustomers = async (req: Request, res: Response) => {
   }
 };
 
-export const createCustomer = async (req: Request, res: Response) => {
+export const createCustomer = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const { name, phone, address } = req.body;
+
     if (!name) {
       return res.status(400).json({ error: 'Customer name is required' });
     }
 
     const newCustomer = await prisma.customer.create({
       data: {
-        name,
-        phone,
-        address,
+        userId,
+        name: String(name).trim(),
+        phone: phone ? String(phone).trim() : null,
+        address: address ? String(address).trim() : null,
       },
     });
 

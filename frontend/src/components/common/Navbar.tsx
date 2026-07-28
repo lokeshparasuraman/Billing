@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, Menu, X, ChevronRight, Keyboard, Wifi, RefreshCw } from 'lucide-react';
+import { Sun, Moon, Menu, X, ChevronRight, Keyboard, LogOut, User as UserIcon } from 'lucide-react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useBillingStore } from '../../store/useBillingStore';
+import { useAuth } from '../../context/AuthContext';
 import { BrandLogo } from './BrandLogo';
 
 
@@ -15,6 +16,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const location = useLocation();
   const { mode, toggleTheme } = useThemeMode();
   const { rows, clearBillingForm, storeDetails } = useBillingStore();
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [fontHover, setFontHover] = useState(false);
 
@@ -303,6 +305,25 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 >
                   <Keyboard style={{ width: 17, height: 17 }} />
                 </button>
+              )}
+
+              {user && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
+                  <div title={user.email} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: txtMuted, background: iconHoverBg, padding: '5px 10px', borderRadius: '8px' }}>
+                    <UserIcon style={{ width: 14, height: 14 }} />
+                    <span>{user.email.split('@')[0]}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={logout}
+                    title="Log Out"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', color: txtMuted, display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s' }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(239, 68, 68, 0.15)'; el.style.color = '#ef4444'; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'none'; el.style.color = txtMuted; }}
+                  >
+                    <LogOut style={{ width: 17, height: 17 }} />
+                  </button>
+                </div>
               )}
             </div>
 

@@ -7,8 +7,10 @@ import { Navbar } from './components/common/Navbar';
 import { BillingPage } from './pages/BillingPage';
 import { InvoiceHistoryPage } from './pages/InvoiceHistoryPage';
 import { ProductCatalogPage } from './pages/ProductCatalogPage';
+import { AuthPage } from './pages/AuthPage';
 import { KeyboardShortcutsHelp } from './components/billing/KeyboardShortcutsHelp';
 import { ThemeProviderContext, useThemeMode } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { useBillingStore } from './store/useBillingStore';
 
 const queryClient = new QueryClient({
@@ -23,7 +25,6 @@ const AppNavigationHandler: React.FC = () => {
   const { rows } = useBillingStore();
   const initialChecked = React.useRef(false);
 
-  // 1. Load home page on initial load/reload ONLY, without blocking normal navbar navigation
   useEffect(() => {
     if (!initialChecked.current) {
       initialChecked.current = true;
@@ -33,7 +34,6 @@ const AppNavigationHandler: React.FC = () => {
     }
   }, [navigate]);
 
-  // 2. Prompt user before reload if entering products in billing form
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       const hasEnteredProducts = rows.some(
@@ -57,66 +57,87 @@ const AppNavigationHandler: React.FC = () => {
   return null;
 };
 
-const AppContent: React.FC = () => {
+const MainDashboard: React.FC = () => {
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { mode } = useThemeMode();
 
+  return (
+    <Router>
+      <AppNavigationHandler />
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: mode === 'dark' ? '#051c1a' : '#f4f5f7',
+          color: mode === 'dark' ? '#ffffff' : '#0a0a0a',
+          transition: 'background-color 0.2s, color 0.2s',
+        }}
+      >
+        <Navbar onOpenShortcuts={() => setIsShortcutsHelpOpen(true)} />
+        <main style={{ flex: 1, paddingTop: '64px' }}>
+          <Routes>
+            <Route path="/" element={<BillingPage />} />
+            <Route path="/history" element={<InvoiceHistoryPage />} />
+            <Route path="/products" element={<ProductCatalogPage />} />
+          </Routes>
+        </main>
+      </div>
+      <KeyboardShortcutsHelp
+        isOpen={isShortcutsHelpOpen}
+        onClose={() => setIsShortcutsHelpOpen(false)}
+      />
+    </Router>
+  );
+};
+
+const AppContent: React.FC = () => {
+  const { user, isLoading } = useAuth();
+  const { mode } = useThemeMode();
+
   const muiTheme = useMemo(
-    () => createTheme({
-      palette: {
-        mode,
-        primary: { main: '#c9f227' },
-        secondary: { main: '#051c1a' },
-        background: {
-          default: mode === 'dark' ? '#051c1a' : '#f4f5f7',
-          paper:   mode === 'dark' ? '#0a2421' : '#f8f9fa',
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          primary: { main: '#c9f227' },
+          secondary: { main: '#051c1a' },
+          background: {
+            default: mode === 'dark' ? '#051c1a' : '#f4f5f7',
+            paper: mode === 'dark' ? '#0a2421' : '#f8f9fa',
+          },
         },
-      },
-      typography: {
-        fontFamily: '"Space Grotesk","Outfit","Inter",sans-serif',
-      },
-    }),
+        typography: {
+          fontFamily: '"Space Grotesk","Outfit","Inter",sans-serif',
+        },
+      }),
     [mode]
   );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+        <p className="text-sm font-medium text-slate-400">Loading Owshika Billing System...</p>
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
-      <Router>
-        <AppNavigationHandler />
-        <div
-          style={{
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: mode === 'dark' ? '#051c1a' : '#f4f5f7',
-            color: mode === 'dark' ? '#ffffff' : '#0a0a0a',
-            transition: 'background-color 0.2s, color 0.2s',
-          }}
-        >
-          <Navbar onOpenShortcuts={() => setIsShortcutsHelpOpen(true)} />
-          <main style={{ flex: 1, paddingTop: '64px' }}>
-            <Routes>
-              <Route path="/" element={<BillingPage />} />
-              <Route path="/history" element={<InvoiceHistoryPage />} />
-              <Route path="/products" element={<ProductCatalogPage />} />
-            </Routes>
-          </main>
-        </div>
-        <KeyboardShortcutsHelp
-          isOpen={isShortcutsHelpOpen}
-          onClose={() => setIsShortcutsHelpOpen(false)}
-        />
-      </Router>
+      {!user ? <AuthPage /> : <MainDashboard />}
     </ThemeProvider>
   );
 };
 
 export const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProviderContext>
-      <AppContent />
-    </ThemeProviderContext>
+    <AuthProvider>
+      <ThemeProviderContext>
+        <AppContent />
+      </ThemeProviderContext>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

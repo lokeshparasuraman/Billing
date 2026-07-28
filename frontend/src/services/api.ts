@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { Product, Customer, SavedInvoice } from '../types/billing';
 
+import { AuthResponse, User } from '../types/auth';
+
 const PROD_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 export const getApiBaseUrl = (): string => {
@@ -17,10 +19,37 @@ export const api = axios.create({
   },
 });
 
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common['Authorization'];
+  }
+};
+
 api.interceptors.request.use((config) => {
   config.baseURL = getApiBaseUrl();
+  const token = typeof window !== 'undefined' ? localStorage.getItem('owshika_auth_token') : null;
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
   return config;
 });
+
+export const loginApi = async (email: string, password: string): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/auth/login', { email, password });
+  return response.data;
+};
+
+export const registerApi = async (email: string, password: string, name?: string): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/auth/register', { email, password, name });
+  return response.data;
+};
+
+export const getMeApi = async (): Promise<User> => {
+  const response = await api.get<{ user: User }>('/auth/me');
+  return response.data.user;
+};
 
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {

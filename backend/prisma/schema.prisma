@@ -9,57 +9,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products      Product[]
+  customers     Customer[]
+  invoices      Invoice[]
+  storeSettings StoreSetting[]
+}
+
 model Product {
-  id          String   @id @default(uuid())
-  partNumber  String   @unique
-  name        String
-  hsn         String
-  gst         Float    // GST percentage (e.g. 5, 12, 18, 28)
-  price       Float    // Selling price per unit
-  unit        String   // PCS, MTR, KG, BOX, SET, PKT, LTR
-  stock       Int      @default(100)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(uuid())
+  partNumber String
+  name       String
+  hsn        String
+  gst        Float
+  price      Float
+  unit       String
+  stock      Int      @default(100)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   invoiceItems InvoiceItem[]
 
+  @@unique([userId, partNumber])
   @@index([partNumber])
   @@index([name])
 }
 
 model Customer {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
   phone     String?
   address   String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  invoices  Invoice[]
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  invoices Invoice[]
+
+  @@index([userId])
 }
 
 model Invoice {
-  id              String        @id @default(uuid())
-  invoiceNumber   String        @unique // e.g. OE-2026-0001
-  invoiceDate     DateTime      @default(now())
+  id              String   @id @default(uuid())
+  invoiceNumber   String
+  invoiceDate     DateTime @default(now())
   customerName    String
   customerPhone   String?
   customerAddress String?
-  paymentMode     String        @default("CASH") // CASH, UPI, CARD, CREDIT
+  paymentMode     String   @default("CASH")
   subtotal        Float
-  discountTotal   Float         @default(0)
+  discountTotal   Float    @default(0)
   cgstTotal       Float
   sgstTotal       Float
-  igstTotal       Float         @default(0)
-  roundOff        Float         @default(0)
+  igstTotal       Float    @default(0)
+  roundOff        Float    @default(0)
   grandTotal      Float
   amountInWords   String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  customerId      String?
-  customer        Customer?     @relation(fields: [customerId], references: [id])
-  items           InvoiceItem[]
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  customerId String?
+  customer   Customer?     @relation(fields: [customerId], references: [id])
+  items      InvoiceItem[]
+
+  @@unique([userId, invoiceNumber])
+  @@index([userId])
 }
 
 model InvoiceItem {
@@ -74,14 +103,14 @@ model InvoiceItem {
   unit        String
   quantity    Float
   price       Float
-  discount    Float    @default(0) // Percentage or fixed discount
-  gstRate     Float    // GST percentage
+  discount    Float    @default(0)
+  gstRate     Float
   gstAmount   Float
   total       Float
 }
 
 model StoreSetting {
-  id        String   @id @default("default_store")
+  id        String   @id @default(uuid())
   storeName String   @default("OWSHIKA ENTERPRISES")
   ownerName String   @default("C.Perumal")
   email     String   @default("owshikaentt@gmail.com")
@@ -89,5 +118,7 @@ model StoreSetting {
   phone     String   @default("+91 9445662637")
   address   String   @default("4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701")
   updatedAt DateTime @updatedAt
-}
 
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

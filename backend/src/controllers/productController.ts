@@ -1,23 +1,27 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { prisma } from '../db.js';
+import { AuthenticatedRequest } from '../middlewares/authMiddleware.js';
 
-export const searchProducts = async (req: Request, res: Response) => {
+export const searchProducts = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const query = String(req.query.q || '').trim();
+
     if (!query) {
       const topProducts = await prisma.product.findMany({
+        where: { userId },
         take: 20,
         orderBy: { name: 'asc' },
       });
       return res.json(topProducts);
     }
 
-    // Search by part number OR product name
     const products = await prisma.product.findMany({
       where: {
+        userId,
         OR: [
-          { partNumber: { contains: query } },
-          { name: { contains: query } },
+          { partNumber: { contains: query, mode: 'insensitive' } },
+          { name: { contains: query, mode: 'insensitive' } },
         ],
       },
       take: 20,
@@ -31,9 +35,11 @@ export const searchProducts = async (req: Request, res: Response) => {
   }
 };
 
-export const getProducts = async (req: Request, res: Response) => {
+export const getProducts = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const products = await prisma.product.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' },
     });
     res.json(products);
@@ -43,11 +49,12 @@ export const getProducts = async (req: Request, res: Response) => {
   }
 };
 
-export const getProductById = async (req: Request, res: Response) => {
+export const getProductById = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
-    const product = await prisma.product.findUnique({
-      where: { id },
+    const product = await prisma.product.findFirst({
+      where: { id, userId },
     });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
@@ -59,8 +66,9 @@ export const getProductById = async (req: Request, res: Response) => {
   }
 };
 
-export const createProduct = async (req: Request, res: Response) => {
+export const createProduct = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const { partNumber, name, hsn, gst, price, unit, stock } = req.body;
 
     if (!partNumber || !name || !hsn || gst === undefined || price === undefined || !unit) {
@@ -71,17 +79,18 @@ export const createProduct = async (req: Request, res: Response) => {
 
     const existing = await prisma.product.findFirst({
       where: {
-        partNumber: {
-          equals: uppercasePartNum,
-        },
+        userId,
+        partNumber: uppercasePartNum,
       },
     });
+
     if (existing) {
       return res.status(400).json({ error: `Product with Part Number '${uppercasePartNum}' already exists.` });
     }
 
     const newProduct = await prisma.product.create({
       data: {
+        userId,
         partNumber: uppercasePartNum,
         name: String(name).trim(),
         hsn: String(hsn).trim(),
@@ -102,11 +111,18 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteProduct = async (req: Request, res: Response) => {
+export const deleteProduct = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
+
+    const existing = await prisma.product.findFirst({ where: { id, userId } });
+    if (!existing) {
+      return res.status(404).json({ error: 'Product not found or unauthorized' });
+    }
+
     await prisma.product.delete({
-      where: { id },
+      where: { id: existing.id },
     });
     res.json({ message: 'Product deleted successfully' });
   } catch (error: any) {
@@ -115,8 +131,9 @@ export const deleteProduct = async (req: Request, res: Response) => {
   }
 };
 
-export const updateProduct = async (req: Request, res: Response) => {
+export const updateProduct = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const userId = req.userId;
     const { id } = req.params;
     const { price, partNumber, name, hsn, gst } = req.body;
 
@@ -126,28 +143,22 @@ export const updateProduct = async (req: Request, res: Response) => {
     if (hsn !== undefined) updateData.hsn = String(hsn).trim();
     if (gst !== undefined) updateData.gst = Number(gst);
 
-    let updated;
+    let existing;
     if (id && id !== 'undefined') {
-      updated = await prisma.product.update({
-        where: { id },
-        data: updateData,
-      });
+      existing = await prisma.product.findFirst({ where: { id, userId } });
     } else if (partNumber) {
       const uppercasePartNum = String(partNumber).trim().toUpperCase();
-      const existing = await prisma.product.findFirst({
-        where: { partNumber: uppercasePartNum },
-      });
-      if (existing) {
-        updated = await prisma.product.update({
-          where: { id: existing.id },
-          data: updateData,
-        });
-      }
+      existing = await prisma.product.findFirst({ where: { partNumber: uppercasePartNum, userId } });
     }
 
-    if (!updated) {
+    if (!existing) {
       return res.status(404).json({ error: 'Product not found for update' });
     }
+
+    const updated = await prisma.product.update({
+      where: { id: existing.id },
+      data: updateData,
+    });
 
     res.json(updated);
   } catch (error: any) {
