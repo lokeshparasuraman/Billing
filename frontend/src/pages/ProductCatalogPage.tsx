@@ -171,7 +171,7 @@ export const ProductCatalogPage: React.FC = () => {
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
             >
               <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span>+ Add New Product</span>
+              <span>Add New Product</span>
             </button>
           </div>
         </div>
@@ -187,7 +187,7 @@ export const ProductCatalogPage: React.FC = () => {
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="p-16 text-center text-base sm:text-lg font-semibold" style={{ color: textMuted }}>
-              No products found in catalog. Click <strong className="font-extrabold underline decoration-2 underline-offset-4" style={{ color: accentText }}>"+ Add New Product"</strong> to populate your store inventory.
+              No products found in catalog. Click <strong className="font-extrabold underline decoration-2 underline-offset-4" style={{ color: accentText }}>"Add New Product"</strong> to populate your store inventory.
             </div>
           ) : (
             <div className="overflow-x-auto">

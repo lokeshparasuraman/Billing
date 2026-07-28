@@ -235,7 +235,7 @@ export const ProductTable: React.FC = () => {
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
           >
-            <Plus className="h-4 w-4" /><span>+ Add Item</span>
+            <Plus className="h-4 w-4" /><span>Add Item</span>
           </button>
         </div>
       </div>
@@ -244,7 +244,7 @@ export const ProductTable: React.FC = () => {
       <div className="block md:hidden p-3 space-y-0">
         {productRows.length === 0 ? (
           <div className="text-center py-8 text-sm" style={{ color: textMuted }}>
-            No products added yet. Click <strong style={{ color: textStrong }}>+ Add Item</strong> to begin.
+            No products added yet. Click <strong style={{ color: textStrong }}>Add Item</strong> to begin.
           </div>
         ) : (
           productRows.map(({ row, globalIndex }, localIdx) => (
@@ -295,7 +295,7 @@ export const ProductTable: React.FC = () => {
             {productRows.length === 0 ? (
               <tr>
                 <td colSpan={10} className="text-center py-8 text-sm" style={{ color: textMuted }}>
-                  No products added yet. Click <strong style={{ color: textStrong }}>+ Add Item</strong> to begin.
+                  No products added yet. Click <strong style={{ color: textStrong }}>Add Item</strong> to begin.
                 </td>
               </tr>
             ) : (
