@@ -6,8 +6,12 @@ import { AuthResponse, User } from '../types/auth';
 const PROD_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 export const getApiBaseUrl = (): string => {
-  if (PROD_BASE && !PROD_BASE.includes('localhost') && !PROD_BASE.includes('127.0.0.1')) {
-    return PROD_BASE.replace(/\/$/, '');
+  if (PROD_BASE && typeof PROD_BASE === 'string' && PROD_BASE.trim() !== '') {
+    const cleanUrl = PROD_BASE.trim().replace(/\/$/, '');
+    if (cleanUrl.endsWith('/api')) {
+      return cleanUrl;
+    }
+    return `${cleanUrl}/api`;
   }
   return '/api';
 };
