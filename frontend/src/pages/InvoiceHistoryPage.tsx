@@ -204,7 +204,7 @@ export const InvoiceHistoryPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Invoice List Table */}
+        {/* Invoice List — table on md+, cards on mobile */}
         <div
           className="rounded-2xl shadow-sm overflow-hidden transition-all"
           style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
@@ -218,78 +218,120 @@ export const InvoiceHistoryPage: React.FC = () => {
               No invoices found in history matching your query.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[700px] text-left border-collapse">
-                <thead>
-                  <tr style={{ background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)', borderBottom: `1px solid ${cardDivide}` }}>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Invoice No</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Date</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Store / Business Name</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>Payment Mode</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-right" style={{ color: textMuted }}>Grand Total</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center w-48" style={{ color: textMuted }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody className="text-xs sm:text-sm">
-                  {filteredAndSortedInvoices.map((inv) => (
-                    <tr
-                      key={inv.id}
-                      style={{ borderBottom: `1px solid ${cardDivide}` }}
-                      className="transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.05]"
-                    >
-                      <td className="py-3.5 px-5 font-mono font-black text-sm" style={{ color: textStrong }}>{inv.invoiceNumber}</td>
-                      <td className="py-3.5 px-5 font-semibold" style={{ color: textMuted }}>
-                        {new Date(inv.invoiceDate).toLocaleDateString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </td>
-                      <td className="py-3.5 px-5 font-bold" style={{ color: textStrong }}>{inv.customerName}</td>
-                      <td className="py-3.5 px-5 text-center">
-                        <span
-                          className="font-bold text-xs px-2.5 py-1 rounded-lg border uppercase"
-                          style={{
-                            background: inputBg,
-                            color: textStrong,
-                            borderColor: inputBorder,
-                          }}
-                        >
-                          {inv.paymentMode}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-5 text-right font-mono font-black text-sm sm:text-base" style={{ color: textStrong }}>
-                        {formatCurrency(inv.grandTotal)}
-                      </td>
-                      <td className="py-3.5 px-5 text-center">
-                        <div className="flex items-center justify-center space-x-2">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenInvoice(inv.id)}
-                            style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
-                            className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none"
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            <span>Preview & Print</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteInvoice(inv.id, inv.invoiceNumber)}
-                            className="p-1.5 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-transparent hover:border-rose-200 dark:hover:border-rose-800 focus:outline-none"
-                            title={`Delete Invoice ${inv.invoiceNumber}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
+            <>
+              {/* ── Desktop table (md and above) ── */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr style={{ background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.03)', borderBottom: `1px solid ${cardDivide}` }}>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Invoice No</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Date</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Customer</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>Payment</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-right" style={{ color: textMuted }}>Grand Total</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="text-xs sm:text-sm">
+                    {filteredAndSortedInvoices.map((inv) => (
+                      <tr
+                        key={inv.id}
+                        style={{ borderBottom: `1px solid ${cardDivide}` }}
+                        className="transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.05]"
+                      >
+                        <td className="py-3.5 px-5 font-mono font-black text-sm" style={{ color: textStrong }}>{inv.invoiceNumber}</td>
+                        <td className="py-3.5 px-5 font-semibold" style={{ color: textMuted }}>
+                          {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td className="py-3.5 px-5 font-bold" style={{ color: textStrong }}>{inv.customerName}</td>
+                        <td className="py-3.5 px-5 text-center">
+                          <span className="font-bold text-xs px-2.5 py-1 rounded-lg border uppercase" style={{ background: inputBg, color: textStrong, borderColor: inputBorder }}>
+                            {inv.paymentMode}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-5 text-right font-mono font-black text-sm" style={{ color: textStrong }}>
+                          {formatCurrency(inv.grandTotal)}
+                        </td>
+                        <td className="py-3.5 px-5 text-center">
+                          <div className="flex items-center justify-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenInvoice(inv.id)}
+                              style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+                              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none"
+                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              <span>Preview & Print</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteInvoice(inv.id, inv.invoiceNumber)}
+                              className="p-1.5 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-transparent hover:border-rose-200 dark:hover:border-rose-800 focus:outline-none"
+                              title={`Delete Invoice ${inv.invoiceNumber}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Mobile card list (below md) ── */}
+              <div className="md:hidden divide-y" style={{ borderColor: cardDivide }}>
+                {filteredAndSortedInvoices.map((inv) => (
+                  <div key={inv.id} className="p-4 space-y-3">
+                    {/* Top row: invoice number + amount */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-mono font-black text-sm" style={{ color: textStrong }}>{inv.invoiceNumber}</p>
+                        <p className="text-[11px] font-semibold mt-0.5" style={{ color: textMuted }}>
+                          {new Date(inv.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </p>
+                      </div>
+                      <span className="font-mono font-black text-base" style={{ color: textStrong }}>
+                        {formatCurrency(inv.grandTotal)}
+                      </span>
+                    </div>
+
+                    {/* Middle row: customer + payment badge */}
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-bold text-sm truncate flex-1" style={{ color: textStrong }}>{inv.customerName}</p>
+                      <span className="font-bold text-[10px] px-2 py-0.5 rounded-md border uppercase shrink-0" style={{ background: inputBg, color: textStrong, borderColor: inputBorder }}>
+                        {inv.paymentMode}
+                      </span>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenInvoice(inv.id)}
+                        style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+                        className="flex-1 inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none"
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>Preview & Print</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteInvoice(inv.id, inv.invoiceNumber)}
+                        className="p-2 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-rose-200/40 dark:border-rose-800/40 focus:outline-none"
+                        title={`Delete Invoice ${inv.invoiceNumber}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>

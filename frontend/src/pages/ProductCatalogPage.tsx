@@ -176,7 +176,7 @@ export const ProductCatalogPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Product Catalog Grid Container */}
+        {/* Product Catalog — table on md+, cards on mobile */}
         <div
           className="rounded-2xl shadow-sm overflow-hidden transition-all"
           style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
@@ -190,58 +190,92 @@ export const ProductCatalogPage: React.FC = () => {
               No products found in catalog. Click <strong className="font-extrabold underline decoration-2 underline-offset-4" style={{ color: accentText }}>"Add New Product"</strong> to populate your store inventory.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[700px] text-left border-collapse">
-                <thead>
-                  <tr style={{ background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)', borderBottom: `1px solid ${cardDivide}` }}>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Part Number</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Product Name</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>HSN Code</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>GST Rate</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-right" style={{ color: textMuted }}>Selling Price</th>
-                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center w-20" style={{ color: textMuted }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody className="text-xs sm:text-sm">
-                  {filteredProducts.map((p) => (
-                    <tr
-                      key={p.id}
-                      style={{ borderBottom: `1px solid ${cardDivide}` }}
-                      className="transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.05]"
-                    >
-                      <td className="py-3.5 px-5 font-mono font-bold" style={{ color: textStrong }}>{p.partNumber}</td>
-                      <td className="py-3.5 px-5 font-semibold" style={{ color: textStrong }}>{p.name}</td>
-                      <td className="py-3.5 px-5 text-center font-mono" style={{ color: textMuted }}>{p.hsn}</td>
-                      <td className="py-3.5 px-5 text-center">
-                        <span
-                          className="font-mono font-bold text-xs px-2.5 py-1 rounded-lg border"
-                          style={{
-                            background: inputBg,
-                            color: textStrong,
-                            borderColor: inputBorder,
-                          }}
-                        >
-                          {p.gst}%
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-5 text-right font-mono font-black text-sm sm:text-base" style={{ color: textStrong }}>
-                        ₹{p.price.toFixed(2)}
-                      </td>
-                      <td className="py-3.5 px-5 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteProduct(p.id, p.name)}
-                          className="p-2 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-transparent hover:border-rose-200 dark:hover:border-rose-800"
-                          title={`Delete ${p.name}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </td>
+            <>
+              {/* ── Desktop table (md and above) ── */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr style={{ background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.03)', borderBottom: `1px solid ${cardDivide}` }}>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Part Number</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Product Name</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>HSN Code</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>GST Rate</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-right" style={{ color: textMuted }}>Selling Price</th>
+                      <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center w-20" style={{ color: textMuted }}>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="text-xs sm:text-sm">
+                    {filteredProducts.map((p) => (
+                      <tr
+                        key={p.id}
+                        style={{ borderBottom: `1px solid ${cardDivide}` }}
+                        className="transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.05]"
+                      >
+                        <td className="py-3.5 px-5 font-mono font-bold" style={{ color: textStrong }}>{p.partNumber}</td>
+                        <td className="py-3.5 px-5 font-semibold" style={{ color: textStrong }}>{p.name}</td>
+                        <td className="py-3.5 px-5 text-center font-mono" style={{ color: textMuted }}>{p.hsn}</td>
+                        <td className="py-3.5 px-5 text-center">
+                          <span className="font-mono font-bold text-xs px-2.5 py-1 rounded-lg border" style={{ background: inputBg, color: textStrong, borderColor: inputBorder }}>
+                            {p.gst}%
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-5 text-right font-mono font-black text-sm" style={{ color: textStrong }}>
+                          ₹{p.price.toFixed(2)}
+                        </td>
+                        <td className="py-3.5 px-5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProduct(p.id, p.name)}
+                            className="p-2 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-transparent hover:border-rose-200 dark:hover:border-rose-800"
+                            title={`Delete ${p.name}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Mobile card list (below md) ── */}
+              <div className="md:hidden divide-y" style={{ borderColor: cardDivide }}>
+                {filteredProducts.map((p) => (
+                  <div key={p.id} className="p-4 space-y-2.5">
+                    {/* Top row: Part number + price */}
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-mono font-black text-sm" style={{ color: textStrong }}>{p.partNumber}</span>
+                      <span className="font-mono font-black text-base shrink-0" style={{ color: textStrong }}>₹{p.price.toFixed(2)}</span>
+                    </div>
+
+                    {/* Product name */}
+                    <p className="font-semibold text-sm leading-snug" style={{ color: textStrong }}>{p.name}</p>
+
+                    {/* Meta row: HSN + GST + Delete */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-bold uppercase" style={{ color: textMuted }}>HSN:</span>
+                        <span className="font-mono text-xs font-bold" style={{ color: textStrong }}>{p.hsn}</span>
+                        <span
+                          className="font-mono font-bold text-[10px] px-2 py-0.5 rounded-md border"
+                          style={{ background: inputBg, color: textStrong, borderColor: inputBorder }}
+                        >
+                          GST {p.gst}%
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteProduct(p.id, p.name)}
+                        className="p-2 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-rose-200/40 dark:border-rose-800/40 shrink-0"
+                        title={`Delete ${p.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
