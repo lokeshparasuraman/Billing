@@ -5,12 +5,7 @@ import { useThemeMode } from '../../context/ThemeContext';
 import { useBillingStore } from '../../store/useBillingStore';
 import { BrandLogo } from './BrandLogo';
 
-/* Font size steps — matches pinelabs A- / A / A+ */
-const FONT_SIZES = [
-  { label: 'A-', value: 14, title: 'Small text' },
-  { label: 'A',  value: 16, title: 'Default text' },
-  { label: 'A+', value: 18, title: 'Large text' },
-];
+
 
 interface NavbarProps {
   onOpenShortcuts?: () => void;
@@ -24,15 +19,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const [fontHover, setFontHover] = useState(false);
 
   /* ─── Font size state persisted to localStorage ─── */
+  const MIN_FONT_SIZE = 12;
+  const MAX_FONT_SIZE = 26;
+  const DEFAULT_FONT_SIZE = 16;
+
   const [fontSize, setFontSize] = useState<number>(() => {
     const saved = localStorage.getItem('pine_font_size');
-    return saved ? parseInt(saved, 10) : 16;
+    return saved ? parseInt(saved, 10) : DEFAULT_FONT_SIZE;
   });
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontSize}px`;
     localStorage.setItem('pine_font_size', String(fontSize));
   }, [fontSize]);
+
+  const handleDecreaseFont = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setFontSize((prev) => Math.max(MIN_FONT_SIZE, prev - 1));
+  };
+
+  const handleIncreaseFont = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setFontSize((prev) => Math.min(MAX_FONT_SIZE, prev + 1));
+  };
+
+  const handleResetFont = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setFontSize(DEFAULT_FONT_SIZE);
+  };
 
   /* ─── Scroll lock when mobile menu drawer is opened ─── */
   useEffect(() => {
@@ -70,13 +84,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   ];
 
   /* ─── Theme tokens ─── */
-  const isDark     = mode === 'dark';
-  const navBg      = isDark ? 'rgba(5,28,26,0.80)' : 'rgba(255,255,255,0.85)';
-  const mobileBg   = isDark ? '#051c1a' : '#ffffff';
-  const border     = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
+  const isDark = mode === 'dark';
+  const navBg = isDark ? 'rgba(5,28,26,0.80)' : 'rgba(255,255,255,0.85)';
+  const mobileBg = isDark ? '#051c1a' : '#ffffff';
+  const border = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
   const txtPrimary = isDark ? '#ffffff' : '#051c1a';
-  const txtMuted   = isDark ? 'rgba(255,255,255,0.60)' : 'rgba(5,28,26,0.55)';
-  const divider    = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
+  const txtMuted = isDark ? 'rgba(255,255,255,0.60)' : 'rgba(5,28,26,0.55)';
+  const divider = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
   const iconHoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
 
   return (
@@ -106,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               className="hidden md:flex"
               style={{ alignItems: 'center', height: '64px', gap: '0' }}
             >
-              {/* Nav links — matching pinelabs: bold 700, 24px side padding, 14px */}
+              {/* Nav links : bold 700, 24px side padding, 14px */}
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -162,85 +176,118 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 {isDark ? <Sun style={{ width: 18, height: 18 }} /> : <Moon style={{ width: 18, height: 18 }} />}
               </button>
 
-              {/* Font size — hover to reveal A- / A / A+ pill, exactly like pinelabs */}
+              {/* Font size — multi-step continuous controls (A-, active size reset, A+) */}
               <div
                 style={{ position: 'relative' }}
                 onMouseEnter={() => setFontHover(true)}
                 onMouseLeave={() => setFontHover(false)}
               >
-                {/* 'A' label — the trigger */}
+                {/* Trigger button */}
                 <button
                   type="button"
-                  title="Font size"
+                  title={`Font size: ${fontSize}px`}
                   style={{
                     background: fontHover ? iconHoverBg : 'none',
-                    border: 'none', cursor: 'default', padding: '6px 10px',
+                    border: 'none', cursor: 'pointer', padding: '6px 10px',
                     borderRadius: '6px',
                     color: fontHover ? txtPrimary : txtMuted,
                     fontSize: '15px', fontWeight: 700, lineHeight: 1,
-                    display: 'flex', alignItems: 'center',
+                    display: 'flex', alignItems: 'center', gap: '4px',
                     transition: 'background 0.15s, color 0.15s',
                     userSelect: 'none',
                   }}
                 >
-                  A
+                  <span>A</span>
+                  <span style={{ fontSize: '10px', opacity: 0.7, fontWeight: 800 }}>{fontSize}px</span>
                 </button>
 
-                {/* Hover dropdown — sits at top:100% with paddingTop bridge so hover never breaks */}
+                {/* Hover popover card */}
                 <div
                   style={{
                     position: 'absolute',
                     top: '100%',
                     right: 0,
-                    paddingTop: '8px',          /* transparent bridge — keeps hover alive */
+                    paddingTop: '8px',
                     zIndex: 60,
                     opacity: fontHover ? 1 : 0,
                     pointerEvents: fontHover ? 'auto' : 'none',
                     transform: fontHover ? 'translateY(0)' : 'translateY(-4px)',
                     transition: 'opacity 0.15s, transform 0.15s',
-                    minWidth: '120px',
+                    minWidth: '150px',
                   }}
                 >
-                  {/* Visible pill card */}
                   <div
                     style={{
                       backgroundColor: isDark ? '#0a2421' : '#051c1a',
-                      border: '1px solid rgba(255,255,255,0.10)',
+                      border: '1px solid rgba(255,255,255,0.12)',
                       borderRadius: '12px',
-                      padding: '4px',
+                      padding: '4px 6px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '2px',
+                      justifyContent: 'space-between',
+                      gap: '4px',
                       boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
                     }}
                   >
-                    {FONT_SIZES.map((fs, i) => {
-                      const isSelected = fontSize === fs.value;
-                      return (
-                        <React.Fragment key={fs.value}>
-                          {i > 0 && <div style={{ width: '1px', height: '18px', backgroundColor: 'rgba(255,255,255,0.10)', flexShrink: 0 }} />}
-                          <button
-                            type="button"
-                            onClick={() => setFontSize(fs.value)}
-                            title={fs.title}
-                            style={{
-                              background: isSelected ? 'rgba(255,255,255,0.14)' : 'none',
-                              border: 'none', cursor: 'pointer',
-                              padding: '7px 14px', borderRadius: '8px',
-                              color: isSelected ? '#ffffff' : 'rgba(255,255,255,0.55)',
-                              fontWeight: isSelected ? 800 : 500,
-                              fontSize: fs.label === 'A-' ? '12px' : fs.label === 'A+' ? '16px' : '14px',
-                              transition: 'background 0.12s, color 0.12s',
-                              flex: 1,
-                            }}
-                            onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.color = '#ffffff'; }}
-                            onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'; }}
-                          >
-                            {fs.label}
-                          </button>
-                        </React.Fragment>
-                      );
-                    })}
+                    <button
+                      type="button"
+                      onClick={handleDecreaseFont}
+                      disabled={fontSize <= MIN_FONT_SIZE}
+                      title="Decrease font size (-1px)"
+                      style={{
+                        background: 'rgba(255,255,255,0.08)',
+                        border: 'none',
+                        cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        color: fontSize <= MIN_FONT_SIZE ? 'rgba(255,255,255,0.3)' : '#ffffff',
+                        fontWeight: 800,
+                        fontSize: '13px',
+                        transition: 'all 0.12s',
+                      }}
+                    >
+                      A-
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleResetFont}
+                      title="Reset font size to 16px"
+                      style={{
+                        background: fontSize === DEFAULT_FONT_SIZE ? 'rgba(201,242,39,0.2)' : 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        color: fontSize === DEFAULT_FONT_SIZE ? '#c9f227' : 'rgba(255,255,255,0.85)',
+                        fontWeight: 800,
+                        fontSize: '12px',
+                        fontFamily: 'monospace',
+                        transition: 'all 0.12s',
+                      }}
+                    >
+                      {fontSize}px
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleIncreaseFont}
+                      disabled={fontSize >= MAX_FONT_SIZE}
+                      title="Increase font size (+1px)"
+                      style={{
+                        background: 'rgba(255,255,255,0.08)',
+                        border: 'none',
+                        cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        color: fontSize >= MAX_FONT_SIZE ? 'rgba(255,255,255,0.3)' : '#ffffff',
+                        fontWeight: 800,
+                        fontSize: '15px',
+                        transition: 'all 0.12s',
+                      }}
+                    >
+                      A+
+                    </button>
                   </div>
                 </div>
               </div>
@@ -351,32 +398,67 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             </button>
           </div>
 
-          {/* A- / A / A+ — inline in mobile bottom row */}
-          <div style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderRadius: '12px', padding: '4px', gap: '2px' }}>
-            {FONT_SIZES.map((fs, i) => {
-              const isSelected = fontSize === fs.value;
-              return (
-                <React.Fragment key={fs.value}>
-                  {i > 0 && <div style={{ width: '1px', height: '16px', backgroundColor: divider, flexShrink: 0 }} />}
-                  <button
-                    type="button"
-                    onClick={() => setFontSize(fs.value)}
-                    title={fs.title}
-                    style={{
-                      background: isSelected ? iconHoverBg : 'none',
-                      border: 'none', cursor: 'pointer', padding: '7px 12px',
-                      borderRadius: '8px',
-                      color: isSelected ? txtPrimary : txtMuted,
-                      fontWeight: isSelected ? 800 : 500,
-                      fontSize: fs.label === 'A-' ? '11px' : fs.label === 'A+' ? '15px' : '13px',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    {fs.label}
-                  </button>
-                </React.Fragment>
-              );
-            })}
+          {/* Multi-step A- / Reset / A+ — inline in mobile bottom row */}
+          <div style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderRadius: '12px', padding: '4px', gap: '4px' }}>
+            <button
+              type="button"
+              onClick={handleDecreaseFont}
+              disabled={fontSize <= MIN_FONT_SIZE}
+              title="Decrease font size"
+              style={{
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                border: 'none',
+                cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                color: fontSize <= MIN_FONT_SIZE ? txtMuted : txtPrimary,
+                fontWeight: 800,
+                fontSize: '12px',
+                transition: 'all 0.15s',
+              }}
+            >
+              A-
+            </button>
+
+            <button
+              type="button"
+              onClick={handleResetFont}
+              title="Reset font size to 16px"
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                color: fontSize === DEFAULT_FONT_SIZE ? (isDark ? '#c9f227' : '#15803d') : txtPrimary,
+                fontWeight: 800,
+                fontSize: '11px',
+                fontFamily: 'monospace',
+                transition: 'all 0.15s',
+              }}
+            >
+              {fontSize}px
+            </button>
+
+            <button
+              type="button"
+              onClick={handleIncreaseFont}
+              disabled={fontSize >= MAX_FONT_SIZE}
+              title="Increase font size"
+              style={{
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                border: 'none',
+                cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                color: fontSize >= MAX_FONT_SIZE ? txtMuted : txtPrimary,
+                fontWeight: 800,
+                fontSize: '14px',
+                transition: 'all 0.15s',
+              }}
+            >
+              A+
+            </button>
           </div>
 
           {onOpenShortcuts && (
