@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchProducts, createProduct, deleteProduct } from '../services/api';
 import { Product } from '../types/billing';
+import { sanitizePriceInput, handlePriceKeyDown } from '../utils/calculations';
 import { Package, Search, Plus, X, Trash2 } from 'lucide-react';
 import { useThemeMode } from '../context/ThemeContext';
 
@@ -314,11 +315,15 @@ export const ProductCatalogPage: React.FC = () => {
                 <div>
                   <label className="block font-bold uppercase mb-1 text-[11px]" style={{ color: textMuted }}>Price (₹) *</label>
                   <input
-                    type="number"
-                    step="any"
+                    type="text"
+                    inputMode="decimal"
                     required
                     value={newProd.price}
-                    onChange={(e) => setNewProd({ ...newProd, price: e.target.value })}
+                    onKeyDown={handlePriceKeyDown}
+                    onChange={(e) => {
+                      const clean = sanitizePriceInput(e.target.value);
+                      setNewProd({ ...newProd, price: clean });
+                    }}
                     placeholder="0.00"
                     style={{ background: inputBg, color: textStrong, border: `1px solid ${inputBorder}` }}
                     className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none font-mono"

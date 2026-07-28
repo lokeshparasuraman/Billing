@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { InvoiceItemRow, Product } from '../../types/billing';
 import { ProductAutocomplete } from '../common/ProductAutocomplete';
 import { updateProductPrice } from '../../services/api';
+import { sanitizePriceInput, handlePriceKeyDown } from '../../utils/calculations';
 import { Trash2, Wrench, Package } from 'lucide-react';
 import { useThemeMode } from '../../context/ThemeContext';
 
@@ -94,10 +95,11 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value === '' ? '' : Math.max(0, parseFloat(e.target.value));
-    onUpdate({ price: val });
-    if (!isLabourOrSpares && typeof val === 'number' && !isNaN(val) && (row.productId || row.partNumber)) {
-      updateProductPrice(row.productId || row.partNumber, val);
+    const clean = sanitizePriceInput(e.target.value);
+    const numVal = clean === '' ? '' : Math.max(0, parseFloat(clean) || 0);
+    onUpdate({ price: numVal });
+    if (!isLabourOrSpares && typeof numVal === 'number' && !isNaN(numVal) && (row.productId || row.partNumber)) {
+      updateProductPrice(row.productId || row.partNumber, numVal);
     }
   };
 
@@ -181,7 +183,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({
       {isLabourOrSpares ? (
         <div>
           <label className="block text-[10px] font-extrabold uppercase mb-1" style={{ color: txtMuted }}>Price (₹)</label>
-          <input ref={priceRef} type="number" min="0" step="any" value={row.price}
+          <input ref={priceRef} type="text" inputMode="decimal" value={row.price}
+            onKeyDown={handlePriceKeyDown}
             onChange={handlePriceChange} placeholder="0.00"
             style={{ ...inputStyle, textAlign: 'right' }} />
         </div>
@@ -195,7 +198,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({
           </div>
           <div>
             <label className="block text-[10px] font-extrabold uppercase mb-1" style={{ color: txtMuted }}>Price (₹)</label>
-            <input ref={priceRef} type="number" min="0" step="any" value={row.price}
+            <input ref={priceRef} type="text" inputMode="decimal" value={row.price}
+              onKeyDown={handlePriceKeyDown}
               onChange={handlePriceChange} placeholder="0.00"
               style={{ ...inputStyle, textAlign: 'right' }} />
             <button type="button" onClick={toggleTaxMode}
@@ -332,9 +336,9 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 
       {/* Price + Tax toggle */}
       <td style={{ ...tdStyle, width: 120 }}>
-        <input ref={priceRef} type="number" min="0" step="any" value={row.price}
+        <input ref={priceRef} type="text" inputMode="decimal" value={row.price}
           onChange={handlePriceChange}
-          onKeyDown={e => handleKeyDownCommon(e, 'price')}
+          onKeyDown={e => { handlePriceKeyDown(e); handleKeyDownCommon(e, 'price'); }}
           placeholder="0.00"
           style={{ ...inputStyle, textAlign: 'right' }} />
         {!isLabourOrSpares && (

@@ -182,3 +182,27 @@ export function formatCurrency(amount: number): string {
     maximumFractionDigits: 2,
   }).format(amount || 0);
 }
+
+/**
+ * Ensures price input strictly accepts non-negative numbers/decimals only (e.g., 125, 45.50).
+ * Rejects all alphabetic characters (abc, e, E) and special characters.
+ */
+export function sanitizePriceInput(val: string | number): string {
+  if (typeof val === 'number') return isNaN(val) ? '' : String(val);
+  if (!val) return '';
+  // Strip out all characters except digits and decimal point
+  let clean = String(val).replace(/[^0-9.]/g, '');
+  // Retain only the first decimal point
+  const parts = clean.split('.');
+  if (parts.length > 2) {
+    clean = `${parts[0]}.${parts.slice(1).join('')}`;
+  }
+  return clean;
+}
+
+export function handlePriceKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
+  // Block non-numeric characters e, E, +, - allowed by HTML5 number inputs
+  if (['e', 'E', '+', '-'].includes(e.key)) {
+    e.preventDefault();
+  }
+}

@@ -4,6 +4,7 @@ import { useBillingStore } from '../../store/useBillingStore';
 import { ProductRow } from './ProductRow';
 import { Plus, HelpCircle, Wrench, ChevronDown, PackageCheck, Trash2, IndianRupee } from 'lucide-react';
 import { InvoiceItemRow } from '../../types/billing';
+import { sanitizePriceInput, handlePriceKeyDown } from '../../utils/calculations';
 
 /* ─── Inline editable row for Labour / Misc sub-sections ─── */
 interface ServiceRowProps {
@@ -47,9 +48,13 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
         <div className="flex items-center gap-1">
           <IndianRupee className="h-3 w-3 shrink-0" style={{ color: textMuted }} />
           <input
-            type="number" min={0} step="any"
-            value={row.price}
-            onChange={e => onUpdate({ price: Math.max(0, parseFloat(e.target.value) || 0) })}
+            type="text" inputMode="decimal"
+            value={row.price === 0 || row.price === '' ? '' : row.price}
+            onKeyDown={handlePriceKeyDown}
+            onChange={e => {
+              const clean = sanitizePriceInput(e.target.value);
+              onUpdate({ price: clean === '' ? '' : Math.max(0, parseFloat(clean) || 0) });
+            }}
             placeholder="0.00"
             className="w-20 sm:w-24 text-right text-xs font-mono font-bold rounded-md px-2 py-1 focus:outline-none"
             style={{ background: 'rgba(128,128,128,0.08)', border: `1px solid ${cardBorder}`, color: textStrong }}
