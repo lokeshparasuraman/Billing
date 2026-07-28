@@ -39,14 +39,8 @@ export const fetchProducts = async (): Promise<Product[]> => {
   try {
     const response = await api.get<Product[]>(`/products`);
     if (Array.isArray(response.data)) {
-      const local = localStorage.getItem('cached_products');
-      const localProds: Product[] = local ? JSON.parse(local) : [];
-      // Merge backend products with any local items
-      const mergedMap = new Map<string, Product>();
-      [...response.data, ...localProds].forEach((p) => mergedMap.set(p.partNumber.toUpperCase(), p));
-      const merged = Array.from(mergedMap.values());
-      localStorage.setItem('cached_products', JSON.stringify(merged));
-      return merged;
+      localStorage.setItem('cached_products', JSON.stringify(response.data));
+      return response.data;
     }
   } catch (error) {
     console.warn('API unavailable for product list, loading from local storage fallback');
@@ -100,6 +94,50 @@ export const createProduct = async (productData: Partial<Product>): Promise<Prod
   return newProd;
 };
 
+export const deleteProduct = async (id: string): Promise<void> => {
+  try {
+    await api.delete(`/products/${id}`);
+  } catch (error) {
+    console.warn('Backend API delete product error, updating local cache');
+  }
+
+  const local = localStorage.getItem('cached_products');
+  if (local) {
+    const products: Product[] = JSON.parse(local);
+    const updated = products.filter((p) => p.id !== id);
+    localStorage.setItem('cached_products', JSON.stringify(updated));
+  }
+};
+
+export const updateProductPrice = async (
+  idOrPartNumber: string,
+  newPrice: number
+): Promise<void> => {
+  if (!idOrPartNumber || typeof newPrice !== 'number' || isNaN(newPrice)) return;
+
+  try {
+    await api.patch(`/products/${idOrPartNumber}`, {
+      price: newPrice,
+      partNumber: idOrPartNumber,
+    });
+  } catch (error) {
+    console.warn('Backend API update price warning:', error);
+  }
+
+  const local = localStorage.getItem('cached_products');
+  if (local) {
+    const products: Product[] = JSON.parse(local);
+    const upper = idOrPartNumber.toUpperCase();
+    const updated = products.map((p) => {
+      if (p.id === idOrPartNumber || p.partNumber.toUpperCase() === upper) {
+        return { ...p, price: newPrice };
+      }
+      return p;
+    });
+    localStorage.setItem('cached_products', JSON.stringify(updated));
+  }
+};
+
 export const fetchNextInvoiceNumber = async (): Promise<string> => {
   try {
     const response = await api.get<{ invoiceNumber: string }>(`/invoices/next-number`);
@@ -130,6 +168,14 @@ export const fetchInvoiceById = async (id: string): Promise<SavedInvoice> => {
   return response.data;
 };
 
+export const deleteInvoice = async (id: string): Promise<void> => {
+  try {
+    await api.delete(`/invoices/${id}`);
+  } catch (error) {
+    console.warn('Backend API delete invoice warning:', error);
+  }
+};
+
 export const searchCustomers = async (query: string): Promise<Customer[]> => {
   try {
     const response = await api.get<Customer[]>(`/customers/search`, {
@@ -140,3 +186,32 @@ export const searchCustomers = async (query: string): Promise<Customer[]> => {
     return [];
   }
 };
+
+export const fetchStoreSettings = async (): Promise<any> => {
+  try {
+    const response = await api.get('/store');
+    if (response.data && response.data.storeName) {
+      localStorage.setItem('store_details', JSON.stringify(response.data));
+      return response.data;
+    }
+  } catch (e) {
+    console.warn('Could not fetch store settings from API, using localStorage fallback');
+  }
+  const local = localStorage.getItem('store_details');
+  return local ? JSON.parse(local) : null;
+};
+
+export const updateStoreSettingsApi = async (details: any): Promise<any> => {
+  localStorage.setItem('store_details', JSON.stringify(details));
+  try {
+    const response = await api.put('/store', details);
+    if (response.data) {
+      localStorage.setItem('store_details', JSON.stringify(response.data));
+      return response.data;
+    }
+  } catch (e) {
+    console.warn('Could not save store settings to backend API, saved to localStorage');
+  }
+  return details;
+};
+

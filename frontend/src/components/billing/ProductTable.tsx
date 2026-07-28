@@ -1,157 +1,343 @@
 import React, { useState } from 'react';
+import { useThemeMode } from '../../context/ThemeContext';
 import { useBillingStore } from '../../store/useBillingStore';
 import { ProductRow } from './ProductRow';
-import { Plus, HelpCircle, Wrench, ChevronDown } from 'lucide-react';
+import { Plus, HelpCircle, Wrench, ChevronDown, PackageCheck, Trash2, IndianRupee } from 'lucide-react';
+import { InvoiceItemRow } from '../../types/billing';
 
+/* ─── Inline editable row for Labour / Misc sub-sections ─── */
+interface ServiceRowProps {
+  row: InvoiceItemRow;
+  index: number;
+  sectionLabel: string;
+  onUpdate: (updates: Partial<InvoiceItemRow>) => void;
+  onRemove: () => void;
+  cardBg: string;
+  cardBorder: string;
+  textStrong: string;
+  textMuted: string;
+}
+
+const ServiceRow: React.FC<ServiceRowProps> = ({
+  row, index, sectionLabel, onUpdate, onRemove,
+  cardBg, cardBorder, textStrong, textMuted,
+}) => {
+  return (
+    <div
+      className="flex flex-wrap sm:flex-nowrap items-center gap-2 px-3 py-2 rounded-xl border transition group min-w-0 overflow-hidden"
+      style={{ background: cardBg, borderColor: cardBorder }}
+    >
+      {/* Index & Name Input */}
+      <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+        <span className="text-[11px] font-mono font-bold w-4 shrink-0 text-center" style={{ color: textMuted }}>
+          {index + 1}
+        </span>
+        <input
+          type="text"
+          value={row.name}
+          onChange={e => onUpdate({ name: e.target.value })}
+          placeholder={`${sectionLabel} description...`}
+          className="w-full text-xs sm:text-sm font-medium bg-transparent focus:outline-none min-w-0"
+          style={{ color: textStrong }}
+        />
+      </div>
+
+      {/* Price Input, Total & Delete Action */}
+      <div className="flex items-center gap-2 shrink-0 ml-auto">
+        <div className="flex items-center gap-1">
+          <IndianRupee className="h-3 w-3 shrink-0" style={{ color: textMuted }} />
+          <input
+            type="number" min={0} step="any"
+            value={row.price}
+            onChange={e => onUpdate({ price: Math.max(0, parseFloat(e.target.value) || 0) })}
+            placeholder="0.00"
+            className="w-20 sm:w-24 text-right text-xs font-mono font-bold rounded-md px-2 py-1 focus:outline-none"
+            style={{ background: 'rgba(128,128,128,0.08)', border: `1px solid ${cardBorder}`, color: textStrong }}
+          />
+        </div>
+
+        <span className="text-xs font-mono font-black min-w-[50px] text-right" style={{ color: textStrong }}>
+          ₹{(Number(row.price || 0)).toFixed(2)}
+        </span>
+
+        <button
+          type="button"
+          onClick={onRemove}
+          className="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition opacity-100 sm:opacity-0 group-hover:opacity-100 shrink-0"
+          title="Remove"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Collapsible section ─── */
+interface ServiceSectionProps {
+  title: string;
+  icon: React.ReactNode;
+  rows: { row: InvoiceItemRow; globalIndex: number }[];
+  onAdd: () => void;
+  onUpdate: (gi: number, updates: Partial<InvoiceItemRow>) => void;
+  onRemove: (gi: number) => void;
+  cardBg: string;
+  cardBorder: string;
+  textStrong: string;
+  textMuted: string;
+}
+
+const ServiceSection: React.FC<ServiceSectionProps> = ({
+  title, icon, rows, onAdd, onUpdate, onRemove,
+  cardBg, cardBorder, textStrong, textMuted,
+}) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${cardBorder}` }}>
+      <div
+        className="flex items-center justify-between px-3 py-2 cursor-pointer select-none transition"
+        style={{ background: 'rgba(128,128,128,0.06)' }}
+        onClick={() => setOpen(o => !o)}
+      >
+        <div className="flex items-center gap-2">
+          <span style={{ color: textMuted }}>{icon}</span>
+          <span className="text-xs font-extrabold uppercase tracking-wider" style={{ color: textMuted }}>{title}</span>
+          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded" style={{ background: 'rgba(128,128,128,0.1)', border: `1px solid ${cardBorder}`, color: textMuted }}>
+            {rows.length}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={e => { e.stopPropagation(); onAdd(); if (!open) setOpen(true); }}
+            style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black border-0 transition"
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+          >
+            <Plus className="h-3 w-3" /> Add
+          </button>
+          <ChevronDown
+            className="h-4 w-4 transition-transform"
+            style={{ color: textMuted, transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+          />
+        </div>
+      </div>
+
+      {open && (
+        <div className="p-2 space-y-1.5" style={{ background: 'rgba(128,128,128,0.03)' }}>
+          {rows.length === 0 ? (
+            <div
+              className="text-center py-4 text-xs cursor-pointer transition"
+              style={{ color: textMuted }}
+              onClick={onAdd}
+            >
+              Click to add a {title.toLowerCase()} entry
+            </div>
+          ) : (
+            rows.map(({ row, globalIndex }, localIdx) => (
+              <ServiceRow
+                key={row.rowId}
+                row={row}
+                index={localIdx}
+                sectionLabel={title}
+                onUpdate={updates => onUpdate(globalIndex, updates)}
+                onRemove={() => onRemove(globalIndex)}
+                cardBg={cardBg}
+                cardBorder={cardBorder}
+                textStrong={textStrong}
+                textMuted={textMuted}
+              />
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ════════════════════════════════════
+   MAIN PRODUCT TABLE
+   ════════════════════════════════════ */
 export const ProductTable: React.FC = () => {
-  const {
-    rows,
-    addRow,
-    addLabourRow,
-    removeRow,
-    updateRow,
-    selectProductForRow,
-    setActiveCell,
-  } = useBillingStore();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
 
-  const [isLabourMenuOpen, setIsLabourMenuOpen] = useState(false);
+  /* Inverted card tokens */
+  const cardBg     = isDark ? '#ebedf0' : '#051c1a';
+  const cardBorder = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
+  const textStrong = isDark ? '#051c1a' : '#ffffff';
+  const textMuted  = isDark ? 'rgba(5,28,26,0.55)' : 'rgba(255,255,255,0.65)';
+
+  const {
+    rows, addRow, addLabourRow, addMiscSparesRow,
+    removeRow, updateRow, selectProductForRow, setActiveCell,
+  } = useBillingStore();
 
   const handleNavigateRow = (currentIndex: number, direction: 'up' | 'down') => {
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex >= 0 && targetIndex < rows.length) {
-      setActiveCell(targetIndex, 'partNumber');
-    }
+    if (targetIndex >= 0 && targetIndex < rows.length) setActiveCell(targetIndex, 'partNumber');
   };
 
-  const labourPresets = [
-    { label: 'General Labour Work', name: 'General Labour Charges' },
-    { label: 'Lathe Machining & Turning', name: 'Lathe Machining & Turning Work' },
-    { label: 'Installation & Fitting', name: 'Installation & Fitting Charges' },
-    { label: 'Custom Welding & Fabrication', name: 'Custom Welding & Fabrication Fees' },
-    { label: 'Transportation & Freight', name: 'Transportation & Freight Charges' },
-  ];
-
-  const handleSelectPreset = (name: string) => {
-    addLabourRow(name);
-    setIsLabourMenuOpen(false);
-  };
+  const productRows = rows.map((r, i) => ({ row: r, globalIndex: i })).filter(({ row }) =>
+    row.itemType !== 'LABOUR' && row.itemType !== 'SPARES' &&
+    row.partNumber !== 'LABOUR' && row.partNumber !== 'SERVICE' && row.partNumber !== 'MISC-SPARES'
+  );
+  const labourRows = rows.map((r, i) => ({ row: r, globalIndex: i })).filter(({ row }) =>
+    row.itemType === 'LABOUR' || row.partNumber === 'LABOUR' || row.partNumber === 'SERVICE'
+  );
+  const miscRows = rows.map((r, i) => ({ row: r, globalIndex: i })).filter(({ row }) =>
+    row.itemType === 'SPARES' || row.partNumber === 'MISC-SPARES'
+  );
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 mb-4 overflow-hidden transition-colors">
-      {/* Table Section Header */}
-      <div className="bg-slate-800 dark:bg-slate-950 text-white px-4 py-2.5 flex items-center justify-between border-b border-slate-700 dark:border-slate-850 flex-wrap gap-2">
-        <div className="flex items-center space-x-2">
-          <span className="font-bold text-sm uppercase tracking-wider text-slate-200">
-            Product & Services Items Entry
+    <div
+      className="rounded-2xl mb-4 overflow-hidden"
+      style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+    >
+      {/* ── Header bar ── */}
+      <div
+        className="px-4 py-3 flex items-center justify-between flex-wrap gap-2"
+        style={{ borderBottom: `1px solid ${cardBorder}`, background: 'rgba(128,128,128,0.04)' }}
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="font-extrabold text-xs sm:text-sm uppercase tracking-wider" style={{ color: textStrong }}>
+            Product & Service Items Entry
           </span>
-          <span className="bg-sky-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+          <span
+            className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md"
+            style={{ border: `1px solid ${cardBorder}`, color: textMuted, background: 'rgba(128,128,128,0.08)' }}
+          >
             {rows.length} {rows.length === 1 ? 'Item' : 'Items'}
           </span>
         </div>
 
-        <div className="flex items-center space-x-2 sm:space-x-3 text-xs text-slate-300">
-          <span className="hidden lg:inline-flex items-center gap-1 text-sky-300 font-mono">
-            <HelpCircle className="h-3.5 w-3.5" /> Press <kbd className="px-1.5 py-0.5 bg-slate-700 dark:bg-slate-800 rounded text-white border border-slate-600">Enter</kbd> to move fields
+        <div className="flex items-center gap-2 text-xs flex-wrap">
+          <span className="hidden lg:inline-flex items-center gap-1 text-[11px] font-mono" style={{ color: textMuted }}>
+            <HelpCircle className="h-3.5 w-3.5" /> Press
+            <kbd
+              className="px-1.5 py-0.5 rounded"
+              style={{ background: 'rgba(128,128,128,0.1)', border: `1px solid ${cardBorder}`, color: textMuted }}
+            >Enter</kbd>
+            to move fields
           </span>
 
-          {/* Quick Labour / Service Dropdown Menu */}
-          <div className="relative">
-            <div className="inline-flex rounded-md shadow-sm">
-              <button
-                type="button"
-                onClick={() => addLabourRow()}
-                className="bg-amber-600 hover:bg-amber-500 text-white px-3 py-1 rounded-l-md text-xs font-bold flex items-center space-x-1 transition"
-                title="Add Labour Work or Service Charge row"
-              >
-                <Wrench className="h-3.5 w-3.5" />
-                <span>+ Labour / Service</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsLabourMenuOpen(!isLabourMenuOpen)}
-                className="bg-amber-700 hover:bg-amber-600 text-white px-1.5 py-1 rounded-r-md border-l border-amber-800 transition"
-              >
-                <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-            </div>
-
-            {isLabourMenuOpen && (
-              <ul className="absolute right-0 mt-1 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1 z-50 text-xs text-slate-800 dark:text-slate-200 divide-y divide-slate-100 dark:divide-slate-700">
-                <li className="px-3 py-1.5 font-bold text-[10px] uppercase text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40">
-                  Quick Labour Presets:
-                </li>
-                {labourPresets.map((preset, idx) => (
-                  <li
-                    key={idx}
-                    onClick={() => handleSelectPreset(preset.name)}
-                    className="px-3 py-2 hover:bg-amber-50 dark:hover:bg-slate-700 cursor-pointer font-medium flex items-center justify-between"
-                  >
-                    <span>{preset.label}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">SAC 9987</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
           <button
-            type="button"
-            onClick={addRow}
-            className="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1 rounded-md text-xs font-bold flex items-center space-x-1 shadow transition"
+            type="button" onClick={addRow}
+            style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+            className="font-bold px-3.5 py-1.5 rounded-full text-xs flex items-center gap-1 border-0 shadow-sm active:scale-[0.98] transition-all"
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
           >
-            <Plus className="h-4 w-4" />
-            <span>Add Hardware Item</span>
+            <Plus className="h-4 w-4" /><span>+ Add Item</span>
           </button>
         </div>
       </div>
 
-      {/* Mobile Horizontal Scroll Hint */}
-      <div className="bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 text-[11px] font-semibold px-3 py-1 block sm:hidden text-center border-b border-sky-100 dark:border-sky-900">
-        👉 Swipe table horizontally to edit all columns (HSN, Price, Tax, Total)
+      {/* ── Mobile cards (below md breakpoint) ── */}
+      <div className="block md:hidden p-3 space-y-0">
+        {productRows.length === 0 ? (
+          <div className="text-center py-8 text-sm" style={{ color: textMuted }}>
+            No products added yet. Click <strong style={{ color: textStrong }}>+ Add Item</strong> to begin.
+          </div>
+        ) : (
+          productRows.map(({ row, globalIndex }, localIdx) => (
+            <ProductRow
+              key={row.rowId}
+              index={localIdx}
+              row={row}
+              isLastRow={localIdx === productRows.length - 1}
+              onUpdate={updates => updateRow(globalIndex, updates)}
+              onSelectProduct={product => selectProductForRow(globalIndex, product)}
+              onRemove={() => removeRow(globalIndex)}
+              onAddRowNeeded={addRow}
+              onNavigateRow={dir => handleNavigateRow(globalIndex, dir)}
+            />
+          ))
+        )}
       </div>
 
-      {/* Table Container */}
-      <div className="overflow-x-auto custom-scrollbar">
-        <table className="w-full min-w-[950px] text-left border-collapse">
+      {/* ── Desktop table (md+ breakpoint) ── */}
+      <div className="hidden md:block overflow-x-auto custom-scrollbar">
+        <table className="w-full text-left border-collapse" style={{ minWidth: 780 }}>
           <thead>
-            <tr className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              <th className="py-2.5 px-2 text-center w-10">#</th>
-              <th className="py-2.5 px-2 min-w-[130px]">Part / Code</th>
-              <th className="py-2.5 px-2 min-w-[200px]">Product / Labour Description</th>
-              <th className="py-2.5 px-2 text-center w-20">HSN / SAC</th>
-              <th className="py-2.5 px-2 text-right w-20">Qty</th>
-              <th className="py-2.5 px-2 text-center w-20">Unit</th>
-              <th className="py-2.5 px-2 text-right w-32">Price (₹) & Mode</th>
-              <th className="py-2.5 px-2 text-right w-16">Disc %</th>
-              <th className="py-2.5 px-2 text-center w-24">GST % (C+S)</th>
-              <th className="py-2.5 px-2 text-right w-24">GST Amt</th>
-              <th className="py-2.5 px-2 text-right w-28">Total (₹)</th>
-              <th className="py-2.5 px-2 text-center w-10">Act</th>
+            <tr style={{ background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)', borderBottom: `1px solid ${cardBorder}` }}>
+              {[
+                { label: '#',                      align: 'center', w: 40  },
+                { label: 'Part / Code',             align: 'left',   w: 110 },
+                { label: 'Product / Labour Desc',   align: 'left',   w: null },
+                { label: 'HSN',                     align: 'center', w: 70  },
+                { label: 'Qty',                     align: 'center', w: 64  },
+                { label: 'Price (₹)',               align: 'right',  w: 110 },
+                { label: 'GST %',                   align: 'center', w: 90  },
+                { label: 'GST Amt',                 align: 'right',  w: 80  },
+                { label: 'Total (₹)',               align: 'right',  w: 90  },
+                { label: '',                        align: 'center', w: 36  },
+              ].map(({ label, align, w }, i) => (
+                <th key={i} style={{
+                  padding: '10px 4px',
+                  fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em',
+                  color: textMuted, textAlign: align as any,
+                  width: w ?? undefined,
+                }}>
+                  {label}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
-            {rows.map((row, idx) => (
-              <ProductRow
-                key={row.rowId}
-                index={idx}
-                row={row}
-                isLastRow={idx === rows.length - 1}
-                onUpdate={(updates) => updateRow(idx, updates)}
-                onSelectProduct={(product) => selectProductForRow(idx, product)}
-                onRemove={() => removeRow(idx)}
-                onAddRowNeeded={addRow}
-                onNavigateRow={(dir) => handleNavigateRow(idx, dir)}
-              />
-            ))}
+          <tbody>
+            {productRows.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="text-center py-8 text-sm" style={{ color: textMuted }}>
+                  No products added yet. Click <strong style={{ color: textStrong }}>+ Add Item</strong> to begin.
+                </td>
+              </tr>
+            ) : (
+              productRows.map(({ row, globalIndex }, localIdx) => (
+                <ProductRow
+                  key={row.rowId}
+                  index={localIdx}
+                  row={row}
+                  isLastRow={localIdx === productRows.length - 1}
+                  onUpdate={updates => updateRow(globalIndex, updates)}
+                  onSelectProduct={product => selectProductForRow(globalIndex, product)}
+                  onRemove={() => removeRow(globalIndex)}
+                  onAddRowNeeded={addRow}
+                  onNavigateRow={dir => handleNavigateRow(globalIndex, dir)}
+                />
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Bottom Action Footer */}
-      <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 px-4 py-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span className="font-mono">
-          Tip: You can add both hardware parts and labour charges in the same invoice.
-        </span>
+      {/* ── Labour & Misc sections ── */}
+      <div className="p-3 space-y-3" style={{ borderTop: `1px solid ${cardBorder}` }}>
+        <ServiceSection
+          title="Labour & Service Charges"
+          icon={<Wrench className="h-3.5 w-3.5" />}
+          rows={labourRows}
+          onAdd={() => addLabourRow()}
+          onUpdate={(gi, updates) => updateRow(gi, updates)}
+          onRemove={gi => removeRow(gi)}
+          cardBg={cardBg}
+          cardBorder={cardBorder}
+          textStrong={textStrong}
+          textMuted={textMuted}
+        />
+        <ServiceSection
+          title="Miscellaneous Spares"
+          icon={<PackageCheck className="h-3.5 w-3.5" />}
+          rows={miscRows}
+          onAdd={() => addMiscSparesRow()}
+          onUpdate={(gi, updates) => updateRow(gi, updates)}
+          onRemove={gi => removeRow(gi)}
+          cardBg={cardBg}
+          cardBorder={cardBorder}
+          textStrong={textStrong}
+          textMuted={textMuted}
+        />
       </div>
     </div>
   );

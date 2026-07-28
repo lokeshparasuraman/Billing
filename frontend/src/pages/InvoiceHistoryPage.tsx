@@ -1,19 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { fetchInvoices, fetchInvoiceById } from '../services/api';
+import React, { useEffect, useState, useRef } from 'react';
+import { fetchInvoices, fetchInvoiceById, deleteInvoice } from '../services/api';
 import { SavedInvoice } from '../types/billing';
 import { formatCurrency } from '../utils/calculations';
-import { Search, FileText, Eye } from 'lucide-react';
+import { Search, FileText, Eye, Trash2, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
 import { A4InvoicePreviewModal } from '../components/print/A4InvoicePreviewModal';
+import { useThemeMode } from '../context/ThemeContext';
 
 export const InvoiceHistoryPage: React.FC = () => {
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+
+  /* Theme tokens matching home page inverted card design */
+  const cardBg     = isDark ? '#ebedf0' : '#051c1a';
+  const cardBorder = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
+  const cardDivide = isDark ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)';
+  const textStrong = isDark ? '#051c1a' : '#ffffff';
+  const textMuted  = isDark ? 'rgba(5,28,26,0.55)' : 'rgba(255,255,255,0.65)';
+  const inputBg    = isDark ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)';
+  const inputBorder= isDark ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
+
   const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<SavedInvoice | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     loadInvoices();
+  }, []);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const loadInvoices = async () => {
@@ -38,94 +66,223 @@ export const InvoiceHistoryPage: React.FC = () => {
     }
   };
 
-  const filteredInvoices = invoices.filter((inv) => {
-    const q = searchQuery.toLowerCase().trim();
-    return (
-      inv.invoiceNumber.toLowerCase().includes(q) ||
-      inv.customerName.toLowerCase().includes(q) ||
-      (inv.customerPhone && inv.customerPhone.includes(q))
+  const handleDeleteInvoice = async (id: string, invNum: string) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete invoice ${invNum} from history?\n\nThis action cannot be undone.`
     );
-  });
+    if (!confirmDelete) return;
+
+    try {
+      await deleteInvoice(id);
+      setInvoices((prev) => prev.filter((i) => i.id !== id));
+    } catch (err) {
+      console.error('Failed to delete invoice:', err);
+      alert('Failed to delete invoice from history.');
+    }
+  };
+
+  // Filter and sort invoices
+  const filteredAndSortedInvoices = [...invoices]
+    .filter((inv) => {
+      const q = searchQuery.toLowerCase().trim();
+      return (
+        inv.invoiceNumber.toLowerCase().includes(q) ||
+        inv.customerName.toLowerCase().includes(q) ||
+        (inv.customerPhone && inv.customerPhone.includes(q))
+      );
+    })
+    .sort((a, b) => {
+      const timeA = new Date(a.invoiceDate).getTime();
+      const timeB = new Date(b.invoiceDate).getTime();
+      return sortOrder === 'newest' ? timeB - timeA : timeA - timeB;
+    });
+
+  const sortOptions = [
+    { id: 'newest', label: 'Date: Newest First' },
+    { id: 'oldest', label: 'Date: Oldest First' },
+  ];
+
+  const currentSortLabel = sortOptions.find(o => o.id === sortOrder)?.label || 'Date: Newest First';
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-12 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+    <div className="min-h-screen pb-16 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Page Header */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div
+          className="rounded-2xl p-6 sm:p-7 mb-6 flex flex-wrap items-center justify-between gap-6 transition-all"
+          style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+        >
           <div>
-            <h1 className="text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <FileText className="h-6 w-6 text-sky-600 dark:text-sky-400" /> Invoice History Registry
+            <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-3" style={{ color: textStrong }}>
+              <FileText className="h-7 w-7 text-[#c9f227]" /> Invoice History Registry
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              View, search, and preview previous B&W A4 commercial tax invoices.
+            <p className="text-xs sm:text-sm font-semibold mt-1.5" style={{ color: textMuted }}>
+              View, search, preview, download, or delete past commercial tax invoices ({invoices.length} Invoices).
             </p>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative w-full sm:w-72">
-            <Search className="h-4 w-4 absolute left-3 top-3 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by Inv No, Customer..."
-              className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
-            />
+          {/* Search & Custom Sort Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-72">
+              <Search className="h-4 w-4 absolute left-3.5 top-3.5" style={{ color: textMuted }} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by Inv No, Customer..."
+                style={{
+                  background: inputBg,
+                  color: textStrong,
+                  border: `1px solid ${inputBorder}`,
+                }}
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none transition"
+              />
+            </div>
+
+            {/* Custom Modern Dropdown Popover */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsSortOpen(!isSortOpen)}
+                style={{
+                  background: inputBg,
+                  color: textStrong,
+                  border: `1px solid ${inputBorder}`,
+                }}
+                className="w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl flex items-center justify-between gap-2.5 transition active:scale-[0.98] select-none focus:outline-none"
+              >
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4 shrink-0" style={{ color: textMuted }} />
+                  <span>{currentSortLabel}</span>
+                </div>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-200 shrink-0 ${isSortOpen ? 'rotate-180' : ''}`}
+                  style={{ color: textMuted }}
+                />
+              </button>
+
+              {/* Popover Dropdown Menu */}
+              {isSortOpen && (
+                <div
+                  style={{
+                    background: cardBg,
+                    border: `1px solid ${cardBorder}`,
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.25)',
+                  }}
+                  className="absolute right-0 top-full mt-2 w-56 rounded-2xl p-1.5 z-50 transition-all duration-150 transform origin-top-right animate-in fade-in zoom-in-95"
+                >
+                  {sortOptions.map((opt) => {
+                    const isSelected = sortOrder === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => {
+                          setSortOrder(opt.id as 'newest' | 'oldest');
+                          setIsSortOpen(false);
+                        }}
+                        style={{
+                          background: isSelected
+                            ? (isDark ? 'rgba(5, 28, 26, 0.08)' : 'rgba(201, 242, 39, 0.20)')
+                            : 'transparent',
+                          color: textStrong,
+                        }}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all text-left focus:outline-none ${
+                          !isSelected ? 'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' : ''
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {isSelected && <Check className="h-4 w-4 shrink-0" style={{ color: isDark ? '#051c1a' : '#c9f227' }} />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Invoice List Table */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div
+          className="rounded-2xl shadow-sm overflow-hidden transition-all"
+          style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+        >
           {isLoading ? (
-            <div className="p-12 text-center text-slate-500 dark:text-slate-400 text-sm font-medium">
+            <div className="p-16 text-center text-base sm:text-lg font-bold" style={{ color: textMuted }}>
               Loading invoices registry...
             </div>
-          ) : filteredInvoices.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 dark:text-slate-400 text-sm">
-              No invoices found matching your query.
+          ) : filteredAndSortedInvoices.length === 0 ? (
+            <div className="p-16 text-center text-base sm:text-lg font-semibold" style={{ color: textMuted }}>
+              No invoices found in history matching your query.
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[650px] text-left border-collapse">
+              <table className="w-full min-w-[700px] text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-800 dark:bg-slate-950 text-white text-[11px] font-bold uppercase tracking-wider">
-                    <th className="py-3 px-4">Invoice No</th>
-                    <th className="py-3 px-4">Date</th>
-                    <th className="py-3 px-4">Customer Name</th>
-                    <th className="py-3 px-4 text-center">Payment Mode</th>
-                    <th className="py-3 px-4 text-right">Grand Total</th>
-                    <th className="py-3 px-4 text-center">Action</th>
+                  <tr style={{ background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)', borderBottom: `1px solid ${cardDivide}` }}>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Invoice No</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Date</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Store / Business Name</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>Payment Mode</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-right" style={{ color: textMuted }}>Grand Total</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center w-48" style={{ color: textMuted }}>Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-xs">
-                  {filteredInvoices.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-sky-50/50 dark:hover:bg-slate-800/50 transition">
-                      <td className="py-3 px-4 font-mono font-bold text-sky-700 dark:text-sky-400">{inv.invoiceNumber}</td>
-                      <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
+                <tbody className="text-xs sm:text-sm">
+                  {filteredAndSortedInvoices.map((inv) => (
+                    <tr
+                      key={inv.id}
+                      style={{ borderBottom: `1px solid ${cardDivide}` }}
+                      className="transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.05]"
+                    >
+                      <td className="py-3.5 px-5 font-mono font-black text-sm" style={{ color: textStrong }}>{inv.invoiceNumber}</td>
+                      <td className="py-3.5 px-5 font-semibold" style={{ color: textMuted }}>
                         {new Date(inv.invoiceDate).toLocaleDateString('en-IN', {
                           day: '2-digit',
                           month: 'short',
                           year: 'numeric',
                         })}
                       </td>
-                      <td className="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">{inv.customerName}</td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-[10px] px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 uppercase">
+                      <td className="py-3.5 px-5 font-bold" style={{ color: textStrong }}>{inv.customerName}</td>
+                      <td className="py-3.5 px-5 text-center">
+                        <span
+                          className="font-bold text-xs px-2.5 py-1 rounded-lg border uppercase"
+                          style={{
+                            background: inputBg,
+                            color: textStrong,
+                            borderColor: inputBorder,
+                          }}
+                        >
                           {inv.paymentMode}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-sky-900 dark:text-sky-400 text-sm">
+                      <td className="py-3.5 px-5 text-right font-mono font-black text-sm sm:text-base" style={{ color: textStrong }}>
                         {formatCurrency(inv.grandTotal)}
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenInvoice(inv.id)}
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900/60 transition border border-sky-200 dark:border-sky-800"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          <span>A4 Preview & Print</span>
-                        </button>
+                      <td className="py-3.5 px-5 text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenInvoice(inv.id)}
+                            style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+                            className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none"
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            <span>Preview & Print</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteInvoice(inv.id, inv.invoiceNumber)}
+                            className="p-1.5 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-transparent hover:border-rose-200 dark:hover:border-rose-800 focus:outline-none"
+                            title={`Delete Invoice ${inv.invoiceNumber}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

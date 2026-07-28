@@ -2,43 +2,124 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   PINELABS EXACT COLOR TOKENS
+   Background:  #051c1a  (dark forest teal)
+   Card:        #0a2421  (slightly lighter teal)
+   Border:      rgba(255,255,255,0.07)
+   Text:        #ffffff  primary
+   Text muted:  rgba(255,255,255,0.60)
+   Accent green (CTA only): #c9f227  (lime, used SPARINGLY)
+   Hover green:  #d6f944
+   No neon mint (#00e599) scattered — white only for secondary
+   ============================================================ */
+
+:root {
+  --pine-bg:        #f4f5f7;
+  --pine-surface:   #eef0f3;
+  --pine-border:    rgba(0,0,0,0.10);
+  --pine-text:      #0a0a0a;
+  --pine-muted:     rgba(0,0,0,0.50);
+  --pine-accent:    #c9f227;
+  --pine-accent-hover: #d6f944;
+}
+
+.dark {
+  --pine-bg:        #051c1a;
+  --pine-surface:   #0a2421;
+  --pine-border:    rgba(255,255,255,0.07);
+  --pine-text:      #ffffff;
+  --pine-muted:     rgba(255,255,255,0.55);
+  --pine-accent:    #c9f227;
+  --pine-accent-hover: #d6f944;
+}
+
 @layer base {
+  *, ::before, ::after {
+    font-family: 'Space Grotesk', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif !important;
+    letter-spacing: -0.02em;
+    border-color: var(--pine-border);
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-sky-500 selection:text-white transition-colors duration-200;
+    background-color: var(--pine-bg);
+    color: var(--pine-text);
+    font-family: 'Space Grotesk', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  /* Selection highlight — lime on dark, dark on light */
+  ::selection {
+    background-color: #c9f227;
+    color: #051c1a;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.04em !important;
+    line-height: 1.1;
   }
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-.dark ::-webkit-scrollbar-track {
-  background: #0f172a;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+/* =====================
+   SCROLLBAR
+   ===================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--pine-bg); }
+::-webkit-scrollbar-thumb { background: var(--pine-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201,242,39,0.4); }
+
+/* =====================
+   INPUTS, SEARCH & BUTTONS — no outline rings or borders when clicked/focused
+   ===================== */
+button:focus, button:focus-visible, button:active,
+select:focus, select:focus-visible, select:active,
+input:focus, input:focus-visible, input:active,
+textarea:focus, textarea:focus-visible, textarea:active {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* Remove spin buttons from numeric inputs for clean UI */
+/* =====================
+   CUSTOM SCROLLBAR helper & CALENDAR PICKER
+   ===================== */
+.custom-scrollbar {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.calendar-picker-light::-webkit-calendar-picker-indicator {
+  filter: invert(1) !important;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.calendar-picker-dark::-webkit-calendar-picker-indicator {
+  filter: invert(0) !important;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+/* Remove spin buttons */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-input[type="number"] {
-  -moz-appearance: textfield;
-}
+input[type="number"] { -moz-appearance: textfield; }

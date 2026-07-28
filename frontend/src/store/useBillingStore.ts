@@ -1,6 +1,33 @@
 import { create } from 'zustand';
 import { InvoiceHeaderDetails, InvoiceItemRow, Product, SavedInvoice } from '../types/billing';
 import { calculateRowTotals } from '../utils/calculations';
+import { updateStoreSettingsApi } from '../services/api';
+
+export interface StoreDetails {
+  storeName: string;
+  gstin: string;
+  phone: string;
+  address: string;
+}
+
+const defaultStoreDetails: StoreDetails = {
+  storeName: 'OWSHIKA ENTERPRISES',
+  gstin: '33BAEPP2449B1Z3',
+  phone: '+91 9445662637',
+  address: '#104, Industrial Main Road, Sector 3, Peenya, Bengaluru - 560058',
+};
+
+function loadStoreDetails(): StoreDetails {
+  try {
+    const saved = localStorage.getItem('store_details');
+    if (saved) {
+      return { ...defaultStoreDetails, ...JSON.parse(saved) };
+    }
+  } catch (e) {
+    console.warn('Failed to load store details from localStorage');
+  }
+  return defaultStoreDetails;
+}
 
 function createEmptyRow(idSuffix?: number): InvoiceItemRow {
   return {
@@ -22,6 +49,7 @@ function createEmptyRow(idSuffix?: number): InvoiceItemRow {
 
 interface BillingState {
   header: InvoiceHeaderDetails;
+  storeDetails: StoreDetails;
   rows: InvoiceItemRow[];
   activeRowIndex: number;
   activeCellField: string;
@@ -32,9 +60,12 @@ interface BillingState {
 
   // Actions
   setHeaderField: <K extends keyof InvoiceHeaderDetails>(field: K, value: InvoiceHeaderDetails[K]) => void;
+  setTransportField: <K extends keyof import('../types/billing').TransportDetails>(field: K, value: import('../types/billing').TransportDetails[K]) => void;
+  setStoreDetails: (details: Partial<StoreDetails>) => void;
   setRows: (rows: InvoiceItemRow[]) => void;
   addRow: () => void;
   addLabourRow: (name?: string, price?: number) => void;
+  addMiscSparesRow: (name?: string, price?: number) => void;
   removeRow: (index: number) => void;
   updateRow: (index: number, updates: Partial<InvoiceItemRow>) => void;
   selectProductForRow: (index: number, product: Product) => void;
@@ -48,16 +79,24 @@ interface BillingState {
 }
 
 const initialHeader: InvoiceHeaderDetails = {
+  billType: 'CUSTOMER',
   invoiceNumber: 'OE-2026-0001',
   invoiceDate: new Date().toISOString().split('T')[0],
-  customerName: '',
+  customerName: 'Owshika Enterprises',
   customerPhone: '',
   customerAddress: '',
   paymentMode: 'CASH',
+  transportDetails: {
+    fromLocation: 'Peenya, Bengaluru',
+    toLocation: '',
+    vehicleNumber: '',
+    transporterName: '',
+  },
 };
 
 export const useBillingStore = create<BillingState>((set, get) => ({
   header: initialHeader,
+  storeDetails: loadStoreDetails(),
   rows: [createEmptyRow(1), createEmptyRow(2), createEmptyRow(3)],
   activeRowIndex: 0,
   activeCellField: 'partNumber',
@@ -73,6 +112,31 @@ export const useBillingStore = create<BillingState>((set, get) => ({
         [field]: value,
       },
     }));
+  },
+
+  setTransportField: (field, value) => {
+    set((state) => ({
+      header: {
+        ...state.header,
+        transportDetails: {
+          ...state.header.transportDetails,
+          [field]: value,
+        },
+      },
+    }));
+  },
+
+  setStoreDetails: (updates) => {
+    set((state) => {
+      const updated = { ...state.storeDetails, ...updates };
+      try {
+        localStorage.setItem('store_details', JSON.stringify(updated));
+        updateStoreSettingsApi(updated).catch(() => {});
+      } catch (e) {
+        console.error('Failed to save store details to database/localStorage:', e);
+      }
+      return { storeDetails: updated };
+    });
   },
 
   setRows: (rows) => set({ rows }),
@@ -108,7 +172,6 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       };
       const recalculated = calculateRowTotals(labourRow);
 
-      // If the last row is completely blank, replace it instead of appending
       const currentRows = [...state.rows];
       if (
         currentRows.length > 0 &&
@@ -128,10 +191,48 @@ export const useBillingStore = create<BillingState>((set, get) => ({
     });
   },
 
+  addMiscSparesRow: (name?: string, price?: number) => {
+    set((state) => {
+      const miscRow: InvoiceItemRow = {
+        rowId: `row_${Date.now()}_misc`,
+        itemType: 'SPARES',
+        productId: '',
+        partNumber: 'MISC-SPARES',
+        name: name || 'Miscellaneous Hardware Spares',
+        hsn: 'N/A',
+        unit: 'PCS',
+        quantity: 1,
+        price: price !== undefined ? price : '',
+        discount: 0,
+        gstRate: 0,
+        gstAmount: 0,
+        taxableAmount: 0,
+        total: 0,
+      };
+      const recalculated = calculateRowTotals(miscRow);
+
+      const currentRows = [...state.rows];
+      if (
+        currentRows.length > 0 &&
+        !currentRows[currentRows.length - 1].name &&
+        !currentRows[currentRows.length - 1].partNumber
+      ) {
+        currentRows[currentRows.length - 1] = recalculated;
+      } else {
+        currentRows.push(recalculated);
+      }
+
+      return {
+        rows: currentRows,
+        activeRowIndex: currentRows.length - 1,
+        activeCellField: 'price',
+      };
+    });
+  },
+
   removeRow: (index: number) => {
     set((state) => {
       if (state.rows.length <= 1) {
-        // Keep at least 1 empty row
         return {
           rows: [createEmptyRow(1)],
           activeRowIndex: 0,

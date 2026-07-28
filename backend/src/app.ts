@@ -4,8 +4,9 @@ import dotenv from 'dotenv';
 import productRoutes from './routes/productRoutes.js';
 import customerRoutes from './routes/customerRoutes.js';
 import invoiceRoutes from './routes/invoiceRoutes.js';
+import storeRoutes from './routes/storeRoutes.js';
 
-dotenv.config();
+dotenv.config({ override: true });
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/store', storeRoutes);
 
 // Root endpoint status
 app.get('/', (req, res) => {

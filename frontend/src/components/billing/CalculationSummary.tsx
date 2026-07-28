@@ -4,49 +4,51 @@ import { calculateInvoiceSummary, formatCurrency } from '../../utils/calculation
 import { createInvoice, fetchNextInvoiceNumber } from '../../services/api';
 import { Printer, Save, RefreshCw, AlertCircle, FileSearch } from 'lucide-react';
 import { SavedInvoice } from '../../types/billing';
+import { useThemeMode } from '../../context/ThemeContext';
 
 export const CalculationSummary: React.FC = () => {
   const {
-    header,
-    rows,
-    isSaving,
-    setIsSaving,
-    validationError,
-    setValidationError,
-    setSavedInvoiceForPrint,
-    setIsPrintModalOpen,
-    clearBillingForm,
-    resetWithNextInvoiceNumber,
+    header, rows, storeDetails, isSaving, setIsSaving,
+    validationError, setValidationError, setSavedInvoiceForPrint,
+    setIsPrintModalOpen, clearBillingForm, resetWithNextInvoiceNumber,
   } = useBillingStore();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+
+  /* ─── Inverted card tokens ─── */
+  const cardBg     = isDark ? '#ebedf0' : '#051c1a';
+  const cardBorder = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
+  const cardDivide = isDark ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)';
+  const textStrong = isDark ? '#051c1a' : '#ffffff';
+  const textMuted  = isDark ? 'rgba(5,28,26,0.55)' : 'rgba(255,255,255,0.65)';
+  const subBg      = isDark ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)';
+  const secBtnStyle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+    padding: '10px 16px', borderRadius: '12px', fontSize: '12px', fontWeight: 700,
+    border: `1px solid ${cardDivide}`,
+    background: subBg, color: textMuted, cursor: 'pointer', transition: 'all 0.15s',
+  };
 
   const summary = calculateInvoiceSummary(rows);
+  const totalGstAmount = summary.cgstTotal + summary.sgstTotal;
 
   const handlePreviewWithoutSaving = () => {
     setValidationError(null);
-    if (!header.customerName || header.customerName.trim() === '') {
-      setValidationError('Customer Name is required to preview invoice.');
-      return;
-    }
-
-    const validItems = rows.filter(
-      (r) => r.name.trim() !== '' && typeof r.quantity === 'number' && r.quantity > 0
-    );
-
-    if (validItems.length === 0) {
-      setValidationError('Please add at least one valid product to preview.');
-      return;
-    }
+    const validItems = rows.filter((r) => r.name.trim() !== '' && typeof r.quantity === 'number' && r.quantity > 0);
+    if (validItems.length === 0) { setValidationError('Please add at least one valid product to preview.'); return; }
 
     const tempInvoice: SavedInvoice = {
       id: 'preview_temp',
+      billType: header.billType || 'CUSTOMER',
+      transportDetails: header.billType === 'TRANSPORT' ? header.transportDetails : undefined,
       invoiceNumber: header.invoiceNumber || 'INV-PREVIEW',
       invoiceDate: header.invoiceDate || new Date().toISOString(),
-      customerName: header.customerName,
-      customerPhone: header.customerPhone,
-      customerAddress: header.customerAddress,
+      customerName: storeDetails.storeName || 'Owshika Enterprises',
+      customerPhone: storeDetails.phone || '',
+      customerAddress: storeDetails.address || '',
       paymentMode: header.paymentMode,
       subtotal: summary.subtotal,
-      discountTotal: summary.discountTotal,
+      discountTotal: 0,
       cgstTotal: summary.cgstTotal,
       sgstTotal: summary.sgstTotal,
       igstTotal: summary.igstTotal,
@@ -62,43 +64,30 @@ export const CalculationSummary: React.FC = () => {
         unit: r.unit || 'PCS',
         quantity: Number(r.quantity),
         price: Number(r.price || 0),
-        discount: Number(r.discount || 0),
+        discount: 0,
         gstRate: Number(r.gstRate || 0),
         gstAmount: (Number(r.quantity) * Number(r.price || 0) * Number(r.gstRate || 0)) / 100,
-        total:
-          Number(r.quantity) * Number(r.price || 0) * (1 - Number(r.discount || 0) / 100) * (1 + Number(r.gstRate || 0) / 100),
+        total: Number(r.quantity) * Number(r.price || 0) * (1 + Number(r.gstRate || 0) / 100),
       })),
     };
-
     setSavedInvoiceForPrint(tempInvoice);
     setIsPrintModalOpen(true);
   };
 
   const handleValidateAndSave = async (shouldPrint: boolean) => {
     setValidationError(null);
-
-    if (!header.customerName || header.customerName.trim() === '') {
-      setValidationError('Customer Name is required to generate invoice.');
-      return;
-    }
-
-    const validItems = rows.filter(
-      (r) => r.name.trim() !== '' && typeof r.quantity === 'number' && r.quantity > 0
-    );
-
-    if (validItems.length === 0) {
-      setValidationError('Please add at least one valid product with Quantity > 0.');
-      return;
-    }
-
+    const validItems = rows.filter((r) => r.name.trim() !== '' && typeof r.quantity === 'number' && r.quantity > 0);
+    if (validItems.length === 0) { setValidationError('Please add at least one valid product with Quantity > 0.'); return; }
     setIsSaving(true);
     try {
       const payload = {
+        billType: header.billType || 'CUSTOMER',
+        transportDetails: header.billType === 'TRANSPORT' ? header.transportDetails : undefined,
         invoiceNumber: header.invoiceNumber,
         invoiceDate: header.invoiceDate,
-        customerName: header.customerName,
-        customerPhone: header.customerPhone,
-        customerAddress: header.customerAddress,
+        customerName: storeDetails.storeName || 'Owshika Enterprises',
+        customerPhone: storeDetails.phone || '',
+        customerAddress: storeDetails.address || '',
         paymentMode: header.paymentMode,
         items: validItems.map((r) => ({
           productId: r.productId || null,
@@ -108,29 +97,20 @@ export const CalculationSummary: React.FC = () => {
           unit: r.unit || 'PCS',
           quantity: Number(r.quantity),
           price: Number(r.price || 0),
-          discount: Number(r.discount || 0),
+          discount: 0,
           gstRate: Number(r.gstRate || 0),
         })),
       };
-
       const savedInv = await createInvoice(payload);
-
       setSavedInvoiceForPrint(savedInv);
-      if (shouldPrint) {
-        setIsPrintModalOpen(true);
-      }
-
-      // Fetch next auto-increment invoice number for next bill
+      if (shouldPrint) setIsPrintModalOpen(true);
       try {
         const nextNum = await fetchNextInvoiceNumber();
         resetWithNextInvoiceNumber(nextNum);
-      } catch (err) {
-        clearBillingForm();
-      }
+      } catch { clearBillingForm(); }
     } catch (err: any) {
       console.error('Save invoice error:', err);
-      const msg = err.response?.data?.error || 'Failed to save invoice. Please check backend connection.';
-      setValidationError(msg);
+      setValidationError(err.response?.data?.error || 'Failed to save invoice. Please check backend connection.');
     } finally {
       setIsSaving(false);
     }
@@ -138,117 +118,101 @@ export const CalculationSummary: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-      {/* Left Column: Validation Error & Amount in Words Banner */}
-      <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
-        {/* Amount in Words Card */}
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-900 dark:to-slate-950 text-white rounded-xl p-4 shadow-sm border border-slate-700">
-          <div className="text-sky-400 text-xs font-bold uppercase tracking-wider mb-1">
+
+      {/* Left: Amount in words + validation + action bar — below billing summary on mobile */}
+      <div className="lg:col-span-7 flex flex-col gap-3 order-2 lg:order-1">
+
+        {/* Amount in Words */}
+        <div
+          className="rounded-2xl p-4 sm:p-5"
+          style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+        >
+          <div className="text-[11px] font-extrabold uppercase tracking-wider mb-1.5" style={{ color: textMuted }}>
             Amount In Words
           </div>
-          <div className="text-sm font-semibold text-slate-100 italic leading-snug">
+          <div className="text-xs sm:text-sm font-semibold italic leading-relaxed" style={{ color: textStrong }}>
             "{summary.amountInWords}"
           </div>
         </div>
 
-        {/* Validation Error Alert if present */}
+        {/* Validation Error */}
         {validationError && (
-          <div className="bg-rose-50 dark:bg-rose-950/50 border-l-4 border-rose-500 p-3 rounded-r-lg text-xs text-rose-800 dark:text-rose-200 flex items-start space-x-2 animate-shake">
-            <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
-            <div className="font-semibold">{validationError}</div>
+          <div className="border-l-4 border-red-500 p-3 sm:p-4 rounded-r-2xl text-xs sm:text-sm flex items-start space-x-2 bg-red-50 dark:bg-red-950/30 text-red-800 dark:text-red-200">
+            <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <div className="font-semibold leading-relaxed">{validationError}</div>
           </div>
         )}
 
-        {/* Action Buttons Toolbar */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={clearBillingForm}
-            className="flex items-center justify-center space-x-1.5 px-3.5 py-2.5 sm:py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-          >
-            <RefreshCw className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+        {/* Action Buttons */}
+        <div
+          className="rounded-2xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+          style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+        >
+          <button type="button" onClick={clearBillingForm} style={secBtnStyle}>
+            <RefreshCw className="h-4 w-4" />
             <span>Clear Form</span>
           </button>
 
-          <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePreviewWithoutSaving}
-              className="flex items-center justify-center space-x-1.5 px-4 py-2.5 sm:py-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 transition shadow-sm"
-              title="Preview A4 Sheet Bill before saving or printing"
-            >
-              <FileSearch className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+          <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2.5">
+            <button type="button" onClick={handlePreviewWithoutSaving} style={secBtnStyle} title="Preview A4 Bill">
+              <FileSearch className="h-4 w-4" />
               <span>A4 Bill Preview</span>
             </button>
 
-            <button
-              type="button"
-              disabled={isSaving}
-              onClick={() => handleValidateAndSave(false)}
-              className="flex items-center justify-center space-x-1.5 px-4 py-2.5 sm:py-2 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 transition shadow-sm"
-            >
-              <Save className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+            <button type="button" disabled={isSaving} onClick={() => handleValidateAndSave(false)} style={secBtnStyle}>
+              <Save className="h-4 w-4" />
               <span>Save Only</span>
             </button>
 
+            {/* Primary CTA — lime */}
             <button
               type="button"
               disabled={isSaving}
               onClick={() => handleValidateAndSave(true)}
-              className="flex items-center justify-center space-x-2 px-5 py-2.5 sm:py-2 rounded-lg text-xs font-extrabold text-white bg-sky-600 hover:bg-sky-500 transition shadow-md shadow-sky-600/30"
               data-action="save-print"
+              style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+              className="flex items-center justify-center space-x-2 px-6 py-2.5 rounded-full text-xs sm:text-sm font-black active:scale-[0.98] transition-all border-0 shadow-sm"
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
             >
-              <Printer className="h-4 w-4" />
+              <Printer className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>{isSaving ? 'Saving...' : 'Save & Print Invoice'}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Right Column: Detailed Financial Summary Card */}
-      <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-        <div className="pb-2 font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-xs flex justify-between">
+      {/* Right: Billing Summary — first on mobile */}
+      <div
+        className="lg:col-span-5 rounded-2xl p-4 sm:p-5 text-xs sm:text-sm order-1 lg:order-2"
+        style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+      >
+        <div className="pb-3 font-extrabold uppercase tracking-wider text-xs flex justify-between" style={{ borderBottom: `1px solid ${cardDivide}`, color: textStrong }}>
           <span>Billing Summary</span>
-          <span className="text-sky-600 dark:text-sky-400">Price Breakdown</span>
+          <span style={{ color: textMuted }}>Tax & Total</span>
         </div>
 
-        {/* Subtotal */}
-        <div className="py-2 flex justify-between items-center font-medium text-slate-700 dark:text-slate-300">
+        <div className="py-2.5 flex justify-between items-center" style={{ borderBottom: `1px solid ${cardDivide}`, color: textMuted }}>
           <span>Subtotal (Taxable):</span>
-          <span className="font-mono text-sm font-semibold">{formatCurrency(summary.subtotal)}</span>
+          <span className="font-mono font-bold" style={{ color: textStrong }}>{formatCurrency(summary.subtotal)}</span>
         </div>
 
-        {/* Discount Total */}
-        {summary.discountTotal > 0 && (
-          <div className="py-2 flex justify-between items-center text-emerald-700 dark:text-emerald-400 font-medium">
-            <span>Total Discount:</span>
-            <span className="font-mono text-sm font-semibold">-{formatCurrency(summary.discountTotal)}</span>
-          </div>
-        )}
-
-        {/* CGST */}
-        <div className="py-2 flex justify-between items-center text-slate-600 dark:text-slate-400">
-          <span>CGST (Central Tax):</span>
-          <span className="font-mono text-xs font-medium">{formatCurrency(summary.cgstTotal)}</span>
+        <div className="py-2.5 flex justify-between items-center" style={{ borderBottom: `1px solid ${cardDivide}`, color: textMuted }}>
+          <span>GST Tax Amount:</span>
+          <span className="font-mono font-bold" style={{ color: textStrong }}>{formatCurrency(totalGstAmount)}</span>
         </div>
 
-        {/* SGST */}
-        <div className="py-2 flex justify-between items-center text-slate-600 dark:text-slate-400">
-          <span>SGST (State Tax):</span>
-          <span className="font-mono text-xs font-medium">{formatCurrency(summary.sgstTotal)}</span>
-        </div>
-
-        {/* Round Off */}
-        <div className="py-2 flex justify-between items-center text-slate-500 dark:text-slate-400">
+        <div className="py-2.5 flex justify-between items-center text-xs" style={{ borderBottom: `1px solid ${cardDivide}`, color: textMuted }}>
           <span>Round Off Adjust:</span>
-          <span className="font-mono text-xs">
+          <span className="font-mono text-xs font-semibold" style={{ color: textMuted }}>
             {summary.roundOff >= 0 ? `+${summary.roundOff.toFixed(2)}` : summary.roundOff.toFixed(2)}
           </span>
         </div>
 
         {/* Grand Total */}
-        <div className="pt-3 pb-1 flex justify-between items-center">
-          <span className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wide">Grand Total:</span>
-          <span className="font-mono text-xl font-extrabold text-sky-700 dark:text-sky-400">
+        <div className="pt-3.5 pb-1 flex justify-between items-center">
+          <span className="font-black text-sm sm:text-base uppercase tracking-wide" style={{ color: textStrong }}>Grand Total:</span>
+          <span className="font-mono text-2xl sm:text-3xl font-black tracking-tight" style={{ color: textStrong }}>
             {formatCurrency(summary.grandTotal)}
           </span>
         </div>

@@ -101,3 +101,57 @@ export const createProduct = async (req: Request, res: Response) => {
     res.status(500).json({ error: error?.message || 'Failed to create product' });
   }
 };
+
+export const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await prisma.product.delete({
+      where: { id },
+    });
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: error?.message || 'Failed to delete product' });
+  }
+};
+
+export const updateProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { price, partNumber, name, hsn, gst } = req.body;
+
+    const updateData: any = {};
+    if (price !== undefined) updateData.price = Number(price);
+    if (name !== undefined) updateData.name = String(name).trim();
+    if (hsn !== undefined) updateData.hsn = String(hsn).trim();
+    if (gst !== undefined) updateData.gst = Number(gst);
+
+    let updated;
+    if (id && id !== 'undefined') {
+      updated = await prisma.product.update({
+        where: { id },
+        data: updateData,
+      });
+    } else if (partNumber) {
+      const uppercasePartNum = String(partNumber).trim().toUpperCase();
+      const existing = await prisma.product.findFirst({
+        where: { partNumber: uppercasePartNum },
+      });
+      if (existing) {
+        updated = await prisma.product.update({
+          where: { id: existing.id },
+          data: updateData,
+        });
+      }
+    }
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Product not found for update' });
+    }
+
+    res.json(updated);
+  } catch (error: any) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: error?.message || 'Failed to update product' });
+  }
+};

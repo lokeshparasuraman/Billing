@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useMemo, useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -9,40 +9,73 @@ import { InvoiceHistoryPage } from './pages/InvoiceHistoryPage';
 import { ProductCatalogPage } from './pages/ProductCatalogPage';
 import { KeyboardShortcutsHelp } from './components/billing/KeyboardShortcutsHelp';
 import { ThemeProviderContext, useThemeMode } from './context/ThemeContext';
+import { useBillingStore } from './store/useBillingStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes cache
-    },
+    queries: { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5 },
   },
 });
+
+/* Helper component inside Router to handle reload redirection & unsaved warning */
+const AppNavigationHandler: React.FC = () => {
+  const navigate = useNavigate();
+  const { rows } = useBillingStore();
+  const initialChecked = React.useRef(false);
+
+  // 1. Load home page on initial load/reload ONLY, without blocking normal navbar navigation
+  useEffect(() => {
+    if (!initialChecked.current) {
+      initialChecked.current = true;
+      if (window.location.pathname !== '/') {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [navigate]);
+
+  // 2. Prompt user before reload if entering products in billing form
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const hasEnteredProducts = rows.some(
+        (r) =>
+          (r.name && r.name.trim() !== '') ||
+          (r.partNumber && r.partNumber.trim() !== '') ||
+          (typeof r.price === 'number' && r.price > 0)
+      );
+
+      if (hasEnteredProducts) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved product entries in your invoice. Do you want to reload?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [rows]);
+
+  return null;
+};
 
 const AppContent: React.FC = () => {
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { mode } = useThemeMode();
 
   const muiTheme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: mode,
-          primary: {
-            main: '#0284c7',
-          },
-          secondary: {
-            main: '#0f172a',
-          },
-          background: {
-            default: mode === 'dark' ? '#020617' : '#f8fafc',
-            paper: mode === 'dark' ? '#0f172a' : '#ffffff',
-          },
+    () => createTheme({
+      palette: {
+        mode,
+        primary: { main: '#c9f227' },
+        secondary: { main: '#051c1a' },
+        background: {
+          default: mode === 'dark' ? '#051c1a' : '#f4f5f7',
+          paper:   mode === 'dark' ? '#0a2421' : '#f8f9fa',
         },
-        typography: {
-          fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-        },
-      }),
+      },
+      typography: {
+        fontFamily: '"Space Grotesk","Outfit","Inter",sans-serif',
+      },
+    }),
     [mode]
   );
 
@@ -50,9 +83,19 @@ const AppContent: React.FC = () => {
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <Router>
-        <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+        <AppNavigationHandler />
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: mode === 'dark' ? '#051c1a' : '#f4f5f7',
+            color: mode === 'dark' ? '#ffffff' : '#0a0a0a',
+            transition: 'background-color 0.2s, color 0.2s',
+          }}
+        >
           <Navbar onOpenShortcuts={() => setIsShortcutsHelpOpen(true)} />
-          <main className="flex-1">
+          <main style={{ flex: 1, paddingTop: '64px' }}>
             <Routes>
               <Route path="/" element={<BillingPage />} />
               <Route path="/history" element={<InvoiceHistoryPage />} />
@@ -69,14 +112,12 @@ const AppContent: React.FC = () => {
   );
 };
 
-export const App: React.FC = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProviderContext>
-        <AppContent />
-      </ThemeProviderContext>
-    </QueryClientProvider>
-  );
-};
+export const App: React.FC = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProviderContext>
+      <AppContent />
+    </ThemeProviderContext>
+  </QueryClientProvider>
+);
 
 export default App;

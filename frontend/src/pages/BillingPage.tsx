@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useBillingStore } from '../store/useBillingStore';
-import { fetchNextInvoiceNumber } from '../services/api';
+import { fetchNextInvoiceNumber, fetchStoreSettings } from '../services/api';
 import { BillingHeader } from '../components/billing/BillingHeader';
 import { ProductTable } from '../components/billing/ProductTable';
 import { CalculationSummary } from '../components/billing/CalculationSummary';
-import { KeyboardShortcutsHelp } from '../components/billing/KeyboardShortcutsHelp';
 import { A4InvoicePreviewModal } from '../components/print/A4InvoicePreviewModal';
 
 export const BillingPage: React.FC = () => {
@@ -13,15 +12,19 @@ export const BillingPage: React.FC = () => {
     isPrintModalOpen,
     setIsPrintModalOpen,
     setHeaderField,
+    setStoreDetails,
     addRow,
   } = useBillingStore();
 
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
-
-  // Auto-fetch next invoice number on initial mount
+  // Auto-fetch next invoice number and store settings on initial mount
   useEffect(() => {
     fetchNextInvoiceNumber().then((num) => {
       setHeaderField('invoiceNumber', num);
+    });
+    fetchStoreSettings().then((details) => {
+      if (details && details.storeName) {
+        setStoreDetails(details);
+      }
     });
   }, []);
 
@@ -45,7 +48,7 @@ export const BillingPage: React.FC = () => {
   }, [addRow]);
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-12 transition-colors duration-200">
+    <div className="min-h-screen pb-12 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         {/* Billing Header Section */}
         <BillingHeader />
@@ -57,10 +60,7 @@ export const BillingPage: React.FC = () => {
         <CalculationSummary />
       </div>
 
-      {/* Keyboard Shortcuts Modal */}
-      <KeyboardShortcutsHelp isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
-
-      {/* A4 Printable B&W Invoice Preview Modal */}
+      {/* A4 Printable B&W Invoice Preview Model */}
       <A4InvoicePreviewModal
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}

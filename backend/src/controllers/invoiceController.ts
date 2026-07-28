@@ -27,10 +27,7 @@ export const createInvoice = async (req: Request, res: Response) => {
       items,
     } = req.body;
 
-    // Validation
-    if (!customerName || String(customerName).trim() === '') {
-      return res.status(400).json({ error: 'Customer Name is required' });
-    }
+    const finalCustomerName = (customerName && String(customerName).trim()) || 'Owshika Enterprises';
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'At least one product item is required' });
@@ -98,10 +95,57 @@ export const createInvoice = async (req: Request, res: Response) => {
     const roundOff = Number((roundedGrandTotal - exactGrandTotal).toFixed(2));
     const amountInWords = numberToWordsIndian(roundedGrandTotal);
 
+    // Auto-register or update entered products into Product Catalog list
+    for (const item of processedItems) {
+      const pNum = String(item.partNumber || '').trim().toUpperCase();
+      const pName = String(item.productName || '').trim();
+      const isSpecialRow =
+        !pNum ||
+        pNum === 'N/A' ||
+        pNum === 'LABOUR' ||
+        pNum === 'SERVICE' ||
+        pNum === 'MISC-SPARES' ||
+        pNum === 'SPARES';
+
+      if (!isSpecialRow && pName) {
+        try {
+          const existing = await prisma.product.findFirst({
+            where: { partNumber: pNum },
+          });
+
+          if (existing) {
+            await prisma.product.update({
+              where: { id: existing.id },
+              data: {
+                price: item.price,
+                hsn: item.hsn || existing.hsn,
+                gst: item.gstRate !== undefined ? item.gstRate : existing.gst,
+                name: pName || existing.name,
+              },
+            });
+          } else {
+            await prisma.product.create({
+              data: {
+                partNumber: pNum,
+                name: pName,
+                hsn: item.hsn || 'N/A',
+                gst: item.gstRate || 0,
+                price: item.price,
+                unit: item.unit || 'PCS',
+                stock: 100,
+              },
+            });
+          }
+        } catch (err) {
+          console.warn('Failed to auto-upsert catalog product:', err);
+        }
+      }
+    }
+
     // Save Customer if not exists or update phone/address
     let customerId: string | null = null;
     const existingCustomer = await prisma.customer.findFirst({
-      where: { name: customerName.trim() },
+      where: { name: finalCustomerName },
     });
 
     if (existingCustomer) {
@@ -109,7 +153,7 @@ export const createInvoice = async (req: Request, res: Response) => {
     } else {
       const newCust = await prisma.customer.create({
         data: {
-          name: customerName.trim(),
+          name: finalCustomerName,
           phone: customerPhone || null,
           address: customerAddress || null,
         },
@@ -129,7 +173,7 @@ export const createInvoice = async (req: Request, res: Response) => {
       data: {
         invoiceNumber: finalInvNum,
         invoiceDate: invoiceDate ? new Date(invoiceDate) : new Date(),
-        customerName: customerName.trim(),
+        customerName: finalCustomerName,
         customerPhone: customerPhone || null,
         customerAddress: customerAddress || null,
         paymentMode: paymentMode || 'CASH',
@@ -196,5 +240,24 @@ export const getInvoiceById = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching invoice by id:', error);
     res.status(500).json({ error: 'Failed to fetch invoice details' });
+  }
+};
+
+export const deleteInvoice = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.invoiceItem.deleteMany({
+      where: { invoiceId: id },
+    });
+
+    await prisma.invoice.delete({
+      where: { id },
+    });
+
+    res.json({ message: 'Invoice deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting invoice:', error);
+    res.status(500).json({ error: error?.message || 'Failed to delete invoice' });
   }
 };

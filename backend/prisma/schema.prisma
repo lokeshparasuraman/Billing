@@ -79,3 +79,13 @@ model InvoiceItem {
   gstAmount   Float
   total       Float
 }
+
+model StoreSetting {
+  id        String   @id @default("default_store")
+  storeName String   @default("OWSHIKA ENTERPRISES")
+  gstin     String   @default("33BAEPP2449B1Z3")
+  phone     String   @default("+91 9445662637")
+  address   String   @default("#104, Industrial Main Road, Sector 3, Peenya, Bengaluru - 560058")
+  updatedAt DateTime @updatedAt
+}
+

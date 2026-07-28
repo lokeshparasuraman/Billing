@@ -17,10 +17,18 @@ export interface Customer {
 }
 
 export type PaymentMode = 'CASH' | 'UPI' | 'CARD' | 'CREDIT';
+export type BillType = 'CUSTOMER' | 'TRANSPORT';
+
+export interface TransportDetails {
+  fromLocation: string;
+  toLocation: string;
+  vehicleNumber: string;
+  transporterName: string;
+}
 
 export interface InvoiceItemRow {
   rowId: string;
-  itemType?: 'PRODUCT' | 'LABOUR';
+  itemType?: 'PRODUCT' | 'LABOUR' | 'SPARES';
   taxMode?: 'EXCLUSIVE' | 'INCLUSIVE';
   productId?: string;
   partNumber: string;
@@ -41,12 +49,14 @@ export interface InvoiceItemRow {
 }
 
 export interface InvoiceHeaderDetails {
+  billType: BillType;
   invoiceNumber: string;
   invoiceDate: string;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
   paymentMode: PaymentMode;
+  transportDetails: TransportDetails;
 }
 
 export interface InvoiceSummary {
@@ -62,12 +72,14 @@ export interface InvoiceSummary {
 
 export interface SavedInvoice {
   id: string;
+  billType?: BillType;
   invoiceNumber: string;
   invoiceDate: string;
   customerName: string;
   customerPhone?: string;
   customerAddress?: string;
   paymentMode: PaymentMode;
+  transportDetails?: TransportDetails;
   subtotal: number;
   discountTotal: number;
   cgstTotal: number;

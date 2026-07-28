@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { SavedInvoice } from '../../types/billing';
 import { PrintableInvoice } from './PrintableInvoice';
-import { Printer, X, ZoomIn, ZoomOut, Maximize2, FileText, Check } from 'lucide-react';
+import { Printer, X, ZoomIn, ZoomOut, Maximize2, FileText, Download } from 'lucide-react';
 
 interface A4InvoicePreviewModalProps {
   isOpen: boolean;
@@ -16,18 +16,60 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
   invoice,
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(100);
-  const [isCopied, setIsCopied] = useState<boolean>(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  // Format date cleanly for filename (e.g. 28-07-2026)
+  const formattedDate = invoice?.invoiceDate
+    ? new Date(invoice.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/[\/\\]/g, '-')
+    : 'Date';
+  const pdfFilename = `Bill_${invoice?.invoiceNumber || 'OE'}_${formattedDate}`;
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: invoice ? `Bill_${invoice.invoiceNumber}` : 'Owshika_BW_Invoice',
+    documentTitle: pdfFilename,
   });
+
+  const handleDownloadBill = () => {
+    if (!invoice || !printRef.current) return;
+    try {
+      const content = printRef.current.innerHTML;
+      const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${pdfFilename}</title>
+  <style>
+    @page { size: A4 portrait; margin: 0mm !important; }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; padding: 0; margin: 0; }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body onload="window.print()">
+  <div style="max-width: 210mm; margin: 0 auto;">
+    ${content}
+  </div>
+</body>
+</html>`;
+
+      const blob = new Blob([fullHtml], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${pdfFilename}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to download bill:', err);
+    }
+  };
 
   // Auto set smaller zoom for mobile devices
   useEffect(() => {
-    if (window.innerWidth < 640) {
-      setZoomLevel(60);
+    if (isOpen) {
+      const isMobile = window.innerWidth < 640;
+      setZoomLevel(isMobile ? 65 : 100);
     }
   }, [isOpen]);
 
@@ -43,7 +85,7 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
       <div className="w-full max-w-6xl bg-slate-900 dark:bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-white flex-shrink-0">
         {/* Left: Title & Invoice Badge */}
         <div className="flex items-center space-x-2.5">
-          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sky-400 shrink-0">
+          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 shrink-0">
             <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <div>
@@ -56,7 +98,7 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-slate-400 font-mono truncate max-w-[200px] sm:max-w-none">
-              #{invoice.invoiceNumber} | {invoice.customerName}
+              #{invoice.invoiceNumber} | OWSHIKA ENTERPRISES
             </p>
           </div>
         </div>
@@ -97,8 +139,18 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
           <div className="flex items-center space-x-2">
             <button
               type="button"
+              onClick={handleDownloadBill}
+              className="bg-[#d4f653] hover:bg-[#c4f038] text-[#051b19] font-black text-xs px-3 sm:px-4 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-[#d4f653]/20 active:scale-95 transition-all"
+              title="Download bill to device Downloads folder"
+            >
+              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-[#051b19]" />
+              <span>Download Bill</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => handlePrint()}
-              className="bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-extrabold text-xs px-3 sm:px-4 py-2 rounded-lg flex items-center space-x-1.5 shadow-lg shadow-sky-600/30 transition"
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-[0.98] shadow-md shadow-emerald-500/20 text-white font-extrabold text-xs px-3 sm:px-4 py-2 rounded-xl flex items-center space-x-1.5 border border-emerald-400/30 transition-all"
             >
               <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
               <span>Print Bill</span>

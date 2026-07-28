@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { fetchProducts, createProduct } from '../services/api';
+import { fetchProducts, createProduct, deleteProduct } from '../services/api';
 import { Product } from '../types/billing';
-import { Package, Search, Plus, X } from 'lucide-react';
+import { Package, Search, Plus, X, Trash2 } from 'lucide-react';
+import { useThemeMode } from '../context/ThemeContext';
 
 export const ProductCatalogPage: React.FC = () => {
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+
+  /* Theme tokens matching home page inverted card design */
+  const cardBg     = isDark ? '#ebedf0' : '#051c1a';
+  const cardBorder = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
+  const cardDivide = isDark ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)';
+  const textStrong = isDark ? '#051c1a' : '#ffffff';
+  const textMuted  = isDark ? 'rgba(5,28,26,0.55)' : 'rgba(255,255,255,0.65)';
+  const inputBg    = isDark ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)';
+  const inputBorder= isDark ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
+
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +30,6 @@ export const ProductCatalogPage: React.FC = () => {
     hsn: '',
     gst: 18,
     price: '',
-    unit: '',
     stock: 100,
   });
 
@@ -28,7 +40,6 @@ export const ProductCatalogPage: React.FC = () => {
       hsn: '',
       gst: 18,
       price: '',
-      unit: '',
       stock: 100,
     });
     setFormError(null);
@@ -60,6 +71,21 @@ export const ProductCatalogPage: React.FC = () => {
     }
   };
 
+  const handleDeleteProduct = async (id: string, name: string) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete product '${name}' from catalog?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await deleteProduct(id);
+      loadCatalog();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete product.');
+    }
+  };
+
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
@@ -76,7 +102,7 @@ export const ProductCatalogPage: React.FC = () => {
         hsn: newProd.hsn.trim(),
         gst: Number(newProd.gst),
         price: Number(newProd.price),
-        unit: newProd.unit.trim() ? newProd.unit.trim().toUpperCase() : 'PCS',
+        unit: 'PCS',
         stock: Number(newProd.stock || 100),
       });
 
@@ -99,80 +125,115 @@ export const ProductCatalogPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-12 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {/* Page Header */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div className="min-h-screen pb-16 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+        {/* Page Header Card */}
+        <div
+          className="rounded-2xl p-6 sm:p-7 mb-6 flex flex-wrap items-center justify-between gap-6 transition-all"
+          style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+        >
           <div>
-            <h1 className="text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Package className="h-6 w-6 text-sky-600 dark:text-sky-400" /> Product & Service Catalog
+            <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-3" style={{ color: textStrong }}>
+              <Package className="h-7 w-7 text-[#c9f227]" /> Product & Service Catalog
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Manage your custom products, parts, services, prices, HSN/SAC codes, and GST rates ({products.length} Items).
+            <p className="text-xs sm:text-sm font-semibold mt-1.5" style={{ color: textMuted }}>
+              Manage your custom products, parts, services, prices, HSN codes, and GST rates ({products.length} Items).
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             {/* Search Bar */}
-            <div className="relative w-full sm:w-64">
-              <Search className="h-4 w-4 absolute left-3 top-3 text-slate-400" />
+            <div className="relative w-full sm:w-80">
+              <Search className="h-4 w-4 absolute left-3.5 top-3.5" style={{ color: textMuted }} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search part # or name..."
-                className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
+                style={{
+                  background: inputBg,
+                  color: textStrong,
+                  border: `1px solid ${inputBorder}`,
+                }}
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[#c9f227] transition"
               />
             </div>
 
             <button
               type="button"
               onClick={handleOpenAddModal}
-              className="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center justify-center space-x-1.5 shadow transition flex-shrink-0"
+              style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-black flex items-center justify-center space-x-2 active:scale-[0.98] transition-all flex-shrink-0 border-0 shadow-sm"
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
             >
-              <Plus className="h-4 w-4" />
-              <span>Add New Product</span>
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span>+ Add New Product</span>
             </button>
           </div>
         </div>
 
-        {/* Product Catalog Grid */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        {/* Product Catalog Grid Container */}
+        <div
+          className="rounded-2xl shadow-sm overflow-hidden transition-all"
+          style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+        >
           {isLoading ? (
-            <div className="p-12 text-center text-slate-500 dark:text-slate-400 text-sm">
+            <div className="p-16 text-center text-base sm:text-lg font-bold" style={{ color: textMuted }}>
               Loading product database...
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 dark:text-slate-400 text-sm">
-              No products found matching your search.
+            <div className="p-16 text-center text-base sm:text-lg font-semibold" style={{ color: textMuted }}>
+              No products found in catalog. Click <strong style={{ color: '#c9f227' }}>"+ Add New Product"</strong> to populate your store inventory.
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[650px] text-left border-collapse">
+              <table className="w-full min-w-[700px] text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-800 dark:bg-slate-950 text-white text-[11px] font-bold uppercase tracking-wider">
-                    <th className="py-3 px-4">Part Number</th>
-                    <th className="py-3 px-4">Product Name</th>
-                    <th className="py-3 px-4 text-center">HSN Code</th>
-                    <th className="py-3 px-4 text-center">Unit</th>
-                    <th className="py-3 px-4 text-center">GST Rate</th>
-                    <th className="py-3 px-4 text-right">Selling Price</th>
+                  <tr style={{ background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)', borderBottom: `1px solid ${cardDivide}` }}>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Part Number</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: textMuted }}>Product Name</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>HSN Code</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center" style={{ color: textMuted }}>GST Rate</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-right" style={{ color: textMuted }}>Selling Price</th>
+                    <th className="py-3.5 px-5 text-xs font-bold uppercase tracking-wider text-center w-20" style={{ color: textMuted }}>Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+                <tbody className="text-xs sm:text-sm">
                   {filteredProducts.map((p) => (
-                    <tr key={p.id} className="hover:bg-sky-50/50 dark:hover:bg-slate-800/50 transition">
-                      <td className="py-2.5 px-4 font-mono font-bold text-sky-700 dark:text-sky-400">{p.partNumber}</td>
-                      <td className="py-2.5 px-4 font-medium text-slate-900 dark:text-slate-100">{p.name}</td>
-                      <td className="py-2.5 px-4 text-center font-mono text-slate-600 dark:text-slate-300">{p.hsn}</td>
-                      <td className="py-2.5 px-4 text-center uppercase font-bold text-[10px] text-slate-500 dark:text-slate-400">{p.unit}</td>
-                      <td className="py-2.5 px-4 text-center">
-                        <span className="bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 font-mono font-bold text-[10px] px-2 py-0.5 rounded border border-sky-200 dark:border-sky-800">
+                    <tr
+                      key={p.id}
+                      style={{ borderBottom: `1px solid ${cardDivide}` }}
+                      className="transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.05]"
+                    >
+                      <td className="py-3.5 px-5 font-mono font-bold" style={{ color: textStrong }}>{p.partNumber}</td>
+                      <td className="py-3.5 px-5 font-semibold" style={{ color: textStrong }}>{p.name}</td>
+                      <td className="py-3.5 px-5 text-center font-mono" style={{ color: textMuted }}>{p.hsn}</td>
+                      <td className="py-3.5 px-5 text-center">
+                        <span
+                          className="font-mono font-bold text-xs px-2.5 py-1 rounded-lg border"
+                          style={{
+                            background: inputBg,
+                            color: textStrong,
+                            borderColor: inputBorder,
+                          }}
+                        >
                           {p.gst}%
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                      <td className="py-3.5 px-5 text-right font-mono font-black text-sm sm:text-base" style={{ color: textStrong }}>
                         ₹{p.price.toFixed(2)}
+                      </td>
+                      <td className="py-3.5 px-5 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteProduct(p.id, p.name)}
+                          className="p-2 rounded-xl text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition border border-transparent hover:border-rose-200 dark:hover:border-rose-800"
+                          title={`Delete ${p.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -185,62 +246,73 @@ export const ProductCatalogPage: React.FC = () => {
 
       {/* Add Product Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="bg-slate-800 dark:bg-slate-950 text-white px-5 py-4 flex items-center justify-between shrink-0">
-              <span className="font-bold text-base tracking-wide">Add Product to Catalog</span>
-              <button onClick={handleCloseAddModal} className="text-slate-400 hover:text-white">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div
+            className="rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+            style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+          >
+            <div
+              className="px-6 py-4 flex items-center justify-between shrink-0"
+              style={{ borderBottom: `1px solid ${cardDivide}` }}
+            >
+              <span className="font-extrabold text-base tracking-wide" style={{ color: textStrong }}>
+                Add Product to Catalog
+              </span>
+              <button onClick={handleCloseAddModal} style={{ color: textMuted }} className="hover:opacity-80 transition">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateProduct} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto">
+            <form onSubmit={handleCreateProduct} className="p-6 space-y-4 text-xs sm:text-sm overflow-y-auto">
               {formError && (
-                <div className="bg-rose-50 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200 p-3 rounded-lg border border-rose-200 dark:border-rose-800 font-semibold">
+                <div className="bg-rose-50 dark:bg-rose-950/50 text-rose-800 dark:text-rose-200 p-3 rounded-xl border border-rose-200 dark:border-rose-800 font-semibold">
                   {formError}
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Part Number *</label>
+                  <label className="block font-bold uppercase mb-1 text-[11px]" style={{ color: textMuted }}>Part Number *</label>
                   <input
                     type="text"
                     required
                     value={newProd.partNumber}
                     onChange={(e) => setNewProd({ ...newProd, partNumber: e.target.value })}
                     placeholder="e.g. HW-BOLT-M12"
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 uppercase font-mono"
+                    style={{ background: inputBg, color: textStrong, border: `1px solid ${inputBorder}` }}
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none uppercase font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">HSN Code *</label>
+                  <label className="block font-bold uppercase mb-1 text-[11px]" style={{ color: textMuted }}>HSN Code *</label>
                   <input
                     type="text"
                     required
                     value={newProd.hsn}
                     onChange={(e) => setNewProd({ ...newProd, hsn: e.target.value })}
                     placeholder="e.g. 7318"
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 font-mono"
+                    style={{ background: inputBg, color: textStrong, border: `1px solid ${inputBorder}` }}
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Product Description Name *</label>
+                <label className="block font-bold uppercase mb-1 text-[11px]" style={{ color: textMuted }}>Product Description Name *</label>
                 <input
                   type="text"
                   required
                   value={newProd.name}
                   onChange={(e) => setNewProd({ ...newProd, name: e.target.value })}
                   placeholder="e.g. Hex Bolt M12 x 50mm Stainless Steel"
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500"
+                  style={{ background: inputBg, color: textStrong, border: `1px solid ${inputBorder}` }}
+                  className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Price (₹) *</label>
+                  <label className="block font-bold uppercase mb-1 text-[11px]" style={{ color: textMuted }}>Price (₹) *</label>
                   <input
                     type="number"
                     step="any"
@@ -248,46 +320,42 @@ export const ProductCatalogPage: React.FC = () => {
                     value={newProd.price}
                     onChange={(e) => setNewProd({ ...newProd, price: e.target.value })}
                     placeholder="0.00"
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 font-mono"
+                    style={{ background: inputBg, color: textStrong, border: `1px solid ${inputBorder}` }}
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">GST %</label>
+                  <label className="block font-bold uppercase mb-1 text-[11px]" style={{ color: textMuted }}>GST %</label>
                   <select
                     value={newProd.gst}
                     onChange={(e) => setNewProd({ ...newProd, gst: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 font-mono"
+                    style={{ background: inputBg, color: textStrong, border: `1px solid ${inputBorder}` }}
+                    className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none font-mono"
                   >
-                    <option value={0}>0%</option>
-                    <option value={5}>5%</option>
-                    <option value={12}>12%</option>
-                    <option value={18}>18%</option>
-                    <option value={28}>28%</option>
+                    <option value={0} style={{ background: cardBg, color: textStrong }}>0%</option>
+                    <option value={5} style={{ background: cardBg, color: textStrong }}>5%</option>
+                    <option value={12} style={{ background: cardBg, color: textStrong }}>12%</option>
+                    <option value={18} style={{ background: cardBg, color: textStrong }}>18%</option>
+                    <option value={28} style={{ background: cardBg, color: textStrong }}>28%</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Unit</label>
-                  <input
-                    type="text"
-                    value={newProd.unit}
-                    onChange={(e) => setNewProd({ ...newProd, unit: e.target.value })}
-                    placeholder="PCS, MTR..."
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 uppercase font-mono"
-                  />
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end space-x-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="pt-4 flex justify-end space-x-3" style={{ borderTop: `1px solid ${cardDivide}` }}>
                 <button
                   type="button"
                   onClick={handleCloseAddModal}
-                  className="px-4 py-2 rounded-lg font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  style={{ background: inputBg, color: textMuted, border: `1px solid ${inputBorder}` }}
+                  className="px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition hover:opacity-80"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg font-extrabold text-white bg-sky-600 hover:bg-sky-500 shadow"
+                  style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+                  className="px-5 py-2 rounded-full font-black text-xs sm:text-sm transition-all border-0 shadow-sm active:scale-[0.98]"
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
                 >
                   Save Product
                 </button>
