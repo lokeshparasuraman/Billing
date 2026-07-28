@@ -122,3 +122,21 @@ export const getMe = async (req: AuthenticatedRequest, res: Response) => {
     res.status(500).json({ error: 'Failed to fetch user details.' });
   }
 };
+
+export const deleteAccount = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ error: 'Not authenticated.' });
+    }
+
+    await prisma.user.delete({
+      where: { id: req.userId },
+    });
+
+    res.json({ message: 'Account and associated user data deleted successfully.' });
+  } catch (error: any) {
+    console.error('Delete account error:', error);
+    res.status(500).json({ error: 'Failed to delete user account.' });
+  }
+};
+

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, Menu, X, ChevronRight, Keyboard, LogOut, User as UserIcon } from 'lucide-react';
+import { Sun, Moon, Menu, X, ChevronRight, Keyboard, LogOut, User as UserIcon, Trash2, AlertTriangle } from 'lucide-react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useBillingStore } from '../../store/useBillingStore';
 import { useAuth } from '../../context/AuthContext';
@@ -16,9 +16,27 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const location = useLocation();
   const { mode, toggleTheme } = useThemeMode();
   const { rows, clearBillingForm, storeDetails } = useBillingStore();
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [fontHover, setFontHover] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isConfirmDelete, setIsConfirmDelete] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null);
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    setDeleteAccountError(null);
+    try {
+      await deleteAccount();
+      setIsProfileModalOpen(false);
+      setIsConfirmDelete(false);
+    } catch (err: any) {
+      setDeleteAccountError(err?.response?.data?.error || err?.message || 'Failed to delete account.');
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
 
   /* ─── Font size state persisted to localStorage ─── */
   const MIN_FONT_SIZE = 12;
@@ -315,10 +333,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
               {user && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
-                  <div title={user.email} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: txtMuted, background: iconHoverBg, padding: '5px 10px', borderRadius: '8px' }}>
-                    <UserIcon style={{ width: 14, height: 14 }} />
-                    <span>{user.email.split('@')[0]}</span>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsProfileModalOpen(true)}
+                    title="View Profile & Account Settings"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      color: txtPrimary,
+                      background: iconHoverBg,
+                      border: `1px solid ${border}`,
+                      padding: '5px 12px',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      transition: 'background 0.15s, border-color 0.15s',
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = '#c9f227';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = border;
+                    }}
+                  >
+                    <UserIcon style={{ width: 14, height: 14, color: '#c9f227' }} />
+                    <span>{user.name || user.email.split('@')[0]}</span>
+                  </button>
                   <button
                     type="button"
                     onClick={logout}
@@ -422,7 +464,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               gap: '12px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+            <div
+              onClick={() => { setMobileOpen(false); setIsProfileModalOpen(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', cursor: 'pointer', flex: 1 }}
+            >
               <div
                 style={{
                   width: '34px',
@@ -561,6 +606,215 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           )}
         </div>
       </div>
+
+      {/* ══════════════════════════════
+          USER PROFILE & ACCOUNT DELETION MODAL
+          ══════════════════════════════ */}
+      {isProfileModalOpen && user && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+          onClick={() => {
+            setIsProfileModalOpen(false);
+            setIsConfirmDelete(false);
+          }}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl p-6 shadow-2xl overflow-hidden animate-fadeIn"
+            style={{
+              backgroundColor: isDark ? '#0a2421' : '#ffffff',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
+              color: txtPrimary,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(201,242,39,0.15)',
+                    border: '1.5px solid rgba(201,242,39,0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#c9f227',
+                  }}
+                >
+                  <UserIcon style={{ width: 20, height: 20 }} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>User Profile</h3>
+                  <p style={{ margin: 0, fontSize: '12px', color: txtMuted }}>Account details & settings</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileModalOpen(false);
+                  setIsConfirmDelete(false);
+                }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: txtMuted }}
+              >
+                <X style={{ width: 20, height: 20 }} />
+              </button>
+            </div>
+
+            {/* Profile Info Cards */}
+            <div
+              style={{
+                backgroundColor: isDark ? 'rgba(5,28,26,0.6)' : 'rgba(0,0,0,0.03)',
+                border: `1px solid ${border}`,
+                borderRadius: '14px',
+                padding: '16px',
+                marginBottom: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}
+            >
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Full Name / Owner
+                </span>
+                <div style={{ fontSize: '14px', fontWeight: 700, marginTop: '2px' }}>
+                  {user.name || 'N/A'}
+                </div>
+              </div>
+
+              <div style={{ height: '1px', backgroundColor: border }} />
+
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Email Address
+                </span>
+                <div style={{ fontSize: '14px', fontWeight: 600, marginTop: '2px', wordBreak: 'break-all' }}>
+                  {user.email}
+                </div>
+              </div>
+            </div>
+
+            {/* Delete Account Error Alert */}
+            {deleteAccountError && (
+              <div
+                style={{
+                  marginBottom: '16px',
+                  padding: '10px 12px',
+                  backgroundColor: 'rgba(239,68,68,0.12)',
+                  border: '1px solid rgba(239,68,68,0.3)',
+                  borderRadius: '10px',
+                  color: '#f87171',
+                  fontSize: '12px',
+                }}
+              >
+                {deleteAccountError}
+              </div>
+            )}
+
+            {/* Danger Zone / Delete Account Confirmation */}
+            {isConfirmDelete ? (
+              <div
+                style={{
+                  backgroundColor: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.25)',
+                  borderRadius: '14px',
+                  padding: '16px',
+                  marginBottom: '10px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', fontWeight: 800, fontSize: '14px', marginBottom: '6px' }}>
+                  <AlertTriangle style={{ width: 18, height: 18 }} />
+                  <span>Delete Account Permanently?</span>
+                </div>
+                <p style={{ fontSize: '12px', color: txtMuted, margin: '0 0 14px', lineHeight: 1.4 }}>
+                  This will permanently delete your account, saved products, and invoices. This action cannot be undone.
+                </p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmDelete(false)}
+                    disabled={deletingAccount}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      borderRadius: '10px',
+                      border: `1px solid ${border}`,
+                      backgroundColor: 'transparent',
+                      color: txtPrimary,
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={deletingAccount}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      backgroundColor: '#ef4444',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      fontSize: '13px',
+                      cursor: deletingAccount ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      boxShadow: '0 4px 14px rgba(239,68,68,0.3)',
+                    }}
+                  >
+                    {deletingAccount ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Trash2 style={{ width: 15, height: 15 }} />
+                        Yes, Delete
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmDelete(true)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    backgroundColor: 'rgba(239,68,68,0.08)',
+                    color: '#f87171',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(239,68,68,0.16)')}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(239,68,68,0.08)')}
+                >
+                  <Trash2 style={{ width: 16, height: 16 }} />
+                  <span>Delete My Account</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 };

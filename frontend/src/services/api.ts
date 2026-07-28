@@ -55,6 +55,10 @@ export const getMeApi = async (): Promise<User> => {
   return response.data.user;
 };
 
+export const deleteAccountApi = async (): Promise<void> => {
+  await api.delete('/auth/account');
+};
+
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
     const response = await api.get<Product[]>(`/products/search`, {
