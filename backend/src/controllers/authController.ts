@@ -36,18 +36,6 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
-    // Create default store settings for new user
-    await prisma.storeSetting.create({
-      data: {
-        userId: newUser.id,
-        storeName: 'OWSHIKA ENTERPRISES',
-        ownerName: newUser.name || 'Owner',
-        email: newUser.email,
-        gstin: '33BAEPP2449B1Z3',
-        phone: '+91 9445662637',
-        address: '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701',
-      },
-    });
 
     const token = jwt.sign({ userId: newUser.id, email: newUser.email }, JWT_SECRET, {
       expiresIn: '30d',

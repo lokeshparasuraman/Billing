@@ -1,8 +1,11 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { prisma } from '../db.js';
-import { AuthenticatedRequest } from '../middlewares/authMiddleware.js';
+
+// Global store ID — we always use a single fixed row for the whole app
+const GLOBAL_STORE_ID = 'global';
 
 const defaultStore = {
+  id: GLOBAL_STORE_ID,
   storeName: 'OWSHIKA ENTERPRISES',
   ownerName: 'C.Perumal',
   email: 'owshikaentt@gmail.com',
@@ -11,23 +14,15 @@ const defaultStore = {
   address: '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701',
 };
 
-export const getStoreSettings = async (req: AuthenticatedRequest, res: Response) => {
+export const getStoreSettings = async (_req: Request, res: Response) => {
   try {
-    const userId = req.userId;
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     let settings = await prisma.storeSetting.findUnique({
-      where: { userId },
+      where: { id: GLOBAL_STORE_ID },
     });
 
     if (!settings) {
       settings = await prisma.storeSetting.create({
-        data: {
-          ...defaultStore,
-          userId,
-        },
+        data: defaultStore,
       });
     }
 
@@ -38,19 +33,14 @@ export const getStoreSettings = async (req: AuthenticatedRequest, res: Response)
   }
 };
 
-export const updateStoreSettings = async (req: AuthenticatedRequest, res: Response) => {
+export const updateStoreSettings = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId;
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const { storeName, ownerName, email, gstin, phone, address } = req.body;
 
-    const existing = await prisma.storeSetting.findUnique({ where: { userId } });
+    const existing = await prisma.storeSetting.findUnique({ where: { id: GLOBAL_STORE_ID } });
 
     const updated = await prisma.storeSetting.upsert({
-      where: { userId },
+      where: { id: GLOBAL_STORE_ID },
       update: {
         storeName: storeName !== undefined ? String(storeName).trim() : (existing?.storeName || defaultStore.storeName),
         ownerName: ownerName !== undefined ? String(ownerName).trim() : (existing?.ownerName || defaultStore.ownerName),
@@ -60,7 +50,7 @@ export const updateStoreSettings = async (req: AuthenticatedRequest, res: Respon
         address: address !== undefined ? String(address).trim() : (existing?.address || defaultStore.address),
       },
       create: {
-        userId,
+        ...defaultStore,
         storeName: storeName !== undefined ? String(storeName).trim() : defaultStore.storeName,
         ownerName: ownerName !== undefined ? String(ownerName).trim() : defaultStore.ownerName,
         email: email !== undefined ? String(email).trim().toLowerCase() : defaultStore.email,
