@@ -54,11 +54,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+      document.documentElement.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+      document.documentElement.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+      document.documentElement.style.overflow = '';
     };
   }, [mobileOpen]);
 
@@ -355,8 +361,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
       {mobileOpen && (
         <div
           className="flex md:hidden fixed inset-0 z-50"
-          style={{ backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', touchAction: 'none' }}
           onClick={() => setMobileOpen(false)}
+          onTouchMove={(e) => e.preventDefault()}
         />
       )}
 

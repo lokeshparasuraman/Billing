@@ -32,38 +32,123 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-4">
-      {/* Background ambient lighting */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl" />
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#051c1a',
+        color: '#ffffff',
+        fontFamily: '"Space Grotesk", "Outfit", "Inter", sans-serif',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Background ambient lighting matching theme */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '-160px',
+            left: '-160px',
+            width: '384px',
+            height: '384px',
+            backgroundColor: 'rgba(201, 242, 39, 0.08)',
+            borderRadius: '9999px',
+            filter: 'blur(80px)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '-160px',
+            right: '-160px',
+            width: '384px',
+            height: '384px',
+            backgroundColor: 'rgba(10, 56, 50, 0.6)',
+            borderRadius: '9999px',
+            filter: 'blur(80px)',
+          }}
+        />
       </div>
 
-      <div className="relative w-full max-w-md bg-slate-800/90 border border-slate-700/80 rounded-2xl shadow-2xl p-8 backdrop-blur-md">
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '430px',
+          backgroundColor: '#0a2421',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '24px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+          padding: '32px 28px',
+          backdropFilter: 'blur(16px)',
+        }}
+      >
         {/* Header Branding */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-4 shadow-inner">
-            <FileText className="w-8 h-8" />
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '56px',
+              height: '56px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(201, 242, 39, 0.12)',
+              border: '1px solid rgba(201, 242, 39, 0.25)',
+              color: '#c9f227',
+              marginBottom: '16px',
+            }}
+          >
+            <FileText style={{ width: 28, height: 28 }} />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">OWSHIKA ENTERPRISES</h1>
-          <p className="text-slate-400 text-sm mt-1">Smart Billing & Invoice Management System</p>
+          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em', margin: 0 }}>
+            OWSHIKA ENTERPRISES
+          </h1>
+          <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.6)', marginTop: '4px', margin: 0 }}>
+            Smart Billing & Invoice Management System
+          </p>
         </div>
 
         {/* Tab Toggle */}
-        <div className="flex bg-slate-900/60 p-1 rounded-xl mb-6 border border-slate-700/50">
+        <div
+          style={{
+            display: 'flex',
+            backgroundColor: 'rgba(5, 28, 26, 0.8)',
+            padding: '4px',
+            borderRadius: '14px',
+            marginBottom: '24px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+          }}
+        >
           <button
             type="button"
             onClick={() => {
               setIsLoginTab(true);
               setError(null);
             }}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-2 ${
-              isLoginTab
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            style={{
+              flex: 1,
+              padding: '10px 0',
+              fontSize: '14px',
+              fontWeight: 800,
+              borderRadius: '10px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s',
+              backgroundColor: isLoginTab ? '#c9f227' : 'transparent',
+              color: isLoginTab ? '#051c1a' : 'rgba(255, 255, 255, 0.6)',
+              boxShadow: isLoginTab ? '0 4px 12px rgba(201, 242, 39, 0.25)' : 'none',
+            }}
           >
-            <LogIn className="w-4 h-4" /> Log In
+            <LogIn style={{ width: 16, height: 16 }} /> Log In
           </button>
           <button
             type="button"
@@ -71,68 +156,180 @@ export const AuthPage: React.FC = () => {
               setIsLoginTab(false);
               setError(null);
             }}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-2 ${
-              !isLoginTab
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            style={{
+              flex: 1,
+              padding: '10px 0',
+              fontSize: '14px',
+              fontWeight: 800,
+              borderRadius: '10px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.2s',
+              backgroundColor: !isLoginTab ? '#c9f227' : 'transparent',
+              color: !isLoginTab ? '#051c1a' : 'rgba(255, 255, 255, 0.6)',
+              boxShadow: !isLoginTab ? '0 4px 12px rgba(201, 242, 39, 0.25)' : 'none',
+            }}
           >
-            <UserPlus className="w-4 h-4" /> Sign Up
+            <UserPlus style={{ width: 16, height: 16 }} /> Sign Up
           </button>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-start gap-2.5 animate-fadeIn">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div
+            style={{
+              marginBottom: '20px',
+              padding: '12px 14px',
+              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '12px',
+              color: '#f87171',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px',
+            }}
+          >
+            <AlertCircle style={{ width: 18, height: 18, flexShrink: 0, marginTop: '2px' }} />
             <span>{error}</span>
           </div>
         )}
 
         {/* Auth Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {!isLoginTab && (
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '6px',
+                }}
+              >
                 Full Name / Business Owner
               </label>
-              <div className="relative">
-                <UserIcon className="absolute left-3.5 top-3 w-5 h-5 text-slate-400" />
+              <div style={{ position: 'relative' }}>
+                <UserIcon
+                  style={{
+                    position: 'absolute',
+                    left: '14px',
+                    top: '12px',
+                    width: '18px',
+                    height: '18px',
+                    color: 'rgba(255, 255, 255, 0.4)',
+                  }}
+                />
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. C. Perumal"
-                  className="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'rgba(5, 28, 26, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '12px',
+                    paddingLeft: '44px',
+                    paddingRight: '14px',
+                    paddingTop: '10px',
+                    paddingBottom: '10px',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                    outline: 'none',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
+                  onBlur={(e) => (e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)')}
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: 'rgba(255, 255, 255, 0.7)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '6px',
+              }}
+            >
               Email Address
             </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-3 w-5 h-5 text-slate-400" />
+            <div style={{ position: 'relative' }}>
+              <Mail
+                style={{
+                  position: 'absolute',
+                  left: '14px',
+                  top: '12px',
+                  width: '18px',
+                  height: '18px',
+                  color: 'rgba(255, 255, 255, 0.4)',
+                }}
+              />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                style={{
+                  width: '100%',
+                  backgroundColor: 'rgba(5, 28, 26, 0.7)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: '12px',
+                  paddingLeft: '44px',
+                  paddingRight: '14px',
+                  paddingTop: '10px',
+                  paddingBottom: '10px',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
+                onBlur={(e) => (e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)')}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label
+              style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: 'rgba(255, 255, 255, 0.7)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '6px',
+              }}
+            >
               Password
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-3 w-5 h-5 text-slate-400" />
+            <div style={{ position: 'relative' }}>
+              <Lock
+                style={{
+                  position: 'absolute',
+                  left: '14px',
+                  top: '12px',
+                  width: '18px',
+                  height: '18px',
+                  color: 'rgba(255, 255, 255, 0.4)',
+                }}
+              />
               <input
                 type="password"
                 required
@@ -140,7 +337,22 @@ export const AuthPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                style={{
+                  width: '100%',
+                  backgroundColor: 'rgba(5, 28, 26, 0.7)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: '12px',
+                  paddingLeft: '44px',
+                  paddingRight: '14px',
+                  paddingTop: '10px',
+                  paddingBottom: '10px',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
+                onBlur={(e) => (e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)')}
               />
             </div>
           </div>
@@ -148,26 +360,60 @@ export const AuthPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:shadow-blue-500/20 active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{
+              width: '100%',
+              marginTop: '12px',
+              backgroundColor: '#c9f227',
+              color: '#051c1a',
+              fontWeight: 800,
+              fontSize: '15px',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.6 : 1,
+              boxShadow: '0 6px 20px rgba(201, 242, 39, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'transform 0.15s, opacity 0.15s',
+            }}
           >
             {loading ? (
-              <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: '20px',
+                  height: '20px',
+                  border: '2px solid rgba(5, 28, 26, 0.3)',
+                  borderTopColor: '#051c1a',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                }}
+              />
             ) : isLoginTab ? (
               <>
-                <LogIn className="w-5 h-5" /> Sign In to Dashboard
+                <LogIn style={{ width: 18, height: 18 }} /> Sign In to Dashboard
               </>
             ) : (
               <>
-                <UserPlus className="w-5 h-5" /> Create Account
+                <UserPlus style={{ width: 18, height: 18 }} /> Create Account
               </>
             )}
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-500 mt-6">
+        <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255, 255, 255, 0.4)', marginTop: '24px', margin: 0 }}>
           Secured with encrypted credentials & cloud persistence
         </p>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
