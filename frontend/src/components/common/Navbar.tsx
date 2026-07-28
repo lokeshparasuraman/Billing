@@ -410,6 +410,69 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           })}
         </div>
 
+        {/* User info + Logout — shown when logged in */}
+        {user && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '14px 20px',
+              borderBottom: `1px solid ${divider}`,
+              gap: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(201,242,39,0.15)',
+                  border: '1.5px solid rgba(201,242,39,0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <UserIcon style={{ width: 16, height: 16, color: '#c9f227' }} />
+              </div>
+              <div style={{ overflow: 'hidden' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: txtPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {user.name || user.email.split('@')[0]}
+                </div>
+                <div style={{ fontSize: '11px', color: txtMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {user.email}
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setMobileOpen(false); logout(); }}
+              title="Log Out"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                borderRadius: '10px',
+                border: '1px solid rgba(239,68,68,0.25)',
+                background: 'rgba(239,68,68,0.08)',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: '#f87171',
+                flexShrink: 0,
+                transition: 'background 0.15s',
+              }}
+            >
+              <LogOut style={{ width: 15, height: 15 }} />
+              <span>Log Out</span>
+            </button>
+          </div>
+        )}
+
         {/* Bottom controls */}
         <div style={{ padding: '20px', borderTop: `1px solid ${divider}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
           {/* Sun / Moon pair */}
