@@ -34,6 +34,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
     localStorage.setItem('pine_font_size', String(fontSize));
   }, [fontSize]);
 
+  /* ─── Scroll lock when mobile menu drawer is opened ─── */
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
 
 
   const handleLogoClick = (e: React.MouseEvent) => {

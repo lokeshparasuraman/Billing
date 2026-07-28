@@ -5,8 +5,20 @@ import { numberToWordsIndian } from '../utils/numberToWords.js';
 export const getNextInvoiceNumber = async (req: Request, res: Response) => {
   try {
     const year = new Date().getFullYear();
-    const count = await prisma.invoice.count();
-    const nextNum = (count + 1).toString().padStart(4, '0');
+    const prefix = `OE-${year}-`;
+    const invoices = await prisma.invoice.findMany({
+      select: { invoiceNumber: true },
+    });
+    let maxSeq = 0;
+    for (const inv of invoices) {
+      if (inv.invoiceNumber && inv.invoiceNumber.startsWith(prefix)) {
+        const seq = parseInt(inv.invoiceNumber.replace(prefix, ''), 10);
+        if (!isNaN(seq) && seq > maxSeq) {
+          maxSeq = seq;
+        }
+      }
+    }
+    const nextNum = (maxSeq + 1).toString().padStart(4, '0');
     const invoiceNumber = `OE-${year}-${nextNum}`;
     res.json({ invoiceNumber });
   } catch (error) {
@@ -254,6 +266,31 @@ export const deleteInvoice = async (req: Request, res: Response) => {
     await prisma.invoice.delete({
       where: { id },
     });
+
+    // Re-sequence remaining invoices for the current year to ensure contiguous invoice numbering
+    const year = new Date().getFullYear();
+    const remainingInvoices = await prisma.invoice.findMany({
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, invoiceNumber: true },
+    });
+
+    // Pass 1: Add temp suffix to avoid unique constraint collisions
+    for (const inv of remainingInvoices) {
+      await prisma.invoice.update({
+        where: { id: inv.id },
+        data: { invoiceNumber: `${inv.invoiceNumber}_TEMP_${inv.id}` },
+      });
+    }
+
+    // Pass 2: Assign clean sequential OE-YYYY-XXXX numbers
+    for (let i = 0; i < remainingInvoices.length; i++) {
+      const inv = remainingInvoices[i];
+      const newInvNum = `OE-${year}-${String(i + 1).padStart(4, '0')}`;
+      await prisma.invoice.update({
+        where: { id: inv.id },
+        data: { invoiceNumber: newInvNum },
+      });
+    }
 
     res.json({ message: 'Invoice deleted successfully' });
   } catch (error: any) {

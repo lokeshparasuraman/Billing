@@ -75,14 +75,26 @@ export const InvoiceHistoryPage: React.FC = () => {
 
     try {
       await deleteInvoice(id);
-      setInvoices((prev) => prev.filter((i) => i.id !== id));
+      await loadInvoices();
     } catch (err) {
       console.error('Failed to delete invoice:', err);
       alert('Failed to delete invoice from history.');
     }
   };
 
-  // Filter and sort invoices
+  const getInvTimestamp = (inv: SavedInvoice): number => {
+    const raw = inv.createdAt || inv.invoiceDate;
+    const t = new Date(raw).getTime();
+    return isNaN(t) ? 0 : t;
+  };
+
+  const getInvSeq = (inv: SavedInvoice): number => {
+    const parts = (inv.invoiceNumber || '').split('-');
+    const num = parseInt(parts[parts.length - 1], 10);
+    return isNaN(num) ? 0 : num;
+  };
+
+  // Filter and sort invoices (robust dual-level sorting: timestamp + invoice sequence)
   const filteredAndSortedInvoices = [...invoices]
     .filter((inv) => {
       const q = searchQuery.toLowerCase().trim();
@@ -93,9 +105,14 @@ export const InvoiceHistoryPage: React.FC = () => {
       );
     })
     .sort((a, b) => {
-      const timeA = new Date(a.invoiceDate).getTime();
-      const timeB = new Date(b.invoiceDate).getTime();
-      return sortOrder === 'newest' ? timeB - timeA : timeA - timeB;
+      const timeA = getInvTimestamp(a);
+      const timeB = getInvTimestamp(b);
+      if (timeA !== timeB) {
+        return sortOrder === 'newest' ? timeB - timeA : timeA - timeB;
+      }
+      const seqA = getInvSeq(a);
+      const seqB = getInvSeq(b);
+      return sortOrder === 'newest' ? seqB - seqA : seqA - seqB;
     });
 
   const sortOptions = [

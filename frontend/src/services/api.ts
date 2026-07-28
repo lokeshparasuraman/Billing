@@ -1,13 +1,31 @@
 import axios from 'axios';
 import { Product, Customer, SavedInvoice } from '../types/billing';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const getApiBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+
+  if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+    return `http://${currentHost}:5000/api`;
+  }
+
+  return envUrl || 'http://localhost:5000/api';
+};
 
 export const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+api.interceptors.request.use((config) => {
+  config.baseURL = getApiBaseUrl();
+  return config;
 });
 
 export const searchProducts = async (query: string): Promise<Product[]> => {
@@ -274,7 +292,15 @@ export const deleteInvoice = async (id: string): Promise<void> => {
   if (local) {
     const invoices: SavedInvoice[] = JSON.parse(local);
     const updated = invoices.filter((i) => i.id !== id);
-    localStorage.setItem('cached_invoices', JSON.stringify(updated));
+    const currentYear = new Date().getFullYear();
+    const sortedOldestFirst = [...updated].sort(
+      (a, b) => new Date(a.createdAt || a.invoiceDate).getTime() - new Date(b.createdAt || b.invoiceDate).getTime()
+    );
+    const resequenced = sortedOldestFirst.map((inv, idx) => ({
+      ...inv,
+      invoiceNumber: `OE-${currentYear}-${String(idx + 1).padStart(4, '0')}`,
+    }));
+    localStorage.setItem('cached_invoices', JSON.stringify(resequenced));
   }
 };
 
