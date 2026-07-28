@@ -292,9 +292,33 @@ export const BillingHeader: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="29ABCDE1234F1Z5"
+                    placeholder="33BAEPP2449B1Z3"
                     value={storeForm.gstin}
                     onChange={(e) => setStoreForm({ ...storeForm, gstin: e.target.value.toUpperCase() })}
+                    className="w-full px-3 py-1.5 rounded-xl font-bold text-xs focus:outline-none font-mono"
+                    style={{ background: inputBg, color: cardStrong, border: `1px solid ${inputBorder}` }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase mb-1" style={{ color: cardMuted }}>Proprietor / Owner Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. C.Perumal"
+                    value={storeForm.ownerName || ''}
+                    onChange={(e) => setStoreForm({ ...storeForm, ownerName: e.target.value })}
+                    className="w-full px-3 py-1.5 rounded-xl font-bold text-xs focus:outline-none"
+                    style={{ background: inputBg, color: cardStrong, border: `1px solid ${inputBorder}` }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase mb-1" style={{ color: cardMuted }}>Store Email ID</label>
+                  <input
+                    type="email"
+                    placeholder="e.g. owshikaentt@gmail.com"
+                    value={storeForm.email || ''}
+                    onChange={(e) => setStoreForm({ ...storeForm, email: e.target.value })}
                     className="w-full px-3 py-1.5 rounded-xl font-bold text-xs focus:outline-none font-mono"
                     style={{ background: inputBg, color: cardStrong, border: `1px solid ${inputBorder}` }}
                   />

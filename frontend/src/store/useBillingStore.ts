@@ -139,7 +139,22 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       } catch (e) {
         console.error('Failed to save store details to database/localStorage:', e);
       }
-      return { storeDetails: updated };
+
+      // Automatically update transport fromLocation to match newly updated shop address
+      const currentFrom = state.header.transportDetails?.fromLocation;
+      const isDefaultOrOld = !currentFrom || currentFrom === state.storeDetails.address || currentFrom === 'Peenya, Bengaluru';
+      const newFrom = isDefaultOrOld && updated.address ? updated.address : currentFrom;
+
+      return {
+        storeDetails: updated,
+        header: {
+          ...state.header,
+          transportDetails: {
+            ...state.header.transportDetails,
+            fromLocation: newFrom || updated.address,
+          },
+        },
+      };
     });
   },
 
