@@ -91,7 +91,7 @@ const initialHeader: InvoiceHeaderDetails = {
   customerAddress: '',
   paymentMode: 'CASH',
   transportDetails: {
-    fromLocation: 'Peenya, Bengaluru',
+    fromLocation: defaultStoreDetails.address,
     toLocation: '',
     vehicleNumber: '',
     transporterName: '',
@@ -309,16 +309,20 @@ export const useBillingStore = create<BillingState>((set, get) => ({
   setIsSaving: (saving: boolean) => set({ isSaving: saving }),
 
   clearBillingForm: () => {
-    set({
+    set((state) => ({
       header: {
         ...initialHeader,
         invoiceDate: new Date().toISOString().split('T')[0],
+        transportDetails: {
+          ...initialHeader.transportDetails,
+          fromLocation: state.storeDetails.address || defaultStoreDetails.address,
+        },
       },
       rows: [createEmptyRow(1), createEmptyRow(2), createEmptyRow(3)],
       activeRowIndex: 0,
       activeCellField: 'partNumber',
       validationError: null,
-    });
+    }));
   },
 
   resetWithNextInvoiceNumber: (nextNum: string) => {
@@ -327,6 +331,10 @@ export const useBillingStore = create<BillingState>((set, get) => ({
         ...initialHeader,
         invoiceNumber: nextNum,
         invoiceDate: new Date().toISOString().split('T')[0],
+        transportDetails: {
+          ...initialHeader.transportDetails,
+          fromLocation: state.storeDetails.address || defaultStoreDetails.address,
+        },
       },
       rows: [createEmptyRow(1), createEmptyRow(2), createEmptyRow(3)],
       activeRowIndex: 0,
