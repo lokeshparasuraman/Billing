@@ -35,15 +35,17 @@ app.get('/api/health', (_req, res) => {
 // API Routes
 app.use('/api', routes);
 
-// Serve the built frontend static files
-// This allows mobile & other devices to access http://<laptop-ip>:5000
-const frontendDist = path.resolve(__dirname, '../../frontend/dist');
-app.use(express.static(frontendDist));
-
-// SPA fallback — for any non-API route, return the frontend index.html
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(frontendDist, 'index.html'));
-});
+// ─── Local / LAN mode: serve built frontend from disk ───────────────────────
+// On Vercel, static files are served by the CDN. Only serve locally.
+if (!process.env.VERCEL) {
+  const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+  app.use(express.static(frontendDist));
+  // SPA fallback for local use
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Global Error Handler
 app.use(errorHandler);
