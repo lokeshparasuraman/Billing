@@ -31,6 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
       await deleteAccount();
       setIsProfileModalOpen(false);
       setIsConfirmDelete(false);
+      setMobileOpen(false);
     } catch (err: any) {
       setDeleteAccountError(err?.response?.data?.error || err?.message || 'Failed to delete account.');
     } finally {
@@ -68,9 +69,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
     setFontSize(DEFAULT_FONT_SIZE);
   };
 
-  /* ─── Scroll lock when mobile menu drawer is opened ─── */
+  /* ─── Scroll lock when mobile menu drawer or profile modal is opened ─── */
   useEffect(() => {
-    if (mobileOpen) {
+    if (mobileOpen || isProfileModalOpen) {
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
       document.documentElement.style.overflow = 'hidden';
@@ -84,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
       document.body.style.touchAction = '';
       document.documentElement.style.overflow = '';
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, isProfileModalOpen]);
 
 
 
@@ -465,7 +466,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             }}
           >
             <div
-              onClick={() => { setMobileOpen(false); setIsProfileModalOpen(true); }}
+              onClick={() => setIsProfileModalOpen(true)}
               style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', cursor: 'pointer', flex: 1 }}
             >
               <div
@@ -612,12 +613,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           ══════════════════════════════ */}
       {isProfileModalOpen && user && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', touchAction: 'none' }}
           onClick={() => {
             setIsProfileModalOpen(false);
             setIsConfirmDelete(false);
           }}
+          onTouchMove={(e) => e.preventDefault()}
         >
           <div
             className="relative w-full max-w-md rounded-2xl p-6 shadow-2xl overflow-hidden animate-fadeIn"
