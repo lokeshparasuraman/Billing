@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import routes from './routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
@@ -35,17 +36,34 @@ app.get('/api/health', (_req, res) => {
 // API Routes
 app.use('/api', routes);
 
-// ─── Local / LAN mode: serve built frontend from disk ───────────────────────
-// On Vercel, static files are served by the CDN. Only serve locally.
+// Serve built frontend static files if available on disk (Render, Local LAN, etc.)
 if (!process.env.VERCEL) {
   const frontendDist = path.resolve(__dirname, '../../frontend/dist');
-  app.use(express.static(frontendDist));
-  // SPA fallback for local use
+  const indexPath = path.join(frontendDist, 'index.html');
+
+  if (fs.existsSync(frontendDist)) {
+    app.use(express.static(frontendDist));
+  }
+
+  // SPA fallback or API status if dist/index.html does not exist
   app.get('*', (_req, res) => {
-    res.sendFile(path.join(frontendDist, 'index.html'));
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.json({
+        message: '⚡ Owshika Enterprises Billing API Backend is Live & Running!',
+        endpoints: {
+          health: '/api/health',
+          auth: '/api/auth',
+          products: '/api/products',
+          invoices: '/api/invoices',
+          customers: '/api/customers',
+          store: '/api/store',
+        },
+      });
+    }
   });
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 // Global Error Handler
 app.use(errorHandler);
