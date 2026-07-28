@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import routes from './routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
@@ -34,18 +35,14 @@ app.get('/api/health', (_req, res) => {
 // API Routes
 app.use('/api', routes);
 
-// Root Status Endpoint
-app.get('/', (_req, res) => {
-  res.json({
-    message: '⚡ Owshika Enterprises Billing API Backend is Live & Running!',
-    endpoints: {
-      health: '/api/health',
-      products: '/api/products',
-      invoices: '/api/invoices',
-      customers: '/api/customers',
-      store: '/api/store',
-    },
-  });
+// Serve the built frontend static files
+// This allows mobile & other devices to access http://<laptop-ip>:5000
+const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+app.use(express.static(frontendDist));
+
+// SPA fallback — for any non-API route, return the frontend index.html
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
 // Global Error Handler
