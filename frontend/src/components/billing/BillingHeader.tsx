@@ -314,7 +314,7 @@ export const BillingHeader: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleAddPhone}
-                      style={{ color: '#c9f227' }}
+                      style={{ color: isDark ? '#c9f227' : '#15803d' }}
                       className="text-[11px] font-black flex items-center gap-1 hover:underline"
                     >
                       <Plus className="h-3 w-3" /> Add Number
@@ -508,7 +508,7 @@ export const BillingHeader: React.FC = () => {
         >
           <div className="flex items-center justify-between pb-2.5 border-b" style={{ borderColor: cardDivider }}>
             <span className="text-xs font-black uppercase tracking-wider flex items-center gap-2" style={{ color: cardStrong }}>
-              <Truck className="h-4 w-4 text-[#c9f227]" /> Transport Details
+              <Truck className="h-4 w-4" style={{ color: isDark ? '#c9f227' : '#15803d' }} /> Transport Details
             </span>
             <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
               Transport Bill

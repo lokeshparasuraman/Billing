@@ -9,14 +9,15 @@ export const ProductCatalogPage: React.FC = () => {
   const { mode } = useThemeMode();
   const isDark = mode === 'dark';
 
-  /* Theme tokens matching home page inverted card design */
-  const cardBg     = isDark ? '#ebedf0' : '#051c1a';
-  const cardBorder = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
-  const cardDivide = isDark ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)';
-  const textStrong = isDark ? '#051c1a' : '#ffffff';
-  const textMuted  = isDark ? 'rgba(5,28,26,0.55)' : 'rgba(255,255,255,0.65)';
-  const inputBg    = isDark ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)';
-  const inputBorder= isDark ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
+  /* Theme tokens matching home page card design */
+  const cardBg     = isDark ? '#0a2421' : '#ffffff';
+  const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.10)';
+  const cardDivide = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
+  const textStrong = isDark ? '#ffffff' : '#051c1a';
+  const textMuted  = isDark ? 'rgba(255,255,255,0.60)' : 'rgba(5,28,26,0.60)';
+  const inputBg    = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+  const inputBorder= isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
+  const accentText = isDark ? '#c9f227' : '#15803d';
 
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,7 +137,7 @@ export const ProductCatalogPage: React.FC = () => {
         >
           <div>
             <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-3" style={{ color: textStrong }}>
-              <Package className="h-7 w-7 text-[#c9f227]" /> Product & Service Catalog
+              <Package className="h-7 w-7" style={{ color: accentText }} /> Product & Service Catalog
             </h1>
             <p className="text-xs sm:text-sm font-semibold mt-1.5" style={{ color: textMuted }}>
               Manage your custom products, parts, services, prices, HSN codes, and GST rates ({products.length} Items).
@@ -186,7 +187,7 @@ export const ProductCatalogPage: React.FC = () => {
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="p-16 text-center text-base sm:text-lg font-semibold" style={{ color: textMuted }}>
-              No products found in catalog. Click <strong style={{ color: '#c9f227' }}>"+ Add New Product"</strong> to populate your store inventory.
+              No products found in catalog. Click <strong className="font-extrabold underline decoration-2 underline-offset-4" style={{ color: accentText }}>"+ Add New Product"</strong> to populate your store inventory.
             </div>
           ) : (
             <div className="overflow-x-auto">

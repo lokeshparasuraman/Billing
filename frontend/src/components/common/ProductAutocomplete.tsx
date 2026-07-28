@@ -42,7 +42,7 @@ export const ProductAutocomplete: React.FC<ProductAutocompleteProps> = ({
   const itemNorm   = isDark ? '#051c1a'                : '#ffffff';
   const itemMuted  = isDark ? 'rgba(5,28,26,0.55)'    : 'rgba(255,255,255,0.60)';
   const itemHover  = isDark ? 'rgba(0,0,0,0.06)'      : 'rgba(255,255,255,0.08)';
-  const accent     = '#c9f227';
+  const accent     = isDark ? '#15803d' : '#c9f227';
 
   const listboxId = useId();
   const [suggestions, setSuggestions] = useState<Product[]>([]);
