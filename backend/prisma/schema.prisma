@@ -83,9 +83,11 @@ model InvoiceItem {
 model StoreSetting {
   id        String   @id @default("default_store")
   storeName String   @default("OWSHIKA ENTERPRISES")
+  ownerName String   @default("C.Perumal")
+  email     String   @default("owshikaentt@gmail.com")
   gstin     String   @default("33BAEPP2449B1Z3")
   phone     String   @default("+91 9445662637")
-  address   String   @default("#104, Industrial Main Road, Sector 3, Peenya, Bengaluru - 560058")
+  address   String   @default("4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701")
   updatedAt DateTime @updatedAt
 }
 

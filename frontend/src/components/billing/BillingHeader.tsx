@@ -5,7 +5,7 @@ import { PaymentMode } from '../../types/billing';
 import {
   Calendar as CalendarIcon, Hash, CreditCard, Banknote, QrCode, ShieldAlert,
   MapPin, FileCheck, Phone, Clock, ChevronLeft, ChevronRight, Edit3, Check, Building, Plus, Trash2,
-  Truck, User, Navigation, Package
+  Truck, User, Navigation, Package, Mail
 } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 
@@ -236,6 +236,14 @@ export const BillingHeader: React.FC = () => {
                 <div className="flex items-center space-x-2" style={{ color: cardText }}>
                   <Phone className="h-4 w-4 shrink-0" style={{ color: cardMuted }} />
                   <span>Mob: <strong className="font-mono font-extrabold" style={{ color: cardStrong }}>{storeDetails.phone}</strong></span>
+                </div>
+                <div className="flex items-center space-x-2" style={{ color: cardText }}>
+                  <User className="h-4 w-4 shrink-0" style={{ color: cardMuted }} />
+                  <span>Owner: <strong className="font-extrabold" style={{ color: cardStrong }}>{storeDetails.ownerName || 'C.Perumal'}</strong></span>
+                </div>
+                <div className="flex items-center space-x-2" style={{ color: cardText }}>
+                  <Mail className="h-4 w-4 shrink-0" style={{ color: cardMuted }} />
+                  <span>Email: <strong className="font-mono font-extrabold" style={{ color: cardStrong }}>{storeDetails.email || 'owshikaentt@gmail.com'}</strong></span>
                 </div>
                 <div className="sm:col-span-2 flex items-start space-x-2 mt-0.5" style={{ color: cardMuted }}>
                   <MapPin className="h-4 w-4 shrink-0 mt-0.5" style={{ color: cardMuted }} />

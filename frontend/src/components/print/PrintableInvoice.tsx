@@ -25,6 +25,8 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
   }
 
   const storeName = store?.storeName || 'OWSHIKA ENTERPRISES';
+  const ownerName = store?.ownerName || 'C.Perumal';
+  const email = store?.email || 'owshikaentt@gmail.com';
   const gstin = store?.gstin || '33BAEPP2449B1Z3';
   const address = store?.address || '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
   const phone = store?.phone || '+91 9445662637';
@@ -94,7 +96,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
               {address}
             </p>
             <p className="text-xs text-black font-mono font-bold pt-0.5">
-              GSTIN: <span className="font-black">{gstin}</span> | Mob: <span className="font-black">{phone}</span>
+              GSTIN: <span className="font-black">{gstin}</span> | Mob: <span className="font-black">{phone}</span> | Email: <span className="font-black">{email}</span>
             </p>
           </div>
 
@@ -133,6 +135,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
               Billed By / Store Details:
             </span>
             <h3 className="font-black text-black text-sm uppercase">{storeName}</h3>
+            <p className="text-black text-xs font-semibold">Proprietor: <span className="font-bold">{ownerName}</span></p>
             <p className="text-black text-xs font-medium leading-relaxed">
               {address}
             </p>
@@ -149,6 +152,10 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
             <p className="text-black text-xs font-mono">
               <span className="font-sans font-semibold text-gray-600 mr-2">Mobile / Contact:</span>
               <strong className="font-black">{phone}</strong>
+            </p>
+            <p className="text-black text-xs font-mono">
+              <span className="font-sans font-semibold text-gray-600 mr-2">Email:</span>
+              <strong className="font-black">{email}</strong>
             </p>
           </div>
         </div>
@@ -328,7 +335,10 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
           </div>
 
           <div className="text-right flex flex-col justify-between items-end min-h-[85px] pl-2">
-            <div className="font-black text-black uppercase tracking-wide text-xs">For {storeName}</div>
+            <div>
+              <div className="font-black text-black uppercase tracking-wide text-xs">For {storeName}</div>
+              <div className="text-[11px] font-bold text-gray-800 font-sans mt-0.5">Prop: {ownerName}</div>
+            </div>
             <div className="border-t-2 border-black pt-1.5 w-52 text-center text-black font-black text-xs tracking-wider">
               Authorized Signatory
             </div>
