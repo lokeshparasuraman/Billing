@@ -26,7 +26,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
 
   const storeName = store?.storeName || 'OWSHIKA ENTERPRISES';
   const gstin = store?.gstin || '33BAEPP2449B1Z3';
-  const address = store?.address || '#104, Industrial Main Road, Sector 3, Peenya, Bengaluru - 560058';
+  const address = store?.address || '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
   const phone = store?.phone || '+91 9445662637';
 
   // Dynamically compute Place of Supply state from GSTIN prefix

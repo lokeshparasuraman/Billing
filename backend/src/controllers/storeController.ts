@@ -6,7 +6,7 @@ const defaultStore = {
   storeName: 'OWSHIKA ENTERPRISES',
   gstin: '33BAEPP2449B1Z3',
   phone: '+91 9445662637',
-  address: '#104, Industrial Main Road, Sector 3, Peenya, Bengaluru - 560058',
+  address: '4/783,Kothumai mill,Near New Bus Stand,Salem Main Road,Dharmapuri-636701 ',
 };
 
 export const getStoreSettings = async (req: Request, res: Response) => {
