@@ -116,9 +116,37 @@ const AppContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center gap-3">
-        <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-        <p className="text-sm font-medium text-slate-400">Loading Owshika Billing System...</p>
+      <div
+        style={{
+          minHeight: '100vh',
+          backgroundColor: mode === 'light' ? '#f4f5f7' : '#051c1a',
+          color: mode === 'light' ? '#051c1a' : '#ffffff',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '16px',
+          fontFamily: '"Space Grotesk", "Outfit", "Inter", sans-serif',
+        }}
+      >
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid rgba(201, 242, 39, 0.2)',
+            borderTopColor: '#c9f227',
+            borderRadius: '50%',
+            animation: 'app-loading-spin 0.8s linear infinite',
+          }}
+        />
+        <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.6, margin: 0 }}>
+          Loading Owshika Billing System...
+        </p>
+        <style>{`
+          @keyframes app-loading-spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }

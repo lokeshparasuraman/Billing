@@ -1,12 +1,33 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark" style="background-color: #051c1a;">
 
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Owshika Enterprises -Driver Seat Dealer</title>
+  <meta name="theme-color" content="#051c1a" />
+  <title>Owshika Enterprises - Driver Seat Dealer</title>
   <meta name="description" content="Commercial billing software for Owshika Enterprises." />
+
+  <!-- Instant Theme Script to prevent color flash on reload -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('owshika_billing_theme_mode');
+        if (saved === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.backgroundColor = '#f4f5f7';
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.backgroundColor = '#051c1a';
+        }
+      } catch (e) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.backgroundColor = '#051c1a';
+      }
+    })();
+  </script>
+
   <!-- High-Performance Optimized Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +36,7 @@
     rel="stylesheet">
 </head>
 
-<body class="bg-slate-50 dark:bg-[#051b19] text-slate-900 dark:text-slate-100 antialiased font-sans">
+<body style="background-color: #051c1a; margin: 0; padding: 0;" class="bg-[#051c1a] text-slate-100 antialiased font-sans">
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
