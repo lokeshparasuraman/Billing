@@ -6,15 +6,17 @@ const PORT = process.env.PORT || 5000;
 
 async function bootstrap() {
   try {
-    console.log('🔄 Syncing database schema...');
-    execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
-    console.log('✅ Database schema in sync.');
+    if (process.env.SYNC_SCHEMA === 'true') {
+      console.log('🔄 Syncing database schema...');
+      execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+      console.log('✅ Database schema in sync.');
+    }
   } catch (err) {
     console.error('⚠️  prisma db push failed (will attempt to continue):', err);
   }
 
   await prisma.$connect();
-  console.log('✅ Database connected.');
+  console.log('✅ Database connected to Neon PostgreSQL.');
 
   app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`⚡ Owshika Billing Backend running on port ${PORT}`);
