@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { SavedInvoice } from '../../types/billing';
 import { PrintableInvoice } from './PrintableInvoice';
-import { Printer, X, ZoomIn, ZoomOut, Maximize2, FileText, Download } from 'lucide-react';
+import { Printer, X, ZoomIn, ZoomOut, Maximize2, FileText, Download, Minimize2 } from 'lucide-react';
 
 interface A4InvoicePreviewModalProps {
   isOpen: boolean;
@@ -16,9 +16,11 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
   invoice,
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [autoFitScale, setAutoFitScale] = useState<number>(1);
   const printRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Format date cleanly for filename (e.g. 28-07-2026)
+  // Format date cleanly for filename (e.g. Bill_OE-2026-0001_28-07-2026)
   const formattedDate = invoice?.invoiceDate
     ? new Date(invoice.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/[\/\\]/g, '-')
     : 'Date';
@@ -65,122 +67,161 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
     }
   };
 
-  // Auto set smaller zoom for mobile devices
+  // Calculate dynamic auto-fit scale so A4 sheet (794px width) fits mobile viewport cleanly without horizontal overflow
   useEffect(() => {
-    if (isOpen) {
-      const isMobile = window.innerWidth < 640;
-      setZoomLevel(isMobile ? 65 : 100);
-    }
+    if (!isOpen) return;
+
+    const calculateFit = () => {
+      const screenWidth = window.innerWidth;
+      if (screenWidth < 640) {
+        // Mobile padding ~24px total
+        const available = screenWidth - 24;
+        const fitRatio = available / 794;
+        setAutoFitScale(Math.max(0.35, Math.min(1, fitRatio)));
+      } else {
+        setAutoFitScale(1);
+      }
+    };
+
+    calculateFit();
+    window.addEventListener('resize', calculateFit);
+    return () => window.removeEventListener('resize', calculateFit);
   }, [isOpen]);
 
   if (!isOpen || !invoice) return null;
 
-  const handleZoomIn = () => setZoomLevel((prev) => Math.min(150, prev + 15));
-  const handleZoomOut = () => setZoomLevel((prev) => Math.max(40, prev - 15));
-  const handleResetZoom = () => setZoomLevel(window.innerWidth < 640 ? 60 : 100);
+  const handleZoomIn = () => setZoomLevel((prev) => Math.min(200, prev + 20));
+  const handleZoomOut = () => setZoomLevel((prev) => Math.max(50, prev - 20));
+  const handleResetZoom = () => setZoomLevel(100);
+
+  const effectiveScale = autoFitScale * (zoomLevel / 100);
+  const a4WidthPx = 794; // approx 210mm at 96 DPI
+  const scaledWidthPx = a4WidthPx * effectiveScale;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-between p-2 sm:p-4 overflow-hidden no-print">
+    <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-between p-2 sm:p-4 overflow-hidden no-print">
       {/* ------------------- MODAL TOP TOOLBAR ------------------- */}
-      <div className="w-full max-w-6xl bg-slate-900 dark:bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-white flex-shrink-0">
-        {/* Left: Title & Invoice Badge */}
-        <div className="flex items-center space-x-2.5">
-          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 shrink-0">
-            <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <h2 className="font-extrabold text-xs sm:text-base tracking-wide text-white">
-                A4 Printable Bill Preview
-              </h2>
-              <span className="hidden sm:inline bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/30 uppercase tracking-wider">
-                B&W Monochrome
-              </span>
+      <div className="w-full max-w-6xl bg-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-4 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 text-white flex-shrink-0">
+        
+        {/* Left: Invoice Title Badge */}
+        <div className="flex items-center justify-between sm:justify-start space-x-3">
+          <div className="flex items-center space-x-2.5">
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <p className="text-[11px] sm:text-xs text-slate-400 font-mono truncate max-w-[200px] sm:max-w-none">
-              #{invoice.invoiceNumber} | OWSHIKA ENTERPRISES
-            </p>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="font-black text-xs sm:text-sm text-white tracking-tight">
+                  A4 Bill Preview
+                </h2>
+                <span className="bg-emerald-500/20 text-emerald-300 text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-500/30 uppercase tracking-wider">
+                  #{invoice.invoiceNumber}
+                </span>
+              </div>
+              <p className="text-[10px] sm:text-xs text-slate-400 font-mono truncate max-w-[180px] sm:max-w-none">
+                {invoice.customerName || 'OWSHIKA ENTERPRISES'}
+              </p>
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="sm:hidden p-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700"
+            title="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-2">
-          {/* Middle: Zoom Controls */}
-          <div className="flex items-center bg-slate-800/90 border border-slate-700 rounded-lg p-1 space-x-1">
+        {/* Right Controls: Zoom & Primary Action Buttons */}
+        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2">
+          
+          {/* Zoom Level Controls */}
+          <div className="flex items-center bg-slate-800/90 border border-slate-700/80 rounded-xl p-1 space-x-1 shrink-0">
             <button
               type="button"
               onClick={handleZoomOut}
-              className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition"
+              className="p-1 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white transition active:scale-95"
               title="Zoom Out"
             >
               <ZoomOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
-            <span className="px-1.5 text-xs font-mono font-bold text-slate-200 min-w-[40px] text-center">
-              {zoomLevel}%
-            </span>
+            
+            <button
+              type="button"
+              onClick={handleResetZoom}
+              className="px-2 py-0.5 text-[11px] font-mono font-black text-slate-200 hover:text-emerald-400 transition"
+              title="Reset to 100%"
+            >
+              {Math.round(zoomLevel)}%
+            </button>
+
             <button
               type="button"
               onClick={handleZoomIn}
-              className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition"
+              className="p-1 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white transition active:scale-95"
               title="Zoom In"
             >
               <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
-            <button
-              type="button"
-              onClick={handleResetZoom}
-              className="p-1 rounded hover:bg-slate-700 text-slate-300 hover:text-white transition border-l border-slate-700 ml-0.5"
-              title="Reset Zoom"
-            >
-              <Maximize2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-            </button>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center space-x-2">
+          {/* Action Buttons: Download & Print */}
+          <div className="flex items-center gap-1.5 shrink-0 ml-auto sm:ml-0">
             <button
               type="button"
               onClick={handleDownloadBill}
-              className="bg-[#d4f653] hover:bg-[#c4f038] text-[#051b19] font-black text-xs px-3 sm:px-4 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-[#d4f653]/20 active:scale-95 transition-all"
-              title="Download bill to device Downloads folder"
+              className="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold text-xs px-3 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all shadow-sm"
+              title="Download HTML file"
             >
-              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-[#051b19]" />
-              <span>Download Bill</span>
+              <Download className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden xs:inline text-[11px]">Download</span>
             </button>
 
             <button
               type="button"
               onClick={() => handlePrint()}
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-[0.98] shadow-md shadow-emerald-500/20 text-white font-extrabold text-xs px-3 sm:px-4 py-2 rounded-xl flex items-center space-x-1.5 border border-emerald-400/30 transition-all"
+              className="bg-[#c9f227] hover:bg-[#d6f944] text-[#051c1a] font-black text-xs px-3.5 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all border-0 shadow-md shadow-[#c9f227]/20"
             >
-              <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <Printer className="h-3.5 w-3.5 shrink-0" />
               <span>Print Bill</span>
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              className="hidden sm:flex p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
               title="Close Preview"
             >
-              <X className="h-4 w-4 sm:h-5 sm:w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* ------------------- A4 PAPER PREVIEW SHEET CONTAINER ------------------- */}
-      <div className="flex-1 w-full max-w-6xl my-3 overflow-auto flex justify-center items-start p-4 bg-slate-950/60 rounded-xl border border-slate-800/80 custom-scrollbar">
-        {/* Authentic A4 Paper Sheet (210mm width simulation) */}
-        <div
-          style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
-          className="transition-transform duration-150 ease-out my-2"
+      {/* ------------------- RESPONSIVE SCALED PREVIEW SHEET CONTAINER ------------------- */}
+      <div 
+        ref={containerRef}
+        className="flex-1 w-full max-w-6xl my-2 overflow-auto flex justify-center items-start p-2 sm:p-6 bg-slate-950/70 rounded-2xl border border-slate-800/80 custom-scrollbar"
+      >
+        {/* Outer wrapper sizing bounding box to prevent layout overflow on mobile */}
+        <div 
+          style={{ 
+            width: `${scaledWidthPx}px`, 
+            margin: '0 auto', 
+            transition: 'width 0.15s ease-out' 
+          }}
         >
-          <div className="bg-white text-black shadow-2xl rounded-sm border border-slate-400 p-8 w-[210mm] min-h-[297mm] relative box-border">
-            {/* Sheet Watermark Header */}
-            <div className="absolute top-2 right-4 text-[9px] font-mono text-slate-400 uppercase select-none tracking-widest no-print">
-              Standard A4 Portrait Sheet (210mm × 297mm)
-            </div>
-
+          {/* Scaled A4 Sheet Container */}
+          <div
+            style={{ 
+              transform: `scale(${effectiveScale})`, 
+              transformOrigin: 'top left',
+              width: `${a4WidthPx}px`
+            }}
+            className="transition-transform duration-150 ease-out bg-white text-black shadow-2xl rounded-sm border border-slate-300 p-4 sm:p-8"
+          >
             {/* Printable Pure B&W Bill Content */}
             <div ref={printRef}>
               <PrintableInvoice invoice={invoice} />
@@ -189,20 +230,18 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
         </div>
       </div>
 
-      {/* ------------------- BOTTOM STATUS BAR ------------------- */}
-      <div className="w-full max-w-6xl bg-slate-900/90 border border-slate-800 rounded-lg px-4 py-2 flex items-center justify-between text-[11px] text-slate-400 flex-shrink-0">
-        <div className="flex items-center space-x-3">
-          <span className="flex items-center space-x-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
-            <span className="font-semibold text-slate-300">Ready for Thermal / Laser Printing</span>
-          </span>
-          <span>•</span>
-          <span className="font-mono">Format: A4 Monochrome</span>
+      {/* ------------------- BOTTOM MOBILE TOUCH HELP BAR ------------------- */}
+      <div className="w-full max-w-6xl bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-1.5 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400 flex-shrink-0">
+        <div className="flex items-center space-x-2">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 shrink-0"></span>
+          <span className="font-semibold text-slate-300">A4 Printable Format</span>
+          <span className="hidden sm:inline">• Use + / - or pinch to zoom</span>
         </div>
-        <div className="font-mono">
-          Total Amount: <strong className="text-white">₹{invoice.grandTotal.toFixed(2)}</strong>
+        <div className="font-mono font-bold text-white">
+          Total: ₹{invoice.grandTotal.toFixed(2)}
         </div>
       </div>
     </div>
   );
 };
+
