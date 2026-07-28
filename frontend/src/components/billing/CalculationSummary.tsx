@@ -85,9 +85,9 @@ export const CalculationSummary: React.FC = () => {
         transportDetails: header.billType === 'TRANSPORT' ? header.transportDetails : undefined,
         invoiceNumber: header.invoiceNumber,
         invoiceDate: header.invoiceDate,
-        customerName: storeDetails.storeName || 'Owshika Enterprises',
-        customerPhone: storeDetails.phone || '',
-        customerAddress: storeDetails.address || '',
+        customerName: header.customerName || 'Walk-in Customer',
+        customerPhone: header.customerPhone || '',
+        customerAddress: header.customerAddress || '',
         paymentMode: header.paymentMode,
         items: validItems.map((r) => ({
           productId: r.productId || null,
@@ -110,7 +110,7 @@ export const CalculationSummary: React.FC = () => {
       } catch { clearBillingForm(); }
     } catch (err: any) {
       console.error('Save invoice error:', err);
-      setValidationError(err.response?.data?.error || 'Failed to save invoice. Please check backend connection.');
+      setValidationError(err.message || err.response?.data?.error || 'Failed to save invoice.');
     } finally {
       setIsSaving(false);
     }

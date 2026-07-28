@@ -61,21 +61,18 @@ export const createProduct = async (productData: Partial<Product>): Promise<Prod
     }
   } catch (error: any) {
     console.warn('Backend API post error:', error);
-    // If backend returned a specific 400 error (like duplicate part number), throw it so user sees the message
-    if (error.response && error.response.status >= 400 && error.response.status < 500) {
-      throw error;
+    if (error.response && error.response.status === 400 && error.response.data && error.response.data.error) {
+      throw new Error(error.response.data.error);
     }
   }
 
-  // Fallback to local storage creation for offline or static hosting environments (e.g. Vercel)
+  // Fallback to local storage creation for live static / offline environments
   const partNumUpper = String(productData.partNumber || '').trim().toUpperCase();
   const local = localStorage.getItem('cached_products');
   const products: Product[] = local ? JSON.parse(local) : [];
 
   if (products.some((p) => p.partNumber.toUpperCase() === partNumUpper)) {
-    const err: any = new Error(`Product with Part Number '${partNumUpper}' already exists.`);
-    err.response = { data: { error: `Product with Part Number '${partNumUpper}' already exists.` } };
-    throw err;
+    throw new Error(`Product with Part Number '${partNumUpper}' already exists.`);
   }
 
   const newProd: Product = {
@@ -141,31 +138,130 @@ export const updateProductPrice = async (
 export const fetchNextInvoiceNumber = async (): Promise<string> => {
   try {
     const response = await api.get<{ invoiceNumber: string }>(`/invoices/next-number`);
-    return response.data.invoiceNumber;
+    if (response.data?.invoiceNumber) {
+      return response.data.invoiceNumber;
+    }
   } catch (error) {
-    const year = new Date().getFullYear();
-    return `OE-${year}-0001`;
+    console.warn('API unavailable for next invoice number, calculating from local cache');
   }
+
+  const year = new Date().getFullYear();
+  const local = localStorage.getItem('cached_invoices');
+  const invoices: SavedInvoice[] = local ? JSON.parse(local) : [];
+  let maxSeq = 0;
+  invoices.forEach((inv) => {
+    if (inv.invoiceNumber && inv.invoiceNumber.startsWith(`OE-${year}-`)) {
+      const parts = inv.invoiceNumber.split('-');
+      const num = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(num) && num > maxSeq) maxSeq = num;
+    }
+  });
+
+  const nextSeq = String(maxSeq + 1).padStart(4, '0');
+  return `OE-${year}-${nextSeq}`;
 };
 
 export const createInvoice = async (invoicePayload: any): Promise<SavedInvoice> => {
-  const response = await api.post<SavedInvoice>(`/invoices`, invoicePayload);
-  return response.data;
+  try {
+    const response = await api.post<SavedInvoice>(`/invoices`, invoicePayload);
+    if (response.data) {
+      const local = localStorage.getItem('cached_invoices');
+      const invoices: SavedInvoice[] = local ? JSON.parse(local) : [];
+      const updated = [response.data, ...invoices.filter((i) => i.id !== response.data.id)];
+      localStorage.setItem('cached_invoices', JSON.stringify(updated));
+      return response.data;
+    }
+  } catch (error: any) {
+    console.warn('Backend API create invoice error, saving to local storage fallback:', error);
+  }
+
+  // Local storage fallback so saving invoice NEVER fails on live deployment!
+  const items = (invoicePayload.items || []).map((it: any, idx: number) => {
+    const qty = Number(it.quantity || 0);
+    const prc = Number(it.price || 0);
+    const gstRate = Number(it.gstRate || 0);
+    const taxable = qty * prc;
+    const gstAmount = (taxable * gstRate) / 100;
+    const total = taxable + gstAmount;
+    return {
+      id: `item_${Date.now()}_${idx}`,
+      invoiceId: `inv_${Date.now()}`,
+      partNumber: it.partNumber || 'N/A',
+      productName: it.productName || 'Service / Product',
+      hsn: it.hsn || 'N/A',
+      unit: it.unit || 'PCS',
+      quantity: qty,
+      price: prc,
+      discount: Number(it.discount || 0),
+      gstRate,
+      gstAmount: Number(gstAmount.toFixed(2)),
+      total: Number(total.toFixed(2)),
+    };
+  });
+
+  const subtotal = items.reduce((acc: number, item: any) => acc + (item.quantity * item.price), 0);
+  const gstTotal = items.reduce((acc: number, item: any) => acc + item.gstAmount, 0);
+  const cgstTotal = gstTotal / 2;
+  const sgstTotal = gstTotal / 2;
+  const rawGrand = subtotal + gstTotal;
+  const grandTotal = Math.round(rawGrand);
+  const roundOff = Number((grandTotal - rawGrand).toFixed(2));
+
+  const localSavedInv: SavedInvoice = {
+    id: `inv_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    invoiceNumber: invoicePayload.invoiceNumber || `OE-${new Date().getFullYear()}-0001`,
+    invoiceDate: invoicePayload.invoiceDate || new Date().toISOString(),
+    billType: invoicePayload.billType || 'CUSTOMER',
+    customerName: invoicePayload.customerName || 'Walk-in Customer',
+    customerPhone: invoicePayload.customerPhone || '',
+    customerAddress: invoicePayload.customerAddress || '',
+    paymentMode: invoicePayload.paymentMode || 'CASH',
+    subtotal: Number(subtotal.toFixed(2)),
+    discountTotal: 0,
+    cgstTotal: Number(cgstTotal.toFixed(2)),
+    sgstTotal: Number(sgstTotal.toFixed(2)),
+    igstTotal: 0,
+    roundOff,
+    grandTotal,
+    amountInWords: invoicePayload.amountInWords || undefined,
+    transportDetails: invoicePayload.transportDetails || undefined,
+    items,
+    createdAt: new Date().toISOString(),
+  };
+
+  const local = localStorage.getItem('cached_invoices');
+  const invoices: SavedInvoice[] = local ? JSON.parse(local) : [];
+  const updated = [localSavedInv, ...invoices];
+  localStorage.setItem('cached_invoices', JSON.stringify(updated));
+  return localSavedInv;
 };
 
 export const fetchInvoices = async (): Promise<SavedInvoice[]> => {
   try {
     const response = await api.get<SavedInvoice[]>(`/invoices`);
-    return response.data;
+    if (Array.isArray(response.data)) {
+      localStorage.setItem('cached_invoices', JSON.stringify(response.data));
+      return response.data;
+    }
   } catch (error) {
-    console.warn('API unavailable for invoices list');
-    return [];
+    console.warn('API unavailable for invoices list, loading from local cache');
   }
+  const local = localStorage.getItem('cached_invoices');
+  return local ? JSON.parse(local) : [];
 };
 
 export const fetchInvoiceById = async (id: string): Promise<SavedInvoice> => {
-  const response = await api.get<SavedInvoice>(`/invoices/${id}`);
-  return response.data;
+  try {
+    const response = await api.get<SavedInvoice>(`/invoices/${id}`);
+    if (response.data) return response.data;
+  } catch (error) {
+    console.warn('API unavailable for invoice by ID, fetching from local cache');
+  }
+  const local = localStorage.getItem('cached_invoices');
+  const invoices: SavedInvoice[] = local ? JSON.parse(local) : [];
+  const found = invoices.find((inv) => inv.id === id);
+  if (found) return found;
+  throw new Error(`Invoice with ID ${id} not found.`);
 };
 
 export const deleteInvoice = async (id: string): Promise<void> => {
@@ -173,6 +269,12 @@ export const deleteInvoice = async (id: string): Promise<void> => {
     await api.delete(`/invoices/${id}`);
   } catch (error) {
     console.warn('Backend API delete invoice warning:', error);
+  }
+  const local = localStorage.getItem('cached_invoices');
+  if (local) {
+    const invoices: SavedInvoice[] = JSON.parse(local);
+    const updated = invoices.filter((i) => i.id !== id);
+    localStorage.setItem('cached_invoices', JSON.stringify(updated));
   }
 };
 
