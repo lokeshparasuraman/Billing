@@ -1,27 +1,41 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import productRoutes from './routes/productRoutes.js';
-import customerRoutes from './routes/customerRoutes.js';
-import invoiceRoutes from './routes/invoiceRoutes.js';
-import storeRoutes from './routes/storeRoutes.js';
+import routes from './routes.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 dotenv.config({ override: true });
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
+// CORS setup allowing requests from laptop, mobile, and web clients
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Health Check Endpoints
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // API Routes
-app.use('/api/products', productRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/invoices', invoiceRoutes);
-app.use('/api/store', storeRoutes);
+app.use('/api', routes);
 
-// Root endpoint status
-app.get('/', (req, res) => {
+// Root Status Endpoint
+app.get('/', (_req, res) => {
   res.json({
     message: '⚡ Owshika Enterprises Billing API Backend is Live & Running!',
     endpoints: {
@@ -29,13 +43,12 @@ app.get('/', (req, res) => {
       products: '/api/products',
       invoices: '/api/invoices',
       customers: '/api/customers',
+      store: '/api/store',
     },
   });
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// Global Error Handler
+app.use(errorHandler);
 
 export default app;

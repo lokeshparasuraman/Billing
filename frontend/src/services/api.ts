@@ -1,23 +1,13 @@
 import axios from 'axios';
 import { Product, Customer, SavedInvoice } from '../types/billing';
 
+const PROD_BASE = (import.meta as any).env?.VITE_API_URL || '';
+
 export const getApiBaseUrl = (): string => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-
-  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
-    return envUrl;
+  if (PROD_BASE && !PROD_BASE.includes('localhost') && !PROD_BASE.includes('127.0.0.1')) {
+    return PROD_BASE.replace(/\/$/, '');
   }
-
-  if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-    const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(currentHost);
-    if (isIp) {
-      return `http://${currentHost}:5000/api`;
-    }
-    return '/api';
-  }
-
-  return envUrl || 'http://localhost:5000/api';
+  return '/api';
 };
 
 export const api = axios.create({
