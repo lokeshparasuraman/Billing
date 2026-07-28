@@ -14,7 +14,7 @@ export const getApiBaseUrl = (): string => {
     if (isIp) {
       return `http://${currentHost}:5000/api`;
     }
-    return envUrl || '/api';
+    return '/api';
   }
 
   return envUrl || 'http://localhost:5000/api';
@@ -57,11 +57,66 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
     .slice(0, 20);
 };
 
+export const syncOfflineLocalDataToBackend = async (): Promise<void> => {
+  try {
+    const localProductsRaw = localStorage.getItem('cached_products');
+    if (localProductsRaw) {
+      const localProducts: Product[] = JSON.parse(localProductsRaw);
+      if (Array.isArray(localProducts) && localProducts.length > 0) {
+        for (const prod of localProducts) {
+          if (prod.partNumber) {
+            try {
+              await api.post('/products', {
+                partNumber: prod.partNumber,
+                name: prod.name,
+                hsn: prod.hsn,
+                gst: prod.gst,
+                price: prod.price,
+                unit: prod.unit,
+                stock: prod.stock,
+              });
+            } catch (e) {
+              // Ignore if product already exists in DB
+            }
+          }
+        }
+      }
+    }
+
+    const localInvoicesRaw = localStorage.getItem('cached_invoices');
+    if (localInvoicesRaw) {
+      const localInvoices: SavedInvoice[] = JSON.parse(localInvoicesRaw);
+      if (Array.isArray(localInvoices) && localInvoices.length > 0) {
+        for (const inv of localInvoices) {
+          if (inv.invoiceNumber && inv.items && inv.items.length > 0) {
+            try {
+              await api.post('/invoices', {
+                invoiceNumber: inv.invoiceNumber,
+                invoiceDate: inv.invoiceDate,
+                customerName: inv.customerName,
+                customerPhone: inv.customerPhone,
+                customerAddress: inv.customerAddress,
+                paymentMode: inv.paymentMode,
+                items: inv.items,
+              });
+            } catch (e) {
+              // Ignore if invoice already exists in DB
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Background sync warning:', err);
+  }
+};
+
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
     const response = await api.get<Product[]>(`/products`);
     if (Array.isArray(response.data)) {
       localStorage.setItem('cached_products', JSON.stringify(response.data));
+      syncOfflineLocalDataToBackend();
       return response.data;
     }
   } catch (error) {
