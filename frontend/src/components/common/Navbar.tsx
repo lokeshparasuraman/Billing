@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, Menu, X, ChevronRight, Keyboard } from 'lucide-react';
+import { Sun, Moon, Menu, X, ChevronRight, Keyboard, Wifi, RefreshCw } from 'lucide-react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useBillingStore } from '../../store/useBillingStore';
 import { BrandLogo } from './BrandLogo';
+import { DeviceSyncModal } from './DeviceSyncModal';
 
 
 
@@ -17,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const { rows, clearBillingForm, storeDetails } = useBillingStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [fontHover, setFontHover] = useState(false);
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
 
   /* ─── Font size state persisted to localStorage ─── */
   const MIN_FONT_SIZE = 12;
@@ -164,6 +166,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
               {/* Separator */}
               <div style={{ width: '1px', height: '20px', backgroundColor: border, margin: '0 16px' }} />
+
+              {/* Device Sync & Server Status Button */}
+              <button
+                type="button"
+                onClick={() => setIsSyncModalOpen(true)}
+                title="Device Sync & Server Connection"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', color: txtMuted, display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s' }}
+                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = iconHoverBg; el.style.color = txtPrimary; }}
+                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'none'; el.style.color = txtMuted; }}
+              >
+                <Wifi style={{ width: 18, height: 18 }} />
+              </button>
 
               {/* Theme toggle */}
               <button
@@ -461,6 +475,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             </button>
           </div>
 
+          <button type="button" onClick={() => { setMobileOpen(false); setIsSyncModalOpen(true); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderRadius: '10px', border: `1px solid ${divider}`, background: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: txtMuted }}>
+            <Wifi style={{ width: 15, height: 15 }} />
+            <span>Sync</span>
+          </button>
+
           {onOpenShortcuts && (
             <button type="button" onClick={() => { setMobileOpen(false); onOpenShortcuts(); }}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '10px', border: `1px solid ${divider}`, background: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: txtMuted }}>
@@ -469,9 +489,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             </button>
           )}
         </div>
-
-
       </div>
+
+      {/* Interactive Cross-Device Sync Modal */}
+      <DeviceSyncModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        onSynced={() => window.location.reload()}
+      />
     </>
   );
 };

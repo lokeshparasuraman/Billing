@@ -1,7 +1,12 @@
 import axios from 'axios';
 import { Product, Customer, SavedInvoice } from '../types/billing';
 
-const getApiBaseUrl = (): string => {
+export const getApiBaseUrl = (): string => {
+  const customUrl = typeof localStorage !== 'undefined' ? localStorage.getItem('custom_api_url') : null;
+  if (customUrl && customUrl.trim()) {
+    return customUrl.trim();
+  }
+
   const envUrl = import.meta.env.VITE_API_URL;
   const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
 
@@ -10,7 +15,11 @@ const getApiBaseUrl = (): string => {
   }
 
   if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-    return `http://${currentHost}:5000/api`;
+    const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(currentHost);
+    if (isIp) {
+      return `http://${currentHost}:5000/api`;
+    }
+    return envUrl || '/api';
   }
 
   return envUrl || 'http://localhost:5000/api';
@@ -341,5 +350,111 @@ export const updateStoreSettingsApi = async (details: any): Promise<any> => {
     console.warn('Could not save store settings to backend API, saved to localStorage');
   }
   return details;
+};
+
+export const checkBackendStatus = async (): Promise<{ isConnected: boolean; url: string; mode: string }> => {
+  const url = getApiBaseUrl();
+  try {
+    const res = await axios.get(`${url.replace(/\/$/, '')}/health`, { timeout: 3000 });
+    if (res.data && res.data.status === 'ok') {
+      return { isConnected: true, url, mode: 'Live Database Server' };
+    }
+  } catch (e) {
+    try {
+      const res2 = await axios.get(`${url.replace(/\/$/, '')}/products`, { timeout: 3000 });
+      if (res2.data) {
+        return { isConnected: true, url, mode: 'Live Database Server' };
+      }
+    } catch (e2) {
+      // Offline fallback
+    }
+  }
+  return { isConnected: false, url, mode: 'Browser Offline Storage (Unsynced)' };
+};
+
+export const setCustomApiUrl = (newUrl: string | null) => {
+  if (newUrl && newUrl.trim()) {
+    localStorage.setItem('custom_api_url', newUrl.trim());
+  } else {
+    localStorage.removeItem('custom_api_url');
+  }
+};
+
+export const syncLocalDataWithBackend = async (): Promise<{
+  syncedProducts: number;
+  syncedInvoices: number;
+  totalProducts: number;
+  totalInvoices: number;
+}> => {
+  const localProdStr = localStorage.getItem('cached_products');
+  const localInvStr = localStorage.getItem('cached_invoices');
+  const localProds: Product[] = localProdStr ? JSON.parse(localProdStr) : [];
+  const localInvs: SavedInvoice[] = localInvStr ? JSON.parse(localInvStr) : [];
+
+  let syncedProductsCount = 0;
+  let syncedInvoicesCount = 0;
+
+  let serverProds: Product[] = [];
+  let serverInvs: SavedInvoice[] = [];
+
+  try {
+    const pRes = await api.get<Product[]>('/products');
+    if (Array.isArray(pRes.data)) serverProds = pRes.data;
+  } catch (err) {
+    console.warn('Could not fetch server products during sync');
+  }
+
+  try {
+    const iRes = await api.get<SavedInvoice[]>('/invoices');
+    if (Array.isArray(iRes.data)) serverInvs = iRes.data;
+  } catch (err) {
+    console.warn('Could not fetch server invoices during sync');
+  }
+
+  // Upload local products to backend server if missing on server
+  const serverPartNums = new Set(serverProds.map((p) => p.partNumber.toUpperCase()));
+  for (const lp of localProds) {
+    if (lp.partNumber && !serverPartNums.has(lp.partNumber.toUpperCase())) {
+      try {
+        const created = await api.post<Product>('/products', lp);
+        if (created.data) {
+          serverProds.push(created.data);
+          syncedProductsCount++;
+        }
+      } catch (err) {
+        console.warn('Sync upload product skipped:', lp.partNumber);
+      }
+    }
+  }
+
+  // Upload local invoices to backend server if missing on server
+  const serverInvNums = new Set(serverInvs.map((i) => i.invoiceNumber));
+  for (const li of localInvs) {
+    if (li.invoiceNumber && !serverInvNums.has(li.invoiceNumber)) {
+      try {
+        const created = await api.post<SavedInvoice>('/invoices', li);
+        if (created.data) {
+          serverInvs.push(created.data);
+          syncedInvoicesCount++;
+        }
+      } catch (err) {
+        console.warn('Sync upload invoice skipped:', li.invoiceNumber);
+      }
+    }
+  }
+
+  // Update local storage cache with unified list
+  const mergedProducts = serverProds.length > 0 ? serverProds : localProds;
+  const mergedInvoices = serverInvs.length > 0 ? serverInvs : localInvs;
+
+  localStorage.setItem('cached_products', JSON.stringify(mergedProducts));
+  localStorage.setItem('cached_invoices', JSON.stringify(mergedInvoices));
+
+  return {
+    syncedProducts: syncedProductsCount,
+    syncedInvoices: syncedInvoicesCount,
+    totalProducts: mergedProducts.length,
+    totalInvoices: mergedInvoices.length,
+  };
 };
 
