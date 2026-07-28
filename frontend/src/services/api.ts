@@ -2,11 +2,6 @@ import axios from 'axios';
 import { Product, Customer, SavedInvoice } from '../types/billing';
 
 export const getApiBaseUrl = (): string => {
-  const customUrl = typeof localStorage !== 'undefined' ? localStorage.getItem('custom_api_url') : null;
-  if (customUrl && customUrl.trim()) {
-    return customUrl.trim();
-  }
-
   const envUrl = import.meta.env.VITE_API_URL;
   const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
 
@@ -37,91 +32,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-const CLOUD_BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019fa90e-3dc9-7e88-ac17-3a18bce95c16';
-
-let isCloudSyncing = false;
-
-export const autoSyncCloudData = async (): Promise<{ products: Product[]; invoices: SavedInvoice[] }> => {
-  if (isCloudSyncing) {
-    const localP = localStorage.getItem('cached_products');
-    const localI = localStorage.getItem('cached_invoices');
-    return {
-      products: localP ? JSON.parse(localP) : [],
-      invoices: localI ? JSON.parse(localI) : [],
-    };
-  }
-
-  isCloudSyncing = true;
-  try {
-    const localP = localStorage.getItem('cached_products');
-    const localI = localStorage.getItem('cached_invoices');
-    const localProds: Product[] = localP ? JSON.parse(localP) : [];
-    const localInvs: SavedInvoice[] = localI ? JSON.parse(localI) : [];
-
-    const cloudRes = await axios.get(CLOUD_BLOB_URL, { timeout: 4000 });
-    const cloudProds: Product[] = Array.isArray(cloudRes.data?.products) ? cloudRes.data.products : [];
-    const cloudInvs: SavedInvoice[] = Array.isArray(cloudRes.data?.invoices) ? cloudRes.data.invoices : [];
-
-    // Merge Products
-    const prodMap = new Map<string, Product>();
-    for (const p of localProds) {
-      if (p.partNumber) prodMap.set(p.partNumber.toUpperCase(), p);
-    }
-    for (const p of cloudProds) {
-      if (p.partNumber && !prodMap.has(p.partNumber.toUpperCase())) {
-        prodMap.set(p.partNumber.toUpperCase(), p);
-      }
-    }
-    const mergedProds = Array.from(prodMap.values());
-
-    // Merge Invoices
-    const invMap = new Map<string, SavedInvoice>();
-    for (const i of localInvs) {
-      const k = i.invoiceNumber || i.id;
-      if (k) invMap.set(k, i);
-    }
-    for (const i of cloudInvs) {
-      const k = i.invoiceNumber || i.id;
-      if (k && !invMap.has(k)) {
-        invMap.set(k, i);
-      }
-    }
-    const mergedInvs = Array.from(invMap.values()).sort(
-      (a, b) => new Date(b.createdAt || b.invoiceDate).getTime() - new Date(a.createdAt || a.invoiceDate).getTime()
-    );
-
-    localStorage.setItem('cached_products', JSON.stringify(mergedProds));
-    localStorage.setItem('cached_invoices', JSON.stringify(mergedInvs));
-
-    if (mergedProds.length !== cloudProds.length || mergedInvs.length !== cloudInvs.length) {
-      axios.put(CLOUD_BLOB_URL, { products: mergedProds, invoices: mergedInvs }).catch(() => {});
-    }
-
-    return { products: mergedProds, invoices: mergedInvs };
-  } catch (err) {
-    const localP = localStorage.getItem('cached_products');
-    const localI = localStorage.getItem('cached_invoices');
-    return {
-      products: localP ? JSON.parse(localP) : [],
-      invoices: localI ? JSON.parse(localI) : [],
-    };
-  } finally {
-    isCloudSyncing = false;
-  }
-};
-
-export const pushCloudData = async (products?: Product[], invoices?: SavedInvoice[]) => {
-  try {
-    const localP = localStorage.getItem('cached_products');
-    const localI = localStorage.getItem('cached_invoices');
-    const prods = products || (localP ? JSON.parse(localP) : []);
-    const invs = invoices || (localI ? JSON.parse(localI) : []);
-    await axios.put(CLOUD_BLOB_URL, { products: prods, invoices: invs }, { timeout: 4000 });
-  } catch (e) {
-    // Background cloud sync warning ignored
-  }
-};
-
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
     const response = await api.get<Product[]>(`/products/search`, {
@@ -131,7 +41,7 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
       return response.data;
     }
   } catch (error) {
-    console.warn('API unavailable, searching products in local storage fallback');
+    console.warn('PostgreSQL API search products warning:', error);
   }
   const local = localStorage.getItem('cached_products');
   const products: Product[] = local ? JSON.parse(local) : [];
@@ -150,24 +60,26 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
     const response = await api.get<Product[]>(`/products`);
-    if (Array.isArray(response.data) && response.data.length > 0) {
+    if (Array.isArray(response.data)) {
       localStorage.setItem('cached_products', JSON.stringify(response.data));
-      pushCloudData(response.data, undefined);
       return response.data;
     }
   } catch (error) {
-    console.warn('API unavailable for product list, loading from cloud / local cache');
+    console.warn('PostgreSQL API unavailable for product list, loading from local storage fallback');
   }
-  const synced = await autoSyncCloudData();
-  return synced.products;
+  const local = localStorage.getItem('cached_products');
+  return local ? JSON.parse(local) : [];
 };
 
 export const createProduct = async (productData: Partial<Product>): Promise<Product> => {
-  let serverProd: Product | null = null;
   try {
     const response = await api.post<Product>(`/products`, productData);
     if (response.data) {
-      serverProd = response.data;
+      const local = localStorage.getItem('cached_products');
+      const products: Product[] = local ? JSON.parse(local) : [];
+      const updated = [response.data, ...products.filter((p) => p.partNumber.toUpperCase() !== response.data.partNumber.toUpperCase())];
+      localStorage.setItem('cached_products', JSON.stringify(updated));
+      return response.data;
     }
   } catch (error: any) {
     console.warn('Backend API post error:', error);
@@ -180,11 +92,11 @@ export const createProduct = async (productData: Partial<Product>): Promise<Prod
   const local = localStorage.getItem('cached_products');
   const products: Product[] = local ? JSON.parse(local) : [];
 
-  if (!serverProd && products.some((p) => p.partNumber.toUpperCase() === partNumUpper)) {
+  if (products.some((p) => p.partNumber.toUpperCase() === partNumUpper)) {
     throw new Error(`Product with Part Number '${partNumUpper}' already exists.`);
   }
 
-  const newProd: Product = serverProd || {
+  const newProd: Product = {
     id: `prod_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
     partNumber: partNumUpper,
     name: String(productData.name || '').trim(),
@@ -195,9 +107,8 @@ export const createProduct = async (productData: Partial<Product>): Promise<Prod
     stock: Number(productData.stock || 100),
   };
 
-  const updated = [newProd, ...products.filter((p) => p.partNumber.toUpperCase() !== partNumUpper)];
+  const updated = [newProd, ...products];
   localStorage.setItem('cached_products', JSON.stringify(updated));
-  pushCloudData(updated, undefined);
   return newProd;
 };
 
@@ -213,7 +124,6 @@ export const deleteProduct = async (id: string): Promise<void> => {
     const products: Product[] = JSON.parse(local);
     const updated = products.filter((p) => p.id !== id);
     localStorage.setItem('cached_products', JSON.stringify(updated));
-    pushCloudData(updated, undefined);
   }
 };
 
@@ -286,7 +196,6 @@ export const createInvoice = async (invoicePayload: any): Promise<SavedInvoice> 
     console.warn('Backend API create invoice error, saving to local storage fallback:', error);
   }
 
-  // Local storage fallback so saving invoice NEVER fails on live deployment!
   const items = (invoicePayload.items || []).map((it: any, idx: number) => {
     const qty = Number(it.quantity || 0);
     const prc = Number(it.price || 0);
@@ -344,23 +253,21 @@ export const createInvoice = async (invoicePayload: any): Promise<SavedInvoice> 
   const invoices: SavedInvoice[] = local ? JSON.parse(local) : [];
   const updated = [localSavedInv, ...invoices.filter((i) => i.id !== localSavedInv.id)];
   localStorage.setItem('cached_invoices', JSON.stringify(updated));
-  pushCloudData(undefined, updated);
   return localSavedInv;
 };
 
 export const fetchInvoices = async (): Promise<SavedInvoice[]> => {
   try {
     const response = await api.get<SavedInvoice[]>(`/invoices`);
-    if (Array.isArray(response.data) && response.data.length > 0) {
+    if (Array.isArray(response.data)) {
       localStorage.setItem('cached_invoices', JSON.stringify(response.data));
-      pushCloudData(undefined, response.data);
       return response.data;
     }
   } catch (error) {
-    console.warn('API unavailable for invoices list, loading from cloud / local cache');
+    console.warn('API unavailable for invoices list, loading from local cache');
   }
-  const synced = await autoSyncCloudData();
-  return synced.invoices;
+  const local = localStorage.getItem('cached_invoices');
+  return local ? JSON.parse(local) : [];
 };
 
 export const fetchInvoiceById = async (id: string): Promise<SavedInvoice> => {
@@ -396,7 +303,6 @@ export const deleteInvoice = async (id: string): Promise<void> => {
       invoiceNumber: `OE-${currentYear}-${String(idx + 1).padStart(4, '0')}`,
     }));
     localStorage.setItem('cached_invoices', JSON.stringify(resequenced));
-    pushCloudData(undefined, resequenced);
   }
 };
 
@@ -438,110 +344,3 @@ export const updateStoreSettingsApi = async (details: any): Promise<any> => {
   }
   return details;
 };
-
-export const checkBackendStatus = async (): Promise<{ isConnected: boolean; url: string; mode: string }> => {
-  const url = getApiBaseUrl();
-  try {
-    const res = await axios.get(`${url.replace(/\/$/, '')}/health`, { timeout: 3000 });
-    if (res.data && res.data.status === 'ok') {
-      return { isConnected: true, url, mode: 'Live Database Server' };
-    }
-  } catch (e) {
-    try {
-      const res2 = await axios.get(`${url.replace(/\/$/, '')}/products`, { timeout: 3000 });
-      if (res2.data) {
-        return { isConnected: true, url, mode: 'Live Database Server' };
-      }
-    } catch (e2) {
-      // Offline fallback
-    }
-  }
-  return { isConnected: false, url, mode: 'Browser Offline Storage (Unsynced)' };
-};
-
-export const setCustomApiUrl = (newUrl: string | null) => {
-  if (newUrl && newUrl.trim()) {
-    localStorage.setItem('custom_api_url', newUrl.trim());
-  } else {
-    localStorage.removeItem('custom_api_url');
-  }
-};
-
-export const syncLocalDataWithBackend = async (): Promise<{
-  syncedProducts: number;
-  syncedInvoices: number;
-  totalProducts: number;
-  totalInvoices: number;
-}> => {
-  const localProdStr = localStorage.getItem('cached_products');
-  const localInvStr = localStorage.getItem('cached_invoices');
-  const localProds: Product[] = localProdStr ? JSON.parse(localProdStr) : [];
-  const localInvs: SavedInvoice[] = localInvStr ? JSON.parse(localInvStr) : [];
-
-  let syncedProductsCount = 0;
-  let syncedInvoicesCount = 0;
-
-  let serverProds: Product[] = [];
-  let serverInvs: SavedInvoice[] = [];
-
-  try {
-    const pRes = await api.get<Product[]>('/products');
-    if (Array.isArray(pRes.data)) serverProds = pRes.data;
-  } catch (err) {
-    console.warn('Could not fetch server products during sync');
-  }
-
-  try {
-    const iRes = await api.get<SavedInvoice[]>('/invoices');
-    if (Array.isArray(iRes.data)) serverInvs = iRes.data;
-  } catch (err) {
-    console.warn('Could not fetch server invoices during sync');
-  }
-
-  // Upload local products to backend server if missing on server
-  const serverPartNums = new Set(serverProds.map((p) => p.partNumber.toUpperCase()));
-  for (const lp of localProds) {
-    if (lp.partNumber && !serverPartNums.has(lp.partNumber.toUpperCase())) {
-      try {
-        const created = await api.post<Product>('/products', lp);
-        if (created.data) {
-          serverProds.push(created.data);
-          syncedProductsCount++;
-        }
-      } catch (err) {
-        console.warn('Sync upload product skipped:', lp.partNumber);
-      }
-    }
-  }
-
-  // Upload local invoices to backend server if missing on server
-  const serverInvNums = new Set(serverInvs.map((i) => i.invoiceNumber));
-  for (const li of localInvs) {
-    if (li.invoiceNumber && !serverInvNums.has(li.invoiceNumber)) {
-      try {
-        const created = await api.post<SavedInvoice>('/invoices', li);
-        if (created.data) {
-          serverInvs.push(created.data);
-          syncedInvoicesCount++;
-        }
-      } catch (err) {
-        console.warn('Sync upload invoice skipped:', li.invoiceNumber);
-      }
-    }
-  }
-
-  // Update local storage cache with unified list
-  const mergedProducts = serverProds.length > 0 ? serverProds : localProds;
-  const mergedInvoices = serverInvs.length > 0 ? serverInvs : localInvs;
-
-  localStorage.setItem('cached_products', JSON.stringify(mergedProducts));
-  localStorage.setItem('cached_invoices', JSON.stringify(mergedInvoices));
-
-  return {
-    syncedProducts: syncedProductsCount,
-    syncedInvoices: syncedInvoicesCount,
-    totalProducts: mergedProducts.length,
-    totalInvoices: mergedInvoices.length,
-  };
-};
-
