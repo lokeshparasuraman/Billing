@@ -78,14 +78,14 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
 
   return (
     <div 
-      className="print-invoice-wrapper text-black bg-white leading-normal" 
+      className="print-invoice-wrapper text-black bg-white leading-normal p-2" 
       style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}
     >
-      {/* ------------------- OUTER FRAMED HEADER SECTION ------------------- */}
-      <div className="border-2 border-black p-4 mb-4">
+      {/* ------------------- UNIFIED STORE HEADER & META ------------------- */}
+      <div className="border-2 border-black p-4 mb-3">
         <div className="flex justify-between items-start gap-4 pb-3 border-b-2 border-black">
-          {/* Company Brand (No Logo, Pure Crisp Typography) */}
-          <div className="space-y-1 max-w-[60%]">
+          {/* Company Brand & Contact Details (Single Source of Truth - No Duplicate Boxes) */}
+          <div className="space-y-1 max-w-[65%]">
             <h1 className="text-2xl font-black tracking-tight text-black uppercase">
               {storeName}
             </h1>
@@ -95,20 +95,22 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
             <p className="text-xs text-black font-medium leading-snug">
               {address}
             </p>
-            <p className="text-xs text-black font-mono font-bold pt-0.5">
-              GSTIN: <span className="font-black">{gstin}</span> | Mob: <span className="font-black">{phone}</span> | Email: <span className="font-black">{email}</span>
-            </p>
+            <div className="text-xs text-black font-mono font-bold pt-1 space-y-0.5">
+              <div>Proprietor: <span className="font-sans font-bold text-black">{ownerName}</span> | Mob: <span className="font-black">{phone}</span></div>
+              <div>GSTIN: <span className="font-black">{gstin}</span> | Place of Supply: <span className="font-sans font-bold">{placeOfSupply}</span></div>
+              <div>Email: <span className="font-black">{email}</span></div>
+            </div>
           </div>
 
           {/* INVOICE BADGE & META */}
           <div className="text-right flex flex-col items-end shrink-0">
-            <div className="border-2 border-black bg-slate-50 text-black font-black text-sm px-4 py-1 uppercase tracking-widest mb-2 shadow-sm">
+            <div className="border-2 border-black bg-slate-100 text-black font-black text-sm px-4 py-1.5 uppercase tracking-widest mb-2 shadow-sm">
               {invoice.billType === 'TRANSPORT' ? 'TRANSPORT WAYBILL' : 'TAX INVOICE'}
             </div>
-            <div className="text-xs space-y-1 font-mono text-black text-right bg-white p-2 border border-black min-w-[200px]">
+            <div className="text-xs space-y-1 font-mono text-black text-right bg-white p-2.5 border border-black min-w-[210px]">
               <div className="flex justify-between gap-3">
                 <span className="font-sans font-semibold text-gray-700">Invoice No:</span>
-                <strong className="font-black text-black">{invoice.invoiceNumber}</strong>
+                <strong className="font-black text-black text-sm">{invoice.invoiceNumber}</strong>
               </div>
               <div className="flex justify-between gap-3">
                 <span className="font-sans font-semibold text-gray-700">Date:</span>
@@ -128,79 +130,58 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
           </div>
         </div>
 
-        {/* Billed By & Place of Supply Grid Box */}
-        <div className="mt-3 grid grid-cols-2 divide-x divide-black border border-black text-xs bg-white">
+        {/* BILLED TO / CUSTOMER & TRANSPORT DETAILS GRID */}
+        <div className="mt-3 grid grid-cols-2 divide-x-2 divide-black border border-black text-xs bg-white">
+          {/* BILLED TO / CUSTOMER DETAILS */}
           <div className="p-3 space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider block text-gray-600">
-              Billed By / Store Details:
+            <span className="text-[10px] font-black uppercase tracking-wider block text-gray-600 border-b border-gray-300 pb-0.5 mb-1">
+              Billed To / Customer Details:
             </span>
-            <h3 className="font-black text-black text-sm uppercase">{storeName}</h3>
-            <p className="text-black text-xs font-semibold">Proprietor: <span className="font-bold">{ownerName}</span></p>
-            <p className="text-black text-xs font-medium leading-relaxed">
-              {address}
+            <h3 className="font-black text-black text-sm uppercase">{invoice.customerName || 'Walk-in Customer'}</h3>
+            {invoice.customerPhone && (
+              <p className="text-black text-xs font-mono">Contact: <strong className="font-bold">{invoice.customerPhone}</strong></p>
+            )}
+            <p className="text-black text-xs font-medium leading-relaxed whitespace-pre-line">
+              {invoice.customerAddress || 'Dharmapuri, Tamil Nadu'}
             </p>
           </div>
-          <div className="p-3 space-y-1 text-right flex flex-col justify-center">
-            <p className="text-black text-xs font-mono">
-              <span className="font-sans font-semibold text-gray-600 mr-2">GSTIN Number:</span>
-              <strong className="font-black">{gstin}</strong>
-            </p>
-            <p className="text-black text-xs font-mono">
-              <span className="font-sans font-semibold text-gray-600 mr-2">Place of Supply:</span>
-              <strong className="font-black">{placeOfSupply}</strong>
-            </p>
-            <p className="text-black text-xs font-mono">
-              <span className="font-sans font-semibold text-gray-600 mr-2">Mobile / Contact:</span>
-              <strong className="font-black">{phone}</strong>
-            </p>
-            <p className="text-black text-xs font-mono">
-              <span className="font-sans font-semibold text-gray-600 mr-2">Email:</span>
-              <strong className="font-black">{email}</strong>
-            </p>
-          </div>
-        </div>
 
-        {/* Transport Details Box (Shown for Transport Bills) */}
-        {(invoice.billType === 'TRANSPORT' || invoice.transportDetails) && (
-          <div className="mt-3 p-3 border border-black bg-slate-50 text-xs">
-            <span className="text-xs font-black uppercase tracking-wider block text-black border-b border-black pb-1.5 mb-2 flex items-center gap-1.5">
-              🚛 Transport Details
+          {/* DISPATCH / TRANSPORT DETAILS */}
+          <div className="p-3 space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-wider block text-gray-600 border-b border-gray-300 pb-0.5 mb-1">
+              Dispatch / Transport Details:
             </span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-              <div className="border-r border-black/20 pr-2">
-                <span className="font-sans font-bold block text-[10px] text-gray-600 uppercase mb-0.5">From Address:</span>
-                <strong className="font-bold text-black font-sans text-[11px] leading-snug block whitespace-pre-line">
+            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+              <div>
+                <span className="font-sans font-semibold text-gray-600 block text-[10px]">From Address:</span>
+                <strong className="font-sans font-bold text-black text-[11px] block leading-snug">
                   {invoice.transportDetails?.fromLocation || address}
                 </strong>
               </div>
-              <div className="border-r border-black/20 pr-2">
-                <span className="font-sans font-bold block text-[10px] text-gray-600 uppercase mb-0.5">To Address:</span>
-                <strong className="font-bold text-black font-sans text-[11px] leading-snug block whitespace-pre-line">
-                  {invoice.transportDetails?.toLocation || 'N/A'}
-                </strong>
-              </div>
-              <div className="border-r border-black/20 pr-2">
-                <span className="font-sans font-bold block text-[10px] text-gray-600 uppercase mb-0.5">Vehicle / LR No:</span>
-                <strong className="font-bold font-mono text-black text-xs block mt-1">
-                  {invoice.transportDetails?.vehicleNumber || 'N/A'}
+              <div>
+                <span className="font-sans font-semibold text-gray-600 block text-[10px]">To Address:</span>
+                <strong className="font-sans font-bold text-black text-[11px] block leading-snug">
+                  {invoice.transportDetails?.toLocation || 'Dharmapuri'}
                 </strong>
               </div>
               <div>
-                <span className="font-sans font-bold block text-[10px] text-gray-600 uppercase mb-0.5">Transporter Name:</span>
-                <strong className="font-bold text-black font-sans text-xs block mt-1">
-                  {invoice.transportDetails?.transporterName || 'Self Transport'}
-                </strong>
+                <span className="font-sans font-semibold text-gray-600 block text-[10px]">Vehicle / LR No:</span>
+                <strong className="font-black text-black text-xs">{invoice.transportDetails?.vehicleNumber || 'N/A'}</strong>
+              </div>
+              <div>
+                <span className="font-sans font-semibold text-gray-600 block text-[10px]">Transporter:</span>
+                <strong className="font-bold text-black text-xs">{invoice.transportDetails?.transporterName || 'Self Transport'}</strong>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* ------------------- COMPLETE FRAMED PRODUCT TABLE ------------------- */}
-      <table className="print-table w-full text-left border-collapse border-2 border-black mb-4 text-xs">
+      {/* ------------------- PRODUCT & SERVICE ITEMS TABLE ------------------- */}
+      <table className="print-table w-full text-left border-collapse border-2 border-black mb-3 text-xs">
         <thead>
-          <tr className="bg-slate-50 text-black font-black uppercase text-[11px] border-b-2 border-black">
-            <th className="py-2 px-2 text-center border border-black w-10">#</th>
+          <tr className="bg-slate-100 text-black font-black uppercase text-[11px] border-b-2 border-black">
+            <th className="py-2 px-2 text-center border border-black w-10">S.No</th>
             <th className="py-2 px-2.5 border border-black w-32 font-sans">Part / Code</th>
             <th className="py-2 px-3 border border-black font-sans">Description of Goods / Services</th>
             <th className="py-2 px-2.5 text-center border border-black w-20 font-sans">HSN</th>
@@ -212,7 +193,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
         </thead>
         <tbody className="divide-y divide-black">
           {invoice.items.map((item, idx) => (
-            <tr key={item.id || idx} className="border-b border-black hover:bg-slate-50/50">
+            <tr key={item.id || idx} className={`border-b border-black ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
               <td className="py-2 px-2 text-center border border-black font-mono font-semibold text-xs">
                 {idx + 1}
               </td>
@@ -242,15 +223,15 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
         </tbody>
       </table>
 
-      {/* ------------------- COMPLETE FRAMED FINAL SUMMARY & TERMS ------------------- */}
-      <div className="print-summary-footer space-y-4">
+      {/* ------------------- SUMMARY & FOOTER ------------------- */}
+      <div className="print-summary-footer space-y-3">
         {/* Amounts & Taxes Grid Box */}
-        <div className="grid grid-cols-12 gap-4 text-xs">
+        <div className="grid grid-cols-12 gap-3 text-xs">
           {/* Left Column: GST Summary Breakdown Table & Bank Info */}
-          <div className="col-span-7 space-y-3">
+          <div className="col-span-7 space-y-2.5">
             {/* GST Summary Table */}
             <div className="border-2 border-black overflow-hidden bg-white">
-              <div className="bg-slate-50 px-3 py-1.5 font-black text-xs uppercase text-black border-b-2 border-black tracking-wide">
+              <div className="bg-slate-100 px-3 py-1.5 font-black text-xs uppercase text-black border-b-2 border-black tracking-wide">
                 GST Tax Summary Breakdown
               </div>
               <table className="w-full text-xs text-left border-collapse">
@@ -274,15 +255,15 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
             </div>
 
             {/* Bank Details Box */}
-            <div className="border-2 border-black p-3 text-xs bg-white space-y-1.5">
-              <span className="font-black uppercase tracking-wide text-black block border-b border-black pb-1">
-                Bank Details for NEFT / RTGS:
+            <div className="border-2 border-black p-2.5 text-xs bg-white space-y-1">
+              <span className="font-black uppercase tracking-wide text-black block border-b border-black pb-1 text-[11px]">
+                Bank Details for NEFT / RTGS / Online Transfer:
               </span>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-black text-xs pt-0.5">
-                <div><span className="font-sans text-gray-600 text-[11px] block">Bank Name:</span> <strong>HDFC Bank Ltd</strong></div>
-                <div><span className="font-sans text-gray-600 text-[11px] block">Account No:</span> <strong>50200012345678</strong></div>
-                <div><span className="font-sans text-gray-600 text-[11px] block">IFSC Code:</span> <strong>HDFC0000123</strong></div>
-                <div><span className="font-sans text-gray-600 text-[11px] block">Branch:</span> <strong>Peenya Industrial Area</strong></div>
+                <div><span className="font-sans text-gray-600 text-[10px] block">Bank Name:</span> <strong>HDFC Bank Ltd</strong></div>
+                <div><span className="font-sans text-gray-600 text-[10px] block">Account No:</span> <strong>50200012345678</strong></div>
+                <div><span className="font-sans text-gray-600 text-[10px] block">IFSC Code:</span> <strong>HDFC0000123</strong></div>
+                <div><span className="font-sans text-gray-600 text-[10px] block">Branch:</span> <strong>Dharmapuri Main Branch</strong></div>
               </div>
             </div>
           </div>
@@ -290,15 +271,15 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
           {/* Right Column: Total Calculations Box */}
           <div className="col-span-5 border-2 border-black divide-y-2 divide-black bg-white text-black flex flex-col justify-between">
             <div className="space-y-0 divide-y divide-black text-xs">
-              <div className="py-2.5 px-3 flex justify-between items-center">
+              <div className="py-2 px-3 flex justify-between items-center">
                 <span className="font-bold text-gray-800">Subtotal (Taxable):</span>
                 <span className="font-mono font-black text-sm">₹{invoice.subtotal.toFixed(2)}</span>
               </div>
-              <div className="py-2.5 px-3 flex justify-between items-center">
+              <div className="py-2 px-3 flex justify-between items-center">
                 <span className="font-bold text-gray-800">GST Tax Amount:</span>
                 <span className="font-mono font-black text-sm">₹{totalGstAmount.toFixed(2)}</span>
               </div>
-              <div className="py-2.5 px-3 flex justify-between items-center text-xs">
+              <div className="py-2 px-3 flex justify-between items-center text-xs">
                 <span className="font-bold text-gray-800">Round Off:</span>
                 <span className="font-mono font-bold">
                   {invoice.roundOff >= 0 ? `+${invoice.roundOff.toFixed(2)}` : invoice.roundOff.toFixed(2)}
@@ -306,7 +287,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
               </div>
             </div>
             
-            <div className="py-3 px-3.5 bg-slate-50 border-t-2 border-black flex justify-between items-center">
+            <div className="py-2.5 px-3.5 bg-slate-100 border-t-2 border-black flex justify-between items-center">
               <span className="font-black uppercase tracking-wider text-sm text-black">Grand Total:</span>
               <span className="font-mono font-black text-xl text-black">
                 {formatCurrency(invoice.grandTotal)}
@@ -316,7 +297,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
         </div>
 
         {/* Amount in Words Framed Box */}
-        <div className="border-2 border-black p-3 bg-slate-50 text-xs flex items-center justify-between gap-4">
+        <div className="border-2 border-black p-2.5 bg-slate-50 text-xs flex items-center justify-between gap-4">
           <span className="font-extrabold text-black uppercase text-xs tracking-wider shrink-0">Amount in Words:</span>
           <div className="font-black text-black text-sm font-sans italic text-right capitalize">
             "{invoice.amountInWords || numberToWordsIndian(invoice.grandTotal)}"
@@ -324,22 +305,22 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
         </div>
 
         {/* Terms & Conditions and Authorized Signatory Framed Box */}
-        <div className="border-2 border-black p-4 grid grid-cols-2 gap-6 text-xs text-black bg-white">
-          <div className="space-y-1.5 border-r border-black pr-4">
+        <div className="border-2 border-black p-3.5 grid grid-cols-2 gap-6 text-xs text-black bg-white">
+          <div className="space-y-1 border-r border-black pr-4">
             <h4 className="font-black text-black uppercase tracking-wide text-xs border-b border-black pb-1">Terms &amp; Conditions:</h4>
-            <ol className="list-decimal list-inside space-y-1 font-semibold text-gray-800 text-[11px] leading-relaxed pt-0.5">
+            <ol className="list-decimal list-inside space-y-0.5 font-semibold text-gray-800 text-[11px] leading-relaxed pt-0.5">
               <li>Goods once sold will not be taken back or exchanged.</li>
               <li>Interest @ 18% p.a. will be charged if bill is not paid within 15 days.</li>
-              <li>Subject to Bengaluru Jurisdiction only.</li>
+              <li>Subject to Dharmapuri Jurisdiction only.</li>
             </ol>
           </div>
 
-          <div className="text-right flex flex-col justify-between items-end min-h-[85px] pl-2">
+          <div className="text-right flex flex-col justify-between items-end min-h-[80px] pl-2">
             <div>
               <div className="font-black text-black uppercase tracking-wide text-xs">For {storeName}</div>
               <div className="text-[11px] font-bold text-gray-800 font-sans mt-0.5">Prop: {ownerName}</div>
             </div>
-            <div className="border-t-2 border-black pt-1.5 w-52 text-center text-black font-black text-xs tracking-wider">
+            <div className="border-t-2 border-black pt-1 w-48 text-center text-black font-black text-xs tracking-wider">
               Authorized Signatory
             </div>
           </div>
@@ -348,4 +329,5 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
     </div>
   );
 };
+
 
