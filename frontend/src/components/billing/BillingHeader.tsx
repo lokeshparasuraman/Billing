@@ -127,8 +127,8 @@ export const BillingHeader: React.FC = () => {
   } = useThemeTokens();
   const cardText = isDark ? 'rgba(5,28,26,0.75)' : 'rgba(255,255,255,0.85)';
 
-  /* BrandLogo: dark mode = dark teal text on white; light mode = white text on dark */
-  const logoVariant = isDark ? 'dark' : 'white';
+  /* BrandLogo: uses auto variant */
+  const logoVariant = 'auto';
 
   /* Theme tokens for elements directly inside outer container (Bill Type bar) */
   const outerText = isDark ? '#ffffff' : '#051c1a';
@@ -143,7 +143,7 @@ export const BillingHeader: React.FC = () => {
 
   const isToday = header.invoiceDate === todayString;
   return (
-    <div className="bg-[#f1f5f9] dark:bg-[#051c1a] rounded-2xl border p-4 sm:p-5 space-y-4 shadow-sm" style={{ borderColor: cardBorder }} ref={null as any}>
+    <div className="rounded-2xl border p-4 sm:p-5 space-y-4 shadow-sm" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: cardBorder }} ref={null as any}>
 
       {/* ── Editing Mode Notification Banner ── */}
       {editingInvoiceId && (
