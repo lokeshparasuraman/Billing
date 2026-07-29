@@ -29,6 +29,11 @@ export const getStoreSettings = async (_req: Request, res: Response) => {
       settings = await prisma.storeSetting.create({
         data: defaultStore,
       });
+    } else if (!settings.address || settings.address.includes('Kothumai Mill')) {
+      settings = await prisma.storeSetting.update({
+        where: { id: GLOBAL_STORE_ID },
+        data: { address: defaultStore.address },
+      });
     }
 
     res.json(settings);

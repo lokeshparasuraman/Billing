@@ -28,7 +28,10 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
   const ownerName = store?.ownerName || 'C.Perumal';
   const email = store?.email || 'owshikaentt@gmail.com';
   const gstin = store?.gstin || '33BAEPP2449B1Z3';
-  const address = store?.address || '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
+  let address = store?.address || '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
+  if (!address || address.includes('Kothumai Mill')) {
+    address = '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
+  }
   const phone = store?.phone || '+91 9445662637';
   const bankName = store?.bankName || '';
   const accountNumber = store?.accountNumber || '';
