@@ -358,60 +358,35 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               {/* Separator */}
               <div style={{ width: '1px', height: '20px', backgroundColor: border, margin: '0 4px' }} />
 
-              {/* Segmented Sun ☀️ / Moon 🌙 Theme Switcher */}
-              <div
+              {/* Single Icon Theme Toggle */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '3px',
-                  borderRadius: '12px',
-                  backgroundColor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.20)',
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
                   border: `1px solid ${border}`,
-                  gap: '3px',
+                  cursor: 'pointer',
+                  backgroundColor: isDark ? '#051c1a' : '#c9f227',
+                  color: isDark ? '#c9f227' : '#051c1a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: isDark
+                    ? '0 0 12px rgba(201,242,39,0.35)'
+                    : '0 2px 8px rgba(0,0,0,0.15)',
+                  flexShrink: 0,
                 }}
               >
-                <button
-                  type="button"
-                  onClick={() => { if (isDark) toggleTheme(); }}
-                  title="Light Mode"
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    backgroundColor: !isDark ? '#c9f227' : 'transparent',
-                    color: !isDark ? '#051c1a' : (isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)'),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.18s ease-in-out',
-                    boxShadow: !isDark ? '0 2px 8px rgba(0,0,0,0.18)' : 'none',
-                  }}
-                >
-                  <Sun style={{ width: 16, height: 16 }} />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { if (!isDark) toggleTheme(); }}
-                  title="Dark Mode"
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    backgroundColor: isDark ? '#051c1a' : 'transparent',
-                    color: isDark ? '#c9f227' : (isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)'),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.18s ease-in-out',
-                    boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.25)' : 'none',
-                  }}
-                >
-                  <Moon style={{ width: 16, height: 16 }} />
-                </button>
-              </div>
+                {isDark ? (
+                  <Moon style={{ width: 18, height: 18, color: '#c9f227' }} />
+                ) : (
+                  <Sun style={{ width: 18, height: 18, color: '#051c1a' }} />
+                )}
+              </button>
 
               {/* Redesigned Font Size Segmented Toggle (A- / A+) */}
               <div
