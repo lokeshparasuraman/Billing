@@ -4,7 +4,7 @@ import { calculateInvoiceSummary, formatCurrency } from '../../utils/calculation
 import { createInvoice, fetchNextInvoiceNumber } from '../../services/api';
 import { Printer, Save, RefreshCw, AlertCircle, FileSearch } from 'lucide-react';
 import { SavedInvoice } from '../../types/billing';
-import { useThemeMode } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../hooks/useThemeTokens';
 
 export const CalculationSummary: React.FC = () => {
   const {
@@ -12,16 +12,12 @@ export const CalculationSummary: React.FC = () => {
     validationError, setValidationError, setSavedInvoiceForPrint,
     setIsPrintModalOpen, clearBillingForm, resetWithNextInvoiceNumber,
   } = useBillingStore();
-  const { mode } = useThemeMode();
-  const isDark = mode === 'dark';
+  const { isDark,
+    inv_cardBg: cardBg, inv_cardBorder: cardBorder, inv_cardDivide: cardDivide,
+    inv_textStrong: textStrong, inv_textMuted: textMuted,
+  } = useThemeTokens();
 
-  /* ─── Inverted card tokens ─── */
-  const cardBg     = isDark ? '#ebedf0' : '#051c1a';
-  const cardBorder = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
-  const cardDivide = isDark ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)';
-  const textStrong = isDark ? '#051c1a' : '#ffffff';
-  const textMuted  = isDark ? 'rgba(5,28,26,0.55)' : 'rgba(255,255,255,0.65)';
-  const subBg      = isDark ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)';
+  const subBg = isDark ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)';
   const secBtnStyle: React.CSSProperties = {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
     padding: '10px 16px', borderRadius: '12px', fontSize: '12px', fontWeight: 700,

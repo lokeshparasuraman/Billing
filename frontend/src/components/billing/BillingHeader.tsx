@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useBillingStore } from '../../store/useBillingStore';
-import { useThemeMode } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { PaymentMode } from '../../types/billing';
 import {
   Calendar as CalendarIcon, Hash, CreditCard, Banknote, QrCode, ShieldAlert,
@@ -120,38 +120,28 @@ export const BillingHeader: React.FC = () => {
   };
 
   const todayString = getLocalDateString();
-  const { mode } = useThemeMode();
-  const isDark = mode === 'dark';
-
-  const isToday = header.invoiceDate === todayString;
-
-  /* Theme-aware tokens for the store card — inverted contrast */
-  const cardBg       = isDark ? '#ebedf0'                     : '#051c1a';
-  const cardBorder   = isDark ? 'rgba(0,0,0,0.08)'           : 'rgba(255,255,255,0.12)';
-  const cardDivider  = isDark ? 'rgba(0,0,0,0.08)'           : 'rgba(255,255,255,0.10)';
-  const cardText     = isDark ? 'rgba(5,28,26,0.75)'         : 'rgba(255,255,255,0.85)';
-  const cardStrong   = isDark ? '#051c1a'                     : '#ffffff';
-  const cardMuted    = isDark ? 'rgba(5,28,26,0.60)'         : 'rgba(255,255,255,0.75)';
-  const inputBg      = isDark ? 'rgba(0,0,0,0.04)'           : 'rgba(255,255,255,0.06)';
-  const inputBorder  = isDark ? 'rgba(0,0,0,0.08)'           : 'rgba(255,255,255,0.08)';
+  const { isDark,
+    inv_cardBg: cardBg, inv_cardBorder: cardBorder, inv_cardDivide: cardDivider,
+    inv_textStrong: cardStrong, inv_textMuted: cardMuted,
+    inv_inputBg: inputBg, inv_inputBorder: inputBorder,
+  } = useThemeTokens();
+  const cardText = isDark ? 'rgba(5,28,26,0.75)' : 'rgba(255,255,255,0.85)';
 
   /* BrandLogo: dark mode = dark teal text on white; light mode = white text on dark */
   const logoVariant = isDark ? 'dark' : 'white';
 
   /* Theme tokens for elements directly inside outer container (Bill Type bar) */
-  const outerText       = isDark ? '#ffffff'                  : '#051c1a';
-  const outerMuted      = isDark ? 'rgba(255,255,255,0.70)'      : 'rgba(5,28,26,0.75)';
-  const btnInactiveBg   = isDark ? 'rgba(255,255,255,0.08)'      : 'rgba(5,28,26,0.06)';
-  const btnInactiveText = isDark ? '#ffffff'                  : '#051c1a';
+  const outerText = isDark ? '#ffffff' : '#051c1a';
+  const outerMuted = isDark ? 'rgba(255,255,255,0.70)' : 'rgba(5,28,26,0.75)';
+  const btnInactiveBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(5,28,26,0.06)';
+  const btnInactiveText = isDark ? '#ffffff' : '#051c1a';
 
-  /* Shared meta card style — inverted: dark teal in light, white in dark */
-  const cardCls_meta = {
-    background: cardBg,
-    border: `1px solid ${cardBorder}`,
-  };
+  /* Shared meta card style */
+  const cardCls_meta = { background: cardBg, border: `1px solid ${cardBorder}` };
   const cardTextStyle = { color: cardStrong };
   const cardMutedStyle = { color: cardMuted };
 
+  const isToday = header.invoiceDate === todayString;
   return (
     <div className="bg-[#f1f5f9] dark:bg-[#051c1a] rounded-2xl border p-4 sm:p-5 space-y-4 shadow-sm" style={{ borderColor: cardBorder }} ref={null as any}>
 
@@ -161,15 +151,14 @@ export const BillingHeader: React.FC = () => {
           <span className="text-xs font-black uppercase tracking-wider" style={{ color: outerMuted }}>
             Bill Type:
           </span>
-          <div 
-            className="relative inline-grid grid-cols-2 p-1.5 rounded-2xl w-64 sm:w-80 select-none overflow-hidden" 
+          <div
+            className="relative inline-grid grid-cols-2 p-1.5 rounded-2xl w-64 sm:w-80 select-none overflow-hidden"
             style={{ background: btnInactiveBg, border: `1px solid ${inputBorder}`, boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.08)' }}
           >
             {/* Liquid Flowing Background Pill Indicator */}
             <div
-              className={`absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] rounded-xl bg-[#c9f227] transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_3px_10px_rgba(201,242,39,0.4)] z-0 ${
-                header.billType === 'TRANSPORT' ? 'translate-x-full' : 'translate-x-0'
-              }`}
+              className={`absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] rounded-xl bg-[#c9f227] transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_3px_10px_rgba(201,242,39,0.4)] z-0 ${header.billType === 'TRANSPORT' ? 'translate-x-full' : 'translate-x-0'
+                }`}
             />
 
             {/* Customer Bill Button */}
@@ -198,7 +187,7 @@ export const BillingHeader: React.FC = () => {
 
         {header.billType === 'TRANSPORT' && (
           <span className="text-[11px] font-black px-3.5 py-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
-            <Truck className="h-4 w-4" /> Goods Transport / Waybill Mode
+            <Truck className="h-4 w-4" /> Transport Mode
           </span>
         )}
       </div>
@@ -528,11 +517,10 @@ export const BillingHeader: React.FC = () => {
 
       {/* ── Transport Details (Smooth Liquid Expand Transition + Complete Addresses) ── */}
       <div
-        className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden ${
-          header.billType === 'TRANSPORT'
+        className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden ${header.billType === 'TRANSPORT'
             ? 'max-h-[1200px] opacity-100 mt-4 border-t border-black/[0.06] dark:border-white/[0.06] pt-4 translate-y-0'
             : 'max-h-0 opacity-0 mt-0 -translate-y-4 pointer-events-none'
-        }`}
+          }`}
       >
         <div
           className="p-4 sm:p-5 rounded-2xl space-y-4 shadow-sm"

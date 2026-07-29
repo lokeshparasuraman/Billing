@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useThemeMode } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { useBillingStore } from '../../store/useBillingStore';
 import { ProductRow } from './ProductRow';
 import { Plus, HelpCircle, Wrench, ChevronDown, PackageCheck, Trash2, IndianRupee } from 'lucide-react';
@@ -166,14 +166,10 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
    MAIN PRODUCT TABLE
    ════════════════════════════════════ */
 export const ProductTable: React.FC = () => {
-  const { mode } = useThemeMode();
-  const isDark = mode === 'dark';
-
-  /* Inverted card tokens */
-  const cardBg     = isDark ? '#ebedf0' : '#051c1a';
-  const cardBorder = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
-  const textStrong = isDark ? '#051c1a' : '#ffffff';
-  const textMuted  = isDark ? 'rgba(5,28,26,0.55)' : 'rgba(255,255,255,0.65)';
+  const { isDark,
+    inv_cardBg: cardBg, inv_cardBorder: cardBorder,
+    inv_textStrong: textStrong, inv_textMuted: textMuted,
+  } = useThemeTokens();
 
   const {
     rows, addRow, addLabourRow, addMiscSparesRow,

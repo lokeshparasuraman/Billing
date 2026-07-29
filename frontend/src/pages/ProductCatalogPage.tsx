@@ -3,21 +3,10 @@ import { fetchProducts, createProduct, deleteProduct } from '../services/api';
 import { Product } from '../types/billing';
 import { sanitizePriceInput, handlePriceKeyDown } from '../utils/calculations';
 import { Package, Search, Plus, X, Trash2 } from 'lucide-react';
-import { useThemeMode } from '../context/ThemeContext';
+import { useThemeTokens } from '../hooks/useThemeTokens';
 
 export const ProductCatalogPage: React.FC = () => {
-  const { mode } = useThemeMode();
-  const isDark = mode === 'dark';
-
-  /* Theme tokens matching home page card design */
-  const cardBg     = isDark ? '#0a2421' : '#f1f5f9';
-  const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.10)';
-  const cardDivide = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
-  const textStrong = isDark ? '#ffffff' : '#051c1a';
-  const textMuted  = isDark ? 'rgba(255,255,255,0.60)' : 'rgba(5,28,26,0.60)';
-  const inputBg    = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
-  const inputBorder= isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
-  const accentText = isDark ? '#c9f227' : '#15803d';
+  const { isDark, surfaceBg: cardBg, cardBorder, cardDivide, textStrong, textMuted, inputBg, inputBorder, accentText } = useThemeTokens();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

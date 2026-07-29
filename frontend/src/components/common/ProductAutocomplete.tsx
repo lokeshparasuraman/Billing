@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useId } from 'react';
 import { Product } from '../../types/billing';
 import { searchProducts } from '../../services/api';
-import { useThemeMode } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../hooks/useThemeTokens';
 
 interface ProductAutocompleteProps {
   value: string;
@@ -19,13 +19,12 @@ export const ProductAutocomplete: React.FC<ProductAutocompleteProps> = ({
   value, fieldMode, placeholder, onSelectProduct, onChangeValue,
   onKeyDownCustom, inputRef, className = '', inputStyle,
 }) => {
-  const { mode } = useThemeMode();
-  const isDark = mode === 'dark';
+  const { isDark, inv_textStrong, inv_textMuted } = useThemeTokens();
 
   /* Inverted card theme tokens */
   const inStyle: React.CSSProperties = inputStyle ?? {
     background    : isDark ? 'rgba(0,0,0,0.05)'        : 'rgba(255,255,255,0.10)',
-    color         : isDark ? '#051c1a'                  : '#ffffff',
+    color         : inv_textStrong,
     border        : `1px solid ${isDark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.18)'}`,
     borderRadius  : '6px',
     padding       : '5px 8px',
@@ -39,10 +38,10 @@ export const ProductAutocomplete: React.FC<ProductAutocompleteProps> = ({
   const dropBg     = isDark ? '#f8f8f8'                : '#051c1a';
   const dropBorder = isDark ? 'rgba(0,0,0,0.10)'       : 'rgba(255,255,255,0.12)';
   const dropDivide = isDark ? 'rgba(0,0,0,0.06)'       : 'rgba(255,255,255,0.06)';
-  const itemNorm   = isDark ? '#051c1a'                : '#ffffff';
-  const itemMuted  = isDark ? 'rgba(5,28,26,0.55)'    : 'rgba(255,255,255,0.60)';
+  const itemNorm   = inv_textStrong;
+  const itemMuted  = inv_textMuted;
   const itemHover  = isDark ? 'rgba(0,0,0,0.06)'      : 'rgba(255,255,255,0.08)';
-  const accent     = isDark ? '#15803d' : '#c9f227';
+  const accent     = '#c9f227';
 
   const listboxId = useId();
   const [suggestions, setSuggestions] = useState<Product[]>([]);

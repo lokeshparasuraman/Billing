@@ -4,7 +4,7 @@ import { ProductAutocomplete } from '../common/ProductAutocomplete';
 import { updateProductPrice } from '../../services/api';
 import { sanitizePriceInput, handlePriceKeyDown } from '../../utils/calculations';
 import { Trash2, Wrench, Package } from 'lucide-react';
-import { useThemeMode } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../hooks/useThemeTokens';
 
 interface ProductRowProps {
   index: number;
@@ -20,12 +20,8 @@ interface ProductRowProps {
 export const ProductRow: React.FC<ProductRowProps> = ({
   index, row, isLastRow, onUpdate, onSelectProduct, onRemove, onAddRowNeeded, onNavigateRow,
 }) => {
-  const { mode } = useThemeMode();
-  const isDark = mode === 'dark';
+  const { isDark, inv_textStrong: txtStrong, inv_textMuted: txtMuted } = useThemeTokens();
 
-  /* ─── Theme tokens: card is INVERTED (white in dark, dark-teal in light) ─── */
-  const txtStrong = isDark ? '#051c1a'                : '#ffffff';
-  const txtMuted  = isDark ? 'rgba(5,28,26,0.55)'    : 'rgba(255,255,255,0.60)';
   const rowBg     = isDark ? 'rgba(0,0,0,0.02)'      : 'rgba(255,255,255,0.02)';
   const rowHover  = isDark ? 'rgba(0,0,0,0.04)'      : 'rgba(255,255,255,0.05)';
   const divider   = isDark ? 'rgba(0,0,0,0.07)'      : 'rgba(255,255,255,0.07)';

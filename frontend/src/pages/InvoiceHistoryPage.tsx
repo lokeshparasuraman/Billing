@@ -4,21 +4,10 @@ import { SavedInvoice } from '../types/billing';
 import { formatCurrency } from '../utils/calculations';
 import { Search, FileText, Eye, Trash2, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
 import { A4InvoicePreviewModal } from '../components/print/A4InvoicePreviewModal';
-import { useThemeMode } from '../context/ThemeContext';
+import { useThemeTokens } from '../hooks/useThemeTokens';
 
 export const InvoiceHistoryPage: React.FC = () => {
-  const { mode } = useThemeMode();
-  const isDark = mode === 'dark';
-
-  /* Theme tokens matching home page card design */
-  const cardBg     = isDark ? '#0a2421' : '#f1f5f9';
-  const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.10)';
-  const cardDivide = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
-  const textStrong = isDark ? '#ffffff' : '#051c1a';
-  const textMuted  = isDark ? 'rgba(255,255,255,0.60)' : 'rgba(5,28,26,0.60)';
-  const inputBg    = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
-  const inputBorder= isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
-  const accentText = isDark ? '#c9f227' : '#15803d';
+  const { isDark, surfaceBg: cardBg, cardBorder, cardDivide, textStrong, textMuted, inputBg, inputBorder, accentText } = useThemeTokens();
 
   const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
