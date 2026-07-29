@@ -84,9 +84,9 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
   const scaledWidthPx = a4WidthPx * effectiveScale;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-between p-2 sm:p-4 overflow-hidden no-print">
+    <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-between p-2 sm:p-4 overflow-hidden no-print animate-smooth-fade">
       {/* ------------------- MODAL TOP TOOLBAR ------------------- */}
-      <div className="w-full max-w-6xl bg-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-4 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 text-white flex-shrink-0">
+      <div className="w-full max-w-6xl bg-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-4 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 text-white flex-shrink-0 animate-smooth-pop">
         
         {/* Left: Invoice Title Badge */}
         <div className="flex items-center justify-between sm:justify-start space-x-3">

@@ -832,7 +832,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           ══════════════════════════════ */}
       {isProfileModalOpen && user && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-smooth-fade"
           style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', touchAction: 'none' }}
           onClick={() => {
             setIsProfileModalOpen(false);
@@ -1042,13 +1042,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           ══════════════════════════════ */}
       {isBankModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto"
-          style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', touchAction: 'none' }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto animate-smooth-fade"
+          style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', touchAction: 'none' }}
           onClick={() => setIsBankModalOpen(false)}
           onTouchMove={(e) => e.preventDefault()}
         >
           <div
-            className="relative w-full max-w-md rounded-2xl p-5 sm:p-6 shadow-2xl overflow-hidden my-auto animate-fadeIn"
+            className="relative w-full max-w-md rounded-2xl p-5 sm:p-6 shadow-2xl overflow-hidden my-auto animate-smooth-pop"
             style={{
               backgroundColor: inv_cardBg,
               border: `1px solid ${inv_cardBorder}`,

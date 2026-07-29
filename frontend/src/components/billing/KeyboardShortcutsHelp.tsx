@@ -32,10 +32,10 @@ export const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ is
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-smooth-fade">
       <div
         style={{ background: modalBg, border: `1px solid ${cardBorder}` }}
-        className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-150 text-white"
+        className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-smooth-pop text-white"
       >
         {/* Header */}
         <div
