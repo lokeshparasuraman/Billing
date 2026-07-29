@@ -857,12 +857,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     width: '42px',
                     height: '42px',
                     borderRadius: '50%',
-                    backgroundColor: 'rgba(201,242,39,0.15)',
-                    border: '1.5px solid rgba(201,242,39,0.35)',
+                    backgroundColor: isDark ? 'rgba(201,242,39,0.15)' : 'rgba(5,28,26,0.08)',
+                    border: isDark ? '1.5px solid rgba(201,242,39,0.35)' : '1.5px solid rgba(5,28,26,0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#c9f227',
+                    color: isDark ? '#c9f227' : '#051c1a',
                   }}
                 >
                   <UserIcon style={{ width: 20, height: 20 }} />
@@ -1067,12 +1067,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     width: '42px',
                     height: '42px',
                     borderRadius: '50%',
-                    backgroundColor: 'rgba(201,242,39,0.15)',
-                    border: '1.5px solid rgba(201,242,39,0.35)',
+                    backgroundColor: isDark ? 'rgba(201,242,39,0.15)' : 'rgba(5,28,26,0.08)',
+                    border: isDark ? '1.5px solid rgba(201,242,39,0.35)' : '1.5px solid rgba(5,28,26,0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#c9f227',
+                    color: isDark ? '#c9f227' : '#051c1a',
                   }}
                 >
                   <Landmark style={{ width: 20, height: 20 }} />
