@@ -35,6 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   });
   const [isSavingBank, setIsSavingBank] = useState(false);
   const [bankSaveSuccess, setBankSaveSuccess] = useState(false);
+  const [bankFormError, setBankFormError] = useState<string | null>(null);
 
   const handleOpenBankModal = () => {
     setBankForm({
@@ -44,28 +45,73 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
       branchName: storeDetails.branchName || '',
       upiId: storeDetails.upiId || '',
     });
+    setBankFormError(null);
     setBankSaveSuccess(false);
     setIsBankModalOpen(true);
   };
 
   const handleSaveBankDetails = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBankFormError(null);
+    setBankSaveSuccess(false);
+
+    const bankName = bankForm.bankName.trim();
+    const accountNumber = bankForm.accountNumber.trim();
+    const ifscCode = bankForm.ifscCode.trim().toUpperCase();
+    const branchName = bankForm.branchName.trim();
+    const upiId = bankForm.upiId.trim().toLowerCase();
+
+    // Strict Validation 1: Bank Name length
+    if (!bankName || bankName.length < 3) {
+      setBankFormError('Bank Name must be at least 3 characters long.');
+      return;
+    }
+
+    // Strict Validation 2: Account Number strictly numeric & length check (9 to 18 numbers)
+    if (!accountNumber || !/^\d+$/.test(accountNumber)) {
+      setBankFormError('Account Number must contain ONLY numbers (0-9). Letters or special characters are not allowed.');
+      return;
+    }
+    if (accountNumber.length < 9 || accountNumber.length > 18) {
+      setBankFormError(`Account Number length is invalid (${accountNumber.length} digits). Standard Indian bank account numbers must be between 9 and 18 digits long.`);
+      return;
+    }
+
+    // Strict Validation 3: IFSC Code format (11 characters: 4 letters + 0 + 6 alphanumeric)
+    if (!ifscCode || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode)) {
+      setBankFormError("Invalid IFSC Code format. Must be exactly 11 characters starting with 4 letters, then '0', followed by 6 letters or numbers (e.g. SBIN0001234).");
+      return;
+    }
+
+    // Strict Validation 4: Branch Name length
+    if (!branchName || branchName.length < 3) {
+      setBankFormError('Branch Name must be at least 3 characters long.');
+      return;
+    }
+
+    // Strict Validation 5: Optional UPI ID format
+    if (upiId && !/^[a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-_]+$/.test(upiId)) {
+      setBankFormError('Invalid UPI ID format (e.g. owshika@sbi).');
+      return;
+    }
+
     setIsSavingBank(true);
     try {
       await setStoreDetails({
-        bankName: bankForm.bankName.trim().toUpperCase(),
-        accountNumber: bankForm.accountNumber.trim(),
-        ifscCode: bankForm.ifscCode.trim().toUpperCase(),
-        branchName: bankForm.branchName.trim(),
-        upiId: bankForm.upiId.trim().toLowerCase(),
+        bankName: bankName.toUpperCase(),
+        accountNumber,
+        ifscCode,
+        branchName,
+        upiId,
       });
       setBankSaveSuccess(true);
       setTimeout(() => {
         setIsBankModalOpen(false);
         setBankSaveSuccess(false);
-      }, 1000);
-    } catch (err) {
+      }, 1200);
+    } catch (err: any) {
       console.error('Failed to save bank details:', err);
+      setBankFormError(err?.response?.data?.error || err?.message || 'Failed to save bank details.');
     } finally {
       setIsSavingBank(false);
     }
@@ -1031,7 +1077,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   <Landmark style={{ width: 20, height: 20 }} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Bank Details & UPI</h3>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Bank Details &amp; UPI</h3>
                   <p style={{ margin: 0, fontSize: '12px', color: txtMuted }}>Stored in database for A4 Invoices</p>
                 </div>
               </div>
@@ -1072,14 +1118,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                  Account Number
+                  Account Number (Numbers Only)
                 </label>
                 <input
                   type="text"
                   required
                   value={bankForm.accountNumber}
-                  onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value })}
-                  placeholder="e.g. 41234567890"
+                  onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value.replace(/\D/g, '').slice(0, 18) })}
+                  placeholder="e.g. 41234567890 (9 to 18 digits)"
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -1103,7 +1149,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     type="text"
                     required
                     value={bankForm.ifscCode}
-                    onChange={(e) => setBankForm({ ...bankForm, ifscCode: e.target.value.toUpperCase() })}
+                    onChange={(e) => setBankForm({ ...bankForm, ifscCode: e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 11) })}
                     placeholder="e.g. SBIN0001234"
                     style={{
                       width: '100%',
@@ -1167,9 +1213,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 />
               </div>
 
+              {bankFormError && (
+                <div style={{ padding: '10px 12px', backgroundColor: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px', color: '#f87171', fontSize: '12px', textAlign: 'left', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertTriangle style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  <span>{bankFormError}</span>
+                </div>
+              )}
+
               {bankSaveSuccess && (
                 <div style={{ padding: '10px', backgroundColor: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '10px', color: '#4ade80', fontSize: '12px', textAlign: 'center', fontWeight: 700 }}>
-                  ✓ Bank Details Saved to Database!
+                  ✓ Bank Details Validated &amp; Saved to Database!
                 </div>
               )}
 

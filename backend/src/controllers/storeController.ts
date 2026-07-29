@@ -42,6 +42,34 @@ export const updateStoreSettings = async (req: Request, res: Response) => {
   try {
     const { storeName, ownerName, email, gstin, phone, address, bankName, accountNumber, ifscCode, branchName, upiId } = req.body;
 
+    // Strict Bank Details Validation if bank details are provided
+    if (bankName !== undefined || accountNumber !== undefined || ifscCode !== undefined) {
+      const cleanBankName = bankName ? String(bankName).trim() : '';
+      const cleanAccNo = accountNumber ? String(accountNumber).trim() : '';
+      const cleanIfsc = ifscCode ? String(ifscCode).trim().toUpperCase() : '';
+      const cleanBranch = branchName ? String(branchName).trim() : '';
+      const cleanUpi = upiId ? String(upiId).trim().toLowerCase() : '';
+
+      // If user is trying to save bank details (not clearing all)
+      if (cleanBankName || cleanAccNo || cleanIfsc) {
+        if (!cleanBankName || cleanBankName.length < 3) {
+          return res.status(400).json({ error: 'Bank Name must be at least 3 characters long.' });
+        }
+        if (!cleanAccNo || !/^\d+$/.test(cleanAccNo) || cleanAccNo.length < 9 || cleanAccNo.length > 18) {
+          return res.status(400).json({ error: 'Account Number must contain only digits (9 to 18 numbers long).' });
+        }
+        if (!cleanIfsc || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(cleanIfsc)) {
+          return res.status(400).json({ error: "Invalid IFSC Code. Must be 11 characters starting with 4 letters, then '0', followed by 6 alphanumeric characters (e.g. SBIN0001234)." });
+        }
+        if (!cleanBranch || cleanBranch.length < 3) {
+          return res.status(400).json({ error: 'Branch Name must be at least 3 characters long.' });
+        }
+        if (cleanUpi && !/^[a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-_]+$/.test(cleanUpi)) {
+          return res.status(400).json({ error: 'Invalid UPI ID format (e.g. owshika@sbi).' });
+        }
+      }
+    }
+
     const existing = await prisma.storeSetting.findUnique({ where: { id: GLOBAL_STORE_ID } });
 
     const updated = await prisma.storeSetting.upsert({
