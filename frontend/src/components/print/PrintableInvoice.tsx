@@ -33,16 +33,8 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
 
   // Dynamically compute Place of Supply state from GSTIN prefix
   const gstStateMap: Record<string, string> = {
-    '29': 'Karnataka (29)',
-    '33': 'Tamil Nadu (33)',
-    '27': 'Maharashtra (27)',
-    '32': 'Kerala (32)',
-    '36': 'Telangana (36)',
-    '37': 'Andhra Pradesh (37)',
-    '07': 'Delhi (07)',
-    '09': 'Uttar Pradesh (09)',
-    '19': 'West Bengal (19)',
-    '24': 'Gujarat (24)'
+    '33': 'Tamil Nadu (33)'
+
   };
   const gstinPrefix = (gstin && gstin.length >= 2) ? gstin.substring(0, 2) : '33';
   const placeOfSupply = gstStateMap[gstinPrefix] || `State (${gstinPrefix})`;
@@ -77,8 +69,8 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
   const totalGstAmount = (invoice.cgstTotal || 0) + (invoice.sgstTotal || 0);
 
   return (
-    <div 
-      className="print-invoice-wrapper text-black bg-white leading-normal p-2" 
+    <div
+      className="print-invoice-wrapper text-black bg-white leading-normal p-2"
       style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}
     >
       {/* ------------------- UNIFIED STORE HEADER & META ------------------- */}
@@ -90,7 +82,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
               {storeName}
             </h1>
             <p className="text-xs font-bold text-gray-800 uppercase tracking-wide">
-              Industrial Hardware, Fasteners, Electricals &amp; Plumbing Supplies
+              Driver Seats Dealer Seating&amp;Spares
             </p>
             <p className="text-xs text-black font-medium leading-snug">
               {address}
@@ -171,7 +163,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
         <thead>
           <tr className="bg-slate-100 text-black font-black uppercase text-[11px] border-b-2 border-black">
             <th className="py-2 px-2 text-center border border-black w-10">S.No</th>
-            <th className="py-2 px-2.5 border border-black w-32 font-sans">Part / Code</th>
+            <th className="py-2 px-2.5 border border-black w-32 font-sans">Part</th>
             <th className="py-2 px-3 border border-black font-sans">Description of Goods / Services</th>
             <th className="py-2 px-2.5 text-center border border-black w-20 font-sans">HSN</th>
             <th className="py-2 px-2.5 text-right border border-black w-16 font-sans">Qty</th>
@@ -275,7 +267,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
                 </span>
               </div>
             </div>
-            
+
             <div className="py-2.5 px-3.5 bg-slate-100 border-t-2 border-black flex justify-between items-center">
               <span className="font-black uppercase tracking-wider text-sm text-black">Grand Total:</span>
               <span className="font-mono font-black text-xl text-black">
