@@ -1095,13 +1095,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             <form onSubmit={handleSaveBankDetails} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                  Bank Name
+                  Bank Name (Letters Only)
                 </label>
                 <input
                   type="text"
                   required
                   value={bankForm.bankName}
-                  onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })}
+                  onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value.replace(/[^a-zA-Z\s.&'-]/g, '').toUpperCase() })}
+                  onKeyDown={(e) => {
+                    // Prevent numeric keys (0-9) from being typed into Bank Name
+                    if (/[0-9]/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="e.g. STATE BANK OF INDIA"
                   style={{
                     width: '100%',
@@ -1156,7 +1162,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                    IFSC Code
+                    IFSC Code (Alphanumeric)
                   </label>
                   <input
                     type="text"
@@ -1180,13 +1186,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                    Branch Name
+                    Branch Name (Letters &amp; Numbers)
                   </label>
                   <input
                     type="text"
                     required
                     value={bankForm.branchName}
-                    onChange={(e) => setBankForm({ ...bankForm, branchName: e.target.value })}
+                    onChange={(e) => setBankForm({ ...bankForm, branchName: e.target.value.replace(/[^a-zA-Z0-9\s.,-]/g, '') })}
                     placeholder="e.g. Dharmapuri Branch"
                     style={{
                       width: '100%',
