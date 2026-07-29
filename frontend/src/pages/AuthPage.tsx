@@ -129,9 +129,9 @@ export const AuthPage: React.FC = () => {
               width: '52px',
               height: '52px',
               borderRadius: '14px',
-              backgroundColor: 'rgba(201, 242, 39, 0.13)',
-              border: '1px solid rgba(201, 242, 39, 0.22)',
-              color: '#c9f227',
+              backgroundColor: 'rgba(13, 148, 136, 0.13)',
+              border: '1px solid rgba(13, 148, 136, 0.22)',
+              color: '#0d9488',
               marginBottom: '14px',
             }}
           >
@@ -172,7 +172,7 @@ export const AuthPage: React.FC = () => {
             marginBottom: '24px',
           }}
         >
-          {/* Sliding lime pill */}
+          {/* Sliding emerald pill */}
           <div
             style={{
               position: 'absolute',
@@ -181,8 +181,8 @@ export const AuthPage: React.FC = () => {
               left: '6px',
               width: 'calc(50% - 6px)',
               borderRadius: '12px',
-              backgroundColor: '#c9f227',
-              boxShadow: '0 3px 10px rgba(201, 242, 39, 0.40)',
+              backgroundColor: '#0d9488',
+              boxShadow: '0 3px 10px rgba(13, 148, 136, 0.40)',
               zIndex: 0,
               transform: isLoginTab ? 'translateX(0)' : 'translateX(100%)',
               transition: 'transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1)',
@@ -288,7 +288,7 @@ export const AuthPage: React.FC = () => {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. C. Perumal"
                   style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
+                  onFocus={(e) => (e.target.style.borderColor = '#0d9488')}
                   onBlur={(e) => (e.target.style.borderColor = t.authInputBorder)}
                 />
               </div>
@@ -313,7 +313,7 @@ export const AuthPage: React.FC = () => {
                 placeholder="name@example.com"
                 className="auth-input-field"
                 style={{ ...inputStyle, paddingRight: '52px' }}
-                onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
+                onFocus={(e) => (e.target.style.borderColor = '#0d9488')}
                 onBlur={(e) => (e.target.style.borderColor = t.authInputBorder)}
               />
             </div>
@@ -338,7 +338,7 @@ export const AuthPage: React.FC = () => {
                 placeholder="••••••••"
                 className="auth-input-field"
                 style={{ ...inputStyle, paddingRight: '52px' }}
-                onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
+                onFocus={(e) => (e.target.style.borderColor = '#0d9488')}
                 onBlur={(e) => (e.target.style.borderColor = t.authInputBorder)}
               />
               {/* Eye toggle — borderless, Google-style */}
@@ -362,17 +362,17 @@ export const AuthPage: React.FC = () => {
                   justifyContent: 'center',
                   zIndex: 30,
                   transition: 'background-color 0.15s, color 0.15s',
-                  color: showPassword ? '#c9f227' : t.authEyeColor,
+                  color: showPassword ? '#0d9488' : t.authEyeColor,
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLElement;
                   el.style.backgroundColor = t.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
-                  el.style.color = '#c9f227';
+                  el.style.color = '#0d9488';
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLElement;
                   el.style.backgroundColor = 'transparent';
-                  el.style.color = showPassword ? '#c9f227' : t.authEyeColor;
+                  el.style.color = showPassword ? '#0d9488' : t.authEyeColor;
                 }}
               >
                 {showPassword ? (
@@ -391,8 +391,8 @@ export const AuthPage: React.FC = () => {
             style={{
               width: '100%',
               marginTop: '8px',
-              backgroundColor: '#c9f227',
-              color: '#051c1a',
+              backgroundColor: '#0d9488',
+              color: '#ffffff',
               fontWeight: 900,
               fontSize: '14px',
               letterSpacing: '0.01em',
@@ -402,7 +402,7 @@ export const AuthPage: React.FC = () => {
               border: 'none',
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.65 : 1,
-              boxShadow: '0 6px 22px rgba(201, 242, 39, 0.28)',
+              boxShadow: '0 6px 22px rgba(13, 148, 136, 0.28)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

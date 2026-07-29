@@ -152,7 +152,7 @@ export const ProductCatalogPage: React.FC = () => {
                   color: textStrong,
                   border: `1px solid ${inputBorder}`,
                 }}
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[#c9f227] transition"
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d9488] transition"
               />
             </div>
 
@@ -398,10 +398,10 @@ export const ProductCatalogPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+                  style={{ backgroundColor: '#0d9488', color: '#ffffff' }}
                   className="px-5 py-2 rounded-full font-black text-xs sm:text-sm transition-all border-0 shadow-sm active:scale-[0.98]"
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0f766e'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0d9488'; }}
                 >
                   Save Product
                 </button>

@@ -9,8 +9,8 @@
    Border:      rgba(255,255,255,0.07)
    Text:        #ffffff  primary
    Text muted:  rgba(255,255,255,0.60)
-   Accent green (CTA only): #c9f227  (lime, used SPARINGLY)
-   Hover green:  #d6f944
+   Accent teal (CTA only):  #0d9488  (mild emerald teal)
+   Hover teal:   #0f766e
    No neon mint (#00e599) scattered — white only for secondary
    ============================================================ */
 
@@ -20,8 +20,8 @@
   --pine-border:    rgba(0,0,0,0.12);
   --pine-text:      #0f172a;
   --pine-muted:     rgba(15,23,42,0.60);
-  --pine-accent:    #c9f227;
-  --pine-accent-hover: #d6f944;
+  --pine-accent:    #0d9488;
+  --pine-accent-hover: #0f766e;
 }
 
 .dark {
@@ -30,8 +30,8 @@
   --pine-border:    rgba(255,255,255,0.07);
   --pine-text:      #ffffff;
   --pine-muted:     rgba(255,255,255,0.55);
-  --pine-accent:    #c9f227;
-  --pine-accent-hover: #d6f944;
+  --pine-accent:    #0d9488;
+  --pine-accent-hover: #0f766e;
 }
 
 @layer base {
@@ -65,10 +65,10 @@
     transition: background-color 0.2s, color 0.2s;
   }
 
-  /* Selection highlight — lime on dark, dark on light */
+  /* Selection highlight */
   ::selection {
-    background-color: #c9f227;
-    color: #051c1a;
+    background-color: #0d9488;
+    color: #ffffff;
   }
 
   h1, h2, h3, h4, h5, h6 {

@@ -116,10 +116,10 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
           <button
             type="button"
             onClick={e => { e.stopPropagation(); onAdd(); if (!open) setOpen(true); }}
-            style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+            style={{ backgroundColor: '#0d9488', color: '#ffffff' }}
             className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black border-0 transition"
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0f766e'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0d9488'; }}
           >
             <Plus className="h-3 w-3" /> Add
           </button>
@@ -226,10 +226,10 @@ export const ProductTable: React.FC = () => {
 
           <button
             type="button" onClick={addRow}
-            style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+            style={{ backgroundColor: '#0d9488', color: '#ffffff' }}
             className="font-bold px-3.5 py-1.5 rounded-full text-xs flex items-center gap-1 border-0 shadow-sm active:scale-[0.98] transition-all"
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0f766e'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0d9488'; }}
           >
             <Plus className="h-4 w-4" /><span>Add Item</span>
           </button>

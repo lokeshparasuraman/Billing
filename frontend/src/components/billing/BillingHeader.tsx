@@ -174,7 +174,7 @@ export const BillingHeader: React.FC = () => {
           >
             {/* Liquid Flowing Background Pill Indicator */}
             <div
-              className={`absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] rounded-xl bg-[#c9f227] transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_3px_10px_rgba(201,242,39,0.4)] z-0 ${header.billType === 'TRANSPORT' ? 'translate-x-full' : 'translate-x-0'
+              className={`absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] rounded-xl bg-[#0d9488] transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_3px_10px_rgba(13,148,136,0.4)] z-0 ${header.billType === 'TRANSPORT' ? 'translate-x-full' : 'translate-x-0'
                 }`}
             />
 
@@ -182,7 +182,7 @@ export const BillingHeader: React.FC = () => {
             <button
               type="button"
               onClick={() => setHeaderField('billType', 'CUSTOMER')}
-              style={{ color: (header.billType === 'CUSTOMER' || !header.billType) ? '#051c1a' : btnInactiveText }}
+              style={{ color: (header.billType === 'CUSTOMER' || !header.billType) ? '#ffffff' : btnInactiveText }}
               className="relative z-10 flex items-center justify-center space-x-2 py-2 px-3 rounded-xl text-xs font-black transition-colors duration-300 border-0 focus:outline-none cursor-pointer w-full text-center"
             >
               <User className="h-4 w-4 shrink-0 transition-transform duration-300" />
@@ -193,7 +193,7 @@ export const BillingHeader: React.FC = () => {
             <button
               type="button"
               onClick={() => setHeaderField('billType', 'TRANSPORT')}
-              style={{ color: header.billType === 'TRANSPORT' ? '#051c1a' : btnInactiveText }}
+              style={{ color: header.billType === 'TRANSPORT' ? '#ffffff' : btnInactiveText }}
               className="relative z-10 flex items-center justify-center space-x-2 py-2 px-3 rounded-xl text-xs font-black transition-colors duration-300 border-0 focus:outline-none cursor-pointer w-full text-center"
             >
               <Truck className="h-4 w-4 shrink-0 transition-transform duration-300" />
@@ -224,10 +224,10 @@ export const BillingHeader: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsEditingStore(true)}
-                  style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+                  style={{ backgroundColor: '#0d9488', color: '#ffffff' }}
                   className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition shrink-0 border-0"
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0f766e'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0d9488'; }}
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Edit Store Details</span>
@@ -270,10 +270,10 @@ export const BillingHeader: React.FC = () => {
                     Cancel
                   </button>
                   <button type="submit"
-                    style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+                    style={{ backgroundColor: '#0d9488', color: '#ffffff' }}
                     className="flex items-center space-x-1 px-3.5 py-1.5 rounded-full font-extrabold text-xs shadow-sm transition border-0"
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}>
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0f766e'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0d9488'; }}>
                     <Check className="h-3.5 w-3.5" />
                     <span>Save Details</span>
                   </button>
@@ -352,7 +352,7 @@ export const BillingHeader: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleAddPhone}
-                      style={{ color: isDark ? '#c9f227' : '#15803d' }}
+                      style={{ color: isDark ? '#059669' : '#0d9488' }}
                       className="text-[11px] font-black flex items-center gap-1 hover:underline"
                     >
                       <Plus className="h-3 w-3" /> Add Number
@@ -515,12 +515,12 @@ export const BillingHeader: React.FC = () => {
                     type="button"
                     onClick={() => setHeaderField('paymentMode', pm.id)}
                     style={isSelected
-                      ? { backgroundColor: '#c9f227', color: '#051c1a', border: '1px solid transparent' }
+                      ? { backgroundColor: '#0d9488', color: '#ffffff', border: '1px solid transparent' }
                       : { background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)', color: cardMuted, border: `1px solid ${cardDivider}` }
                     }
                     className="flex items-center justify-center space-x-1.5 py-2 px-1 rounded-xl text-xs font-bold transition-all"
-                    onMouseEnter={e => { if (isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-                    onMouseLeave={e => { if (isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+                    onMouseEnter={e => { if (isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = '#0f766e'; }}
+                    onMouseLeave={e => { if (isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = '#0d9488'; }}
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0" />
                     <span>{pm.label}</span>
@@ -545,7 +545,7 @@ export const BillingHeader: React.FC = () => {
         >
           <div className="flex items-center justify-between pb-2.5 border-b" style={{ borderColor: cardDivider }}>
             <span className="text-xs font-black uppercase tracking-wider flex items-center gap-2" style={{ color: cardStrong }}>
-              <Truck className="h-4 w-4" style={{ color: isDark ? '#c9f227' : '#15803d' }} /> Transport Details
+              <Truck className="h-4 w-4" style={{ color: isDark ? '#059669' : '#0d9488' }} /> Transport Details
             </span>
             <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
               Transport Bill

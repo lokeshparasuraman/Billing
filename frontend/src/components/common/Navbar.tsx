@@ -364,22 +364,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   borderRadius: '10px',
                   border: `1px solid ${border}`,
                   cursor: 'pointer',
-                  backgroundColor: isDark ? '#051c1a' : '#c9f227',
-                  color: isDark ? '#c9f227' : '#051c1a',
+                  backgroundColor: isDark ? '#0f766e' : '#0d9488',
+                  color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: isDark
-                    ? '0 0 12px rgba(201,242,39,0.35)'
-                    : '0 2px 8px rgba(0,0,0,0.15)',
+                  boxShadow: '0 2px 8px rgba(13,148,136,0.3)',
                   flexShrink: 0,
                 }}
               >
                 {isDark ? (
-                  <Moon style={{ width: 18, height: 18, color: '#c9f227' }} />
+                  <Moon style={{ width: 18, height: 18, color: '#ffffff' }} />
                 ) : (
-                  <Sun style={{ width: 18, height: 18, color: '#051c1a' }} />
+                  <Sun style={{ width: 18, height: 18, color: '#ffffff' }} />
                 )}
               </button>
 
@@ -405,9 +403,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     borderRadius: '8px',
                     border: 'none',
                     cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
-                    backgroundColor: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : 'transparent',
+                    backgroundColor: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#0f766e' : '#0d9488') : 'transparent',
                     color: fontSize < DEFAULT_FONT_SIZE
-                      ? (isDark ? '#c9f227' : '#051c1a')
+                      ? '#ffffff'
                       : (fontSize <= MIN_FONT_SIZE ? (isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)') : txtPrimary),
                     fontWeight: 800,
                     fontSize: '13px',
@@ -428,9 +426,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     borderRadius: '8px',
                     border: 'none',
                     cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
-                    backgroundColor: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : 'transparent',
+                    backgroundColor: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#0f766e' : '#0d9488') : 'transparent',
                     color: fontSize > DEFAULT_FONT_SIZE
-                      ? (isDark ? '#c9f227' : '#051c1a')
+                      ? '#ffffff'
                       : (fontSize >= MAX_FONT_SIZE ? (isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)') : txtPrimary),
                     fontWeight: 800,
                     fontSize: '14px',
@@ -599,14 +597,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       height: '34px',
                       borderRadius: '10px',
                       backgroundColor: isActive
-                        ? (isDark ? 'rgba(5,28,26,0.12)' : 'rgba(201,242,39,0.18)')
+                        ? (isDark ? 'rgba(5,28,26,0.12)' : 'rgba(13,148,136,0.18)')
                         : (isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)'),
-                      border: `1px solid ${isActive ? (isDark ? 'rgba(5,28,26,0.25)' : 'rgba(201,242,39,0.4)') : border}`,
+                      border: `1px solid ${isActive ? (isDark ? 'rgba(5,28,26,0.25)' : 'rgba(13,148,136,0.4)') : border}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: isActive
-                        ? (isDark ? '#051c1a' : '#c9f227')
+                        ? (isDark ? '#051c1a' : '#0d9488')
                         : (isDark ? '#051c1a' : '#ffffff'),
                       flexShrink: 0,
                     }}
@@ -647,7 +645,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: isDark ? '#051c1a' : '#c9f227',
+                  color: isDark ? '#051c1a' : '#0d9488',
                   flexShrink: 0,
                 }}
               >
@@ -680,12 +678,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
-                  backgroundColor: isDark ? 'rgba(5,28,26,0.08)' : 'rgba(201,242,39,0.18)',
-                  border: `1.5px solid ${isDark ? 'rgba(5,28,26,0.20)' : 'rgba(201,242,39,0.35)'}`,
+                  backgroundColor: isDark ? 'rgba(5,28,26,0.08)' : 'rgba(13,148,136,0.18)',
+                  border: `1.5px solid ${isDark ? 'rgba(5,28,26,0.20)' : 'rgba(13,148,136,0.35)'}`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: isDark ? '#051c1a' : '#c9f227',
+                  color: isDark ? '#051c1a' : '#0d9488',
                   flexShrink: 0,
                 }}
               >
@@ -739,22 +737,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               borderRadius: '10px',
               border: `1px solid ${border}`,
               cursor: 'pointer',
-              backgroundColor: isDark ? '#051c1a' : '#c9f227',
-              color: isDark ? '#c9f227' : '#051c1a',
+              backgroundColor: isDark ? '#0f766e' : '#0d9488',
+              color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: isDark
-                ? '0 0 12px rgba(201,242,39,0.35)'
-                : '0 2px 8px rgba(0,0,0,0.15)',
+              boxShadow: '0 2px 8px rgba(13,148,136,0.3)',
               flexShrink: 0,
             }}
           >
             {isDark ? (
-              <Moon style={{ width: 20, height: 20, color: '#c9f227' }} />
+              <Moon style={{ width: 20, height: 20, color: '#ffffff' }} />
             ) : (
-              <Sun style={{ width: 20, height: 20, color: '#051c1a' }} />
+              <Sun style={{ width: 20, height: 20, color: '#ffffff' }} />
             )}
           </button>
 
@@ -766,12 +762,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               disabled={fontSize <= MIN_FONT_SIZE}
               title="Decrease font size"
               style={{
-                background: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : (isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)'),
+                background: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#0f766e' : '#0d9488') : (isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)'),
                 border: 'none',
                 cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
                 padding: '6px 12px',
                 borderRadius: '8px',
-                color: fontSize <= MIN_FONT_SIZE ? txtMuted : (isDark ? '#051c1a' : '#ffffff'),
+                color: fontSize <= MIN_FONT_SIZE ? txtMuted : '#ffffff',
                 fontWeight: 800,
                 fontSize: '13px',
                 transition: 'all 0.15s',
@@ -786,12 +782,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               disabled={fontSize >= MAX_FONT_SIZE}
               title="Increase font size"
               style={{
-                background: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : (isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)'),
+                background: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#0f766e' : '#0d9488') : (isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)'),
                 border: 'none',
                 cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
                 padding: '6px 12px',
                 borderRadius: '8px',
-                color: fontSize >= MAX_FONT_SIZE ? txtMuted : (isDark ? '#051c1a' : '#ffffff'),
+                color: fontSize >= MAX_FONT_SIZE ? txtMuted : '#ffffff',
                 fontWeight: 800,
                 fontSize: '14px',
                 transition: 'all 0.15s',
@@ -861,7 +857,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: isDark ? '#051c1a' : '#c9f227',
+                    color: isDark ? '#051c1a' : '#0d9488',
                   }}
                 >
                   <UserIcon style={{ width: 20, height: 20 }} />
@@ -1066,12 +1062,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     width: '42px',
                     height: '42px',
                     borderRadius: '50%',
-                    backgroundColor: isDark ? 'rgba(5,28,26,0.08)' : 'rgba(201,242,39,0.15)',
-                    border: isDark ? '1.5px solid rgba(5,28,26,0.18)' : '1.5px solid rgba(201,242,39,0.35)',
+                    backgroundColor: isDark ? 'rgba(5,28,26,0.08)' : 'rgba(13,148,136,0.15)',
+                    border: isDark ? '1.5px solid rgba(5,28,26,0.18)' : '1.5px solid rgba(13,148,136,0.35)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: isDark ? '#051c1a' : '#c9f227',
+                    color: isDark ? '#051c1a' : '#0d9488',
                   }}
                 >
                   <Landmark style={{ width: 20, height: 20 }} />
@@ -1250,8 +1246,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   padding: '12px',
                   borderRadius: '12px',
                   border: 'none',
-                  backgroundColor: '#c9f227',
-                  color: '#051c1a',
+                  backgroundColor: '#0d9488',
+                  color: '#ffffff',
                   fontWeight: 800,
                   fontSize: '14px',
                   cursor: isSavingBank ? 'not-allowed' : 'pointer',
@@ -1259,7 +1255,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: '0 4px 14px rgba(201,242,39,0.25)',
+                  boxShadow: '0 4px 14px rgba(13,148,136,0.3)',
                 }}
               >
                 {isSavingBank ? 'Saving...' : 'Save Bank Details'}

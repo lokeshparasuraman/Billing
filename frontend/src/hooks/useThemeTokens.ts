@@ -43,16 +43,15 @@ export function useThemeTokens() {
   const inv_inputBorder= isDark ? 'rgba(0,0,0,0.15)'       : 'rgba(255,255,255,0.14)';
 
   /* ── Button & Accent tokens ─────────────────────────────────────
-   * On Warm Beige card (Dark mode) → Dark Forest Teal button (#051c1a) with White text
-   * On Dark Teal card (Light mode) → Electric Lime button (#c9f227) with Dark Teal text
+   * Mild, dark-theme aligned emerald teal theme colors
    * ─────────────────────────────────────────────────────────────── */
-  const btnPrimaryBg    = isDark ? '#051c1a'               : '#c9f227';
-  const btnPrimaryText  = isDark ? '#ffffff'               : '#051c1a';
-  const btnPrimaryHover = isDark ? '#0a2e2b'               : '#d6f944';
+  const btnPrimaryBg    = isDark ? '#051c1a'               : '#0d9488';
+  const btnPrimaryText  = '#ffffff';
+  const btnPrimaryHover = isDark ? '#0f3833'               : '#0f766e';
 
-  const accent          = isDark ? '#15803d'               : '#c9f227';
-  const accentHover     = isDark ? '#166534'               : '#d6f944';
-  const accentText      = isDark ? '#15803d'               : '#c9f227';
+  const accent          = isDark ? '#059669'               : '#0d9488';
+  const accentHover     = isDark ? '#047857'               : '#0f766e';
+  const accentText      = isDark ? '#059669'               : '#0d9488';
 
   /* ── Auth page tokens ──────────────────────────────────────── */
   const authBg          = isDark ? '#051c1a'                   : '#dde3ec';
@@ -63,7 +62,7 @@ export function useThemeTokens() {
     : '0 24px 60px rgba(0,0,0,0.50)';
   const authText        = isDark ? '#051c1a'                   : '#ffffff';
   const authMuted       = isDark ? 'rgba(5,28,26,0.65)'        : 'rgba(255,255,255,0.65)';
-  const authIconColor   = isDark ? '#15803d'                   : '#c9f227';
+  const authIconColor   = isDark ? '#059669'                   : '#0d9488';
   const authInputBg     = isDark ? 'rgba(0,0,0,0.05)'          : 'rgba(255,255,255,0.06)';
   const authInputBorder = isDark ? 'rgba(0,0,0,0.15)'          : 'rgba(255,255,255,0.14)';
   const authInputText   = isDark ? '#051c1a'                   : '#ffffff';

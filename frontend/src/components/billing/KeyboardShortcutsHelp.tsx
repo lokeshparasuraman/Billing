@@ -43,7 +43,7 @@ export const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ is
           className="px-5 py-4 flex items-center justify-between"
         >
           <div className="flex items-center space-x-2">
-            <Keyboard className="h-5 w-5 text-[#c9f227]" />
+            <Keyboard className="h-5 w-5 text-[#0d9488]" />
             <span className="font-extrabold text-base tracking-wide" style={{ color: textStrong }}>
               Keyboard Shortcuts
             </span>
@@ -91,10 +91,10 @@ export const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ is
         >
           <button
             onClick={onClose}
-            style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
+            style={{ backgroundColor: '#0d9488', color: '#ffffff' }}
             className="px-6 py-2 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none"
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0f766e'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#0d9488'; }}
           >
             Got It
           </button>

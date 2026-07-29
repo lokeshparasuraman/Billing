@@ -220,7 +220,7 @@ export const InvoiceHistoryPage: React.FC = () => {
                         }`}
                       >
                         <span>{opt.label}</span>
-                        {isSelected && <Check className="h-4 w-4 shrink-0" style={{ color: isDark ? '#051c1a' : '#c9f227' }} />}
+                        {isSelected && <Check className="h-4 w-4 shrink-0" style={{ color: isDark ? '#051c1a' : '#0d9488' }} />}
                       </button>
                     );
                   })}

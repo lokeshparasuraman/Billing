@@ -89,7 +89,7 @@ const AppContent: React.FC = () => {
       createTheme({
         palette: {
           mode,
-          primary: { main: '#c9f227' },
+          primary: { main: '#0d9488' },
           secondary: { main: '#051c1a' },
           background: {
             default: mode === 'dark' ? '#051c1a' : '#f4f5f7',
@@ -122,8 +122,8 @@ const AppContent: React.FC = () => {
           style={{
             width: '40px',
             height: '40px',
-            border: '4px solid rgba(201, 242, 39, 0.2)',
-            borderTopColor: '#c9f227',
+            border: '4px solid rgba(13, 148, 136, 0.2)',
+            borderTopColor: '#0d9488',
             borderRadius: '50%',
             animation: 'app-loading-spin 0.8s linear infinite',
           }}

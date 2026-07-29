@@ -216,7 +216,7 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
             <button
               type="button"
               onClick={() => handlePrint()}
-              className="bg-[#c9f227] hover:bg-[#d6f944] text-[#051c1a] font-black text-xs px-3.5 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all border-0 shadow-md shadow-[#c9f227]/20"
+              className="bg-[#0d9488] hover:bg-[#0f766e] text-[#ffffff] font-black text-xs px-3.5 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all border-0 shadow-md shadow-[#0d9488]/20"
               title="Print Invoice"
             >
               <Printer className="h-3.5 w-3.5 shrink-0" />
