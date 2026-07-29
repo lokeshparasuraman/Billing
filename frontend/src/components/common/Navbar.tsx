@@ -369,120 +369,57 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 {isDark ? <Sun style={{ width: 18, height: 18 }} /> : <Moon style={{ width: 18, height: 18 }} />}
               </button>
 
-              {/* Font size — multi-step continuous controls (A-, active size reset, A+) */}
+              {/* Pine Labs style Font Size Switcher (A- / A+) */}
               <div
-                style={{ position: 'relative' }}
-                onMouseEnter={() => setFontHover(true)}
-                onMouseLeave={() => setFontHover(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2px',
+                  padding: '2px 4px',
+                  borderRadius: '10px',
+                  background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)',
+                  border: `1px solid ${border}`,
+                }}
               >
-                {/* Trigger button */}
                 <button
                   type="button"
-                  title={`Font size: ${fontSize}px`}
+                  onClick={handleDecreaseFont}
+                  disabled={fontSize <= MIN_FONT_SIZE}
+                  title="Decrease font size"
                   style={{
-                    background: fontHover ? iconHoverBg : 'none',
-                    border: 'none', cursor: 'pointer', padding: '6px 10px',
+                    background: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : 'none',
+                    color: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#ffffff' : '#051c1a') : txtMuted,
+                    border: 'none',
+                    cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
+                    padding: '4px 8px',
                     borderRadius: '6px',
-                    color: fontHover ? txtPrimary : txtMuted,
-                    fontSize: '15px', fontWeight: 700, lineHeight: 1,
-                    display: 'flex', alignItems: 'center', gap: '4px',
-                    transition: 'background 0.15s, color 0.15s',
-                    userSelect: 'none',
+                    fontWeight: 800,
+                    fontSize: '13px',
+                    transition: 'all 0.15s',
                   }}
                 >
-                  <span>A</span>
-                  <span style={{ fontSize: '10px', opacity: 0.7, fontWeight: 800 }}>{fontSize}px</span>
+                  A-
                 </button>
 
-                {/* Hover popover card */}
-                <div
+                <button
+                  type="button"
+                  onClick={handleIncreaseFont}
+                  disabled={fontSize >= MAX_FONT_SIZE}
+                  title="Increase font size"
                   style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    paddingTop: '8px',
-                    zIndex: 60,
-                    opacity: fontHover ? 1 : 0,
-                    pointerEvents: fontHover ? 'auto' : 'none',
-                    transform: fontHover ? 'translateY(0)' : 'translateY(-4px)',
-                    transition: 'opacity 0.15s, transform 0.15s',
-                    minWidth: '150px',
+                    background: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : 'none',
+                    color: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#ffffff' : '#051c1a') : txtMuted,
+                    border: 'none',
+                    cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    fontWeight: 800,
+                    fontSize: '14px',
+                    transition: 'all 0.15s',
                   }}
                 >
-                  <div
-                    style={{
-                      backgroundColor: inv_cardBg,
-                      border: `1px solid ${inv_cardBorder}`,
-                      borderRadius: '12px',
-                      padding: '4px 6px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '4px',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={handleDecreaseFont}
-                      disabled={fontSize <= MIN_FONT_SIZE}
-                      title="Decrease font size (-1px)"
-                      style={{
-                        background: isDark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.12)',
-                        border: 'none',
-                        cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
-                        padding: '6px 10px',
-                        borderRadius: '8px',
-                        color: fontSize <= MIN_FONT_SIZE ? mMuted : mTxt,
-                        fontWeight: 800,
-                        fontSize: '13px',
-                        transition: 'all 0.12s',
-                      }}
-                    >
-                      A-
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleResetFont}
-                      title="Reset font size to 16px"
-                      style={{
-                        background: fontSize === DEFAULT_FONT_SIZE ? 'rgba(201,242,39,0.2)' : 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        color: fontSize === DEFAULT_FONT_SIZE ? '#c9f227' : mTxt,
-                        fontWeight: 800,
-                        fontSize: '12px',
-                        fontFamily: 'monospace',
-                        transition: 'all 0.12s',
-                      }}
-                    >
-                      {fontSize}px
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleIncreaseFont}
-                      disabled={fontSize >= MAX_FONT_SIZE}
-                      title="Increase font size (+1px)"
-                      style={{
-                        background: isDark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.12)',
-                        border: 'none',
-                        cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
-                        padding: '6px 10px',
-                        borderRadius: '8px',
-                        color: fontSize >= MAX_FONT_SIZE ? mMuted : mTxt,
-                        fontWeight: 800,
-                        fontSize: '15px',
-                        transition: 'all 0.12s',
-                      }}
-                    >
-                      A+
-                    </button>
-                  </div>
-                </div>
+                  A+
+                </button>
               </div>
 
               {/* Shortcuts */}
@@ -769,38 +706,67 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           </div>
         )}
 
-        {/* Bottom controls */}
+        {/* Bottom controls — high-contrast in both Light & Dark modes */}
         <div style={{ padding: '20px', borderTop: `1px solid ${divider}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-          {/* Sun / Moon pair */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderRadius: '12px', padding: '6px' }}>
-            <button type="button" onClick={() => { if (isDark) toggleTheme(); }}
-              style={{ padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: !isDark ? iconHoverBg : 'none', color: !isDark ? txtPrimary : txtMuted, display: 'flex', alignItems: 'center', transition: 'all 0.15s' }}
-              title="Light Mode">
+          {/* Sun / Moon Theme Toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: isDark ? 'rgba(5,28,26,0.08)' : 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '4px', border: `1px solid ${border}` }}>
+            <button
+              type="button"
+              onClick={() => { if (isDark) toggleTheme(); }}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                background: !isDark ? (isDark ? '#051c1a' : '#c9f227') : 'transparent',
+                color: !isDark ? (isDark ? '#ffffff' : '#051c1a') : (isDark ? 'rgba(5,28,26,0.60)' : 'rgba(255,255,255,0.60)'),
+                display: 'flex',
+                alignItems: 'center',
+                boxShadow: !isDark ? '0 2px 8px rgba(0,0,0,0.12)' : 'none',
+                transition: 'all 0.15s',
+              }}
+              title="Light Mode"
+            >
               <Sun style={{ width: 18, height: 18 }} />
             </button>
-            <button type="button" onClick={() => { if (!isDark) toggleTheme(); }}
-              style={{ padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: isDark ? iconHoverBg : 'none', color: isDark ? txtPrimary : txtMuted, display: 'flex', alignItems: 'center', transition: 'all 0.15s' }}
-              title="Dark Mode">
+
+            <button
+              type="button"
+              onClick={() => { if (!isDark) toggleTheme(); }}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                background: isDark ? '#051c1a' : '#c9f227',
+                color: isDark ? '#ffffff' : '#051c1a',
+                display: 'flex',
+                alignItems: 'center',
+                boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.12)' : 'none',
+                transition: 'all 0.15s',
+              }}
+              title="Dark Mode"
+            >
               <Moon style={{ width: 18, height: 18 }} />
             </button>
           </div>
 
-          {/* Multi-step A- / Reset / A+ — inline in mobile bottom row */}
-          <div style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderRadius: '12px', padding: '4px', gap: '4px' }}>
+          {/* Pine Labs style Font Switcher (A- / A+) */}
+          <div style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(5,28,26,0.08)' : 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '4px', gap: '4px', border: `1px solid ${border}` }}>
             <button
               type="button"
               onClick={handleDecreaseFont}
               disabled={fontSize <= MIN_FONT_SIZE}
               title="Decrease font size"
               style={{
-                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                background: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : (isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)'),
                 border: 'none',
                 cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
                 padding: '6px 12px',
                 borderRadius: '8px',
-                color: fontSize <= MIN_FONT_SIZE ? txtMuted : txtPrimary,
+                color: fontSize <= MIN_FONT_SIZE ? txtMuted : (isDark ? '#051c1a' : '#ffffff'),
                 fontWeight: 800,
-                fontSize: '12px',
+                fontSize: '13px',
                 transition: 'all 0.15s',
               }}
             >
@@ -809,36 +775,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
             <button
               type="button"
-              onClick={handleResetFont}
-              title="Reset font size to 16px"
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                color: fontSize === DEFAULT_FONT_SIZE ? (isDark ? '#c9f227' : '#15803d') : txtPrimary,
-                fontWeight: 800,
-                fontSize: '11px',
-                fontFamily: 'monospace',
-                transition: 'all 0.15s',
-              }}
-            >
-              {fontSize}px
-            </button>
-
-            <button
-              type="button"
               onClick={handleIncreaseFont}
               disabled={fontSize >= MAX_FONT_SIZE}
               title="Increase font size"
               style={{
-                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                background: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : (isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)'),
                 border: 'none',
                 cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
                 padding: '6px 12px',
                 borderRadius: '8px',
-                color: fontSize >= MAX_FONT_SIZE ? txtMuted : txtPrimary,
+                color: fontSize >= MAX_FONT_SIZE ? txtMuted : (isDark ? '#051c1a' : '#ffffff'),
                 fontWeight: 800,
                 fontSize: '14px',
                 transition: 'all 0.15s',
@@ -849,8 +795,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           </div>
 
           {onOpenShortcuts && (
-            <button type="button" onClick={() => { setMobileOpen(false); onOpenShortcuts(); }}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', borderRadius: '10px', border: `1px solid ${divider}`, background: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: txtMuted }}>
+            <button
+              type="button"
+              onClick={() => { setMobileOpen(false); onOpenShortcuts(); }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '10px 16px',
+                borderRadius: '10px',
+                border: `1px solid ${isDark ? 'rgba(5,28,26,0.25)' : 'rgba(255,255,255,0.25)'}`,
+                background: isDark ? 'rgba(5,28,26,0.04)' : 'rgba(255,255,255,0.06)',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: isDark ? '#051c1a' : '#ffffff',
+              }}
+            >
               <Keyboard style={{ width: 15, height: 15 }} />
               <span>Shortcuts</span>
             </button>
