@@ -642,15 +642,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       height: '34px',
                       borderRadius: '10px',
                       backgroundColor: isActive
-                        ? (isDark ? 'rgba(201,242,39,0.18)' : 'rgba(5,28,26,0.10)')
-                        : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'),
-                      border: `1px solid ${isActive ? (isDark ? 'rgba(201,242,39,0.4)' : 'rgba(5,28,26,0.25)') : border}`,
+                        ? (isDark ? 'rgba(5,28,26,0.12)' : 'rgba(201,242,39,0.18)')
+                        : (isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)'),
+                      border: `1px solid ${isActive ? (isDark ? 'rgba(5,28,26,0.25)' : 'rgba(201,242,39,0.4)') : border}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: isActive
-                        ? (isDark ? '#c9f227' : '#051c1a')
-                        : (isDark ? '#ffffff' : '#051c1a'),
+                        ? (isDark ? '#051c1a' : '#c9f227')
+                        : (isDark ? '#051c1a' : '#ffffff'),
                       flexShrink: 0,
                     }}
                   >
@@ -685,12 +685,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   width: '34px',
                   height: '34px',
                   borderRadius: '10px',
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                  backgroundColor: isDark ? 'rgba(5,28,26,0.06)' : 'rgba(255,255,255,0.08)',
                   border: `1px solid ${border}`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: isDark ? '#c9f227' : '#051c1a',
+                  color: isDark ? '#051c1a' : '#c9f227',
                   flexShrink: 0,
                 }}
               >
@@ -723,12 +723,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
-                  backgroundColor: isDark ? 'rgba(201,242,39,0.18)' : 'rgba(5,28,26,0.08)',
-                  border: `1.5px solid ${isDark ? 'rgba(201,242,39,0.35)' : 'rgba(5,28,26,0.2)'}`,
+                  backgroundColor: isDark ? 'rgba(5,28,26,0.08)' : 'rgba(201,242,39,0.18)',
+                  border: `1.5px solid ${isDark ? 'rgba(5,28,26,0.20)' : 'rgba(201,242,39,0.35)'}`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: isDark ? '#c9f227' : '#051c1a',
+                  color: isDark ? '#051c1a' : '#c9f227',
                   flexShrink: 0,
                 }}
               >
