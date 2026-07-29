@@ -296,7 +296,7 @@ export const AuthPage: React.FC = () => {
               <Mail
                 style={{
                   position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
-                  width: '17px', height: '17px', color: 'rgba(255,255,255,0.35)',
+                  width: '18px', height: '18px', color: '#c9f227', zIndex: 20,
                 }}
               />
               <input
@@ -305,7 +305,8 @@ export const AuthPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                style={inputStyle}
+                className="auth-input-field"
+                style={{ ...inputStyle, paddingRight: '52px' }}
                 onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
                 onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
               />
@@ -319,7 +320,7 @@ export const AuthPage: React.FC = () => {
               <Lock
                 style={{
                   position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
-                  width: '17px', height: '17px', color: 'rgba(255,255,255,0.35)',
+                  width: '18px', height: '18px', color: '#c9f227', zIndex: 20,
                 }}
               />
               <input
@@ -329,46 +330,48 @@ export const AuthPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                style={inputStyle}
+                className="auth-input-field"
+                style={{ ...inputStyle, paddingRight: '52px' }}
                 onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
                 onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
               />
-              {/* Eye toggle button — 100% visible in all modes */}
+              {/* Eye toggle button — Solid Badge to pop out over ANY background/autofill */}
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 title={showPassword ? 'Hide password' : 'Show password'}
                 style={{
                   position: 'absolute',
-                  right: '10px',
+                  right: '8px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  backgroundColor: '#051c1a',
+                  border: '1.5px solid #c9f227',
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  padding: '6px',
+                  padding: '5px 7px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  zIndex: 10,
+                  zIndex: 30,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLElement;
-                  el.style.backgroundColor = 'rgba(201, 242, 39, 0.2)';
-                  el.style.borderColor = '#c9f227';
+                  el.style.backgroundColor = '#c9f227';
+                  el.style.color = '#051c1a';
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLElement;
-                  el.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-                  el.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                  el.style.backgroundColor = '#051c1a';
+                  el.style.color = '#c9f227';
                 }}
               >
                 {showPassword ? (
-                  <EyeOff style={{ width: 18, height: 18, color: '#c9f227' }} />
+                  <EyeOff style={{ width: 17, height: 17 }} />
                 ) : (
-                  <Eye style={{ width: 18, height: 18, color: '#ffffff' }} />
+                  <Eye style={{ width: 17, height: 17 }} />
                 )}
               </button>
             </div>
@@ -452,6 +455,14 @@ export const AuthPage: React.FC = () => {
       <style>{`
         @keyframes auth-spin {
           to { transform: rotate(360deg); }
+        }
+        input.auth-input-field:-webkit-autofill,
+        input.auth-input-field:-webkit-autofill:hover,
+        input.auth-input-field:-webkit-autofill:focus,
+        input.auth-input-field:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 1000px #051c1a inset !important;
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: #ffffff !important;
         }
       `}</style>
     </div>

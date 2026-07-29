@@ -38,11 +38,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
   const handleOpenBankModal = () => {
     setBankForm({
-      bankName: storeDetails.bankName || 'STATE BANK OF INDIA',
-      accountNumber: storeDetails.accountNumber || '41234567890',
-      ifscCode: storeDetails.ifscCode || 'SBIN0001234',
-      branchName: storeDetails.branchName || 'Dharmapuri Main Branch',
-      upiId: storeDetails.upiId || 'owshika@sbi',
+      bankName: storeDetails.bankName || '',
+      accountNumber: storeDetails.accountNumber || '',
+      ifscCode: storeDetails.ifscCode || '',
+      branchName: storeDetails.branchName || '',
+      upiId: storeDetails.upiId || '',
     });
     setBankSaveSuccess(false);
     setIsBankModalOpen(true);

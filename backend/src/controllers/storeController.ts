@@ -12,11 +12,11 @@ const defaultStore = {
   gstin: '33BAEPP2449B1Z3',
   phone: '+91 9445662637',
   address: '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701',
-  bankName: 'STATE BANK OF INDIA',
-  accountNumber: '41234567890',
-  ifscCode: 'SBIN0001234',
-  branchName: 'Dharmapuri Main Branch',
-  upiId: 'owshika@sbi',
+  bankName: '',
+  accountNumber: '',
+  ifscCode: '',
+  branchName: '',
+  upiId: '',
 };
 
 export const getStoreSettings = async (_req: Request, res: Response) => {

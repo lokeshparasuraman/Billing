@@ -30,46 +30,20 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
   const gstin = store?.gstin || '33BAEPP2449B1Z3';
   const address = store?.address || '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
   const phone = store?.phone || '+91 9445662637';
-  const bankName = store?.bankName || 'STATE BANK OF INDIA';
-  const accountNumber = store?.accountNumber || '41234567890';
-  const ifscCode = store?.ifscCode || 'SBIN0001234';
-  const branchName = store?.branchName || 'Dharmapuri Main Branch';
-  const upiId = store?.upiId || 'owshika@sbi';
+  const bankName = store?.bankName || '';
+  const accountNumber = store?.accountNumber || '';
+  const ifscCode = store?.ifscCode || '';
+  const branchName = store?.branchName || '';
+  const upiId = store?.upiId || '';
+  const hasBankDetails = Boolean(bankName || accountNumber || ifscCode);
 
   // Dynamically compute Place of Supply state from GSTIN prefix
   const gstStateMap: Record<string, string> = {
     '33': 'Tamil Nadu (33)'
-
   };
   const gstinPrefix = (gstin && gstin.length >= 2) ? gstin.substring(0, 2) : '33';
   const placeOfSupply = gstStateMap[gstinPrefix] || `State (${gstinPrefix})`;
 
-  // Calculate GST Breakdown by HSN/GST Rate for bottom summary
-  const gstBreakdownMap: Record<number, { taxable: number; gstAmt: number }> = {};
-
-  invoice.items.forEach((item) => {
-    const rate = item.gstRate || 0;
-    const gross = item.quantity * item.price;
-    const disc = (gross * (item.discount || 0)) / 100;
-    const taxable = gross - disc;
-    const gstAmt = item.gstAmount || (taxable * rate) / 100;
-
-    if (!gstBreakdownMap[rate]) {
-      gstBreakdownMap[rate] = { taxable: 0, gstAmt: 0 };
-    }
-    gstBreakdownMap[rate].taxable += taxable;
-    gstBreakdownMap[rate].gstAmt += gstAmt;
-  });
-
-  const gstBreakdownList = Object.keys(gstBreakdownMap).map((rateStr) => {
-    const rate = Number(rateStr);
-    const data = gstBreakdownMap[rate];
-    return {
-      rate,
-      taxable: data.taxable,
-      totalGst: data.gstAmt,
-    };
-  });
 
   const totalGstAmount = (invoice.cgstTotal || 0) + (invoice.sgstTotal || 0);
 
@@ -213,45 +187,30 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
       <div className="print-summary-footer space-y-3">
         {/* Amounts & Taxes Grid Box */}
         <div className="grid grid-cols-12 gap-3 text-xs">
-          {/* Left Column: GST Summary Breakdown Table & Bank Info */}
-          <div className="col-span-7 space-y-2.5">
-            {/* GST Summary Table */}
-            <div className="border-2 border-black overflow-hidden bg-white">
-              <div className="bg-slate-100 px-3 py-1.5 font-black text-xs uppercase text-black border-b-2 border-black tracking-wide">
-                GST Tax Summary Breakdown
+          {/* Left Column: Bank Details (if provided) or Terms & Notes */}
+          <div className="col-span-7 border-2 border-black p-3 text-xs bg-white flex flex-col justify-between">
+            {hasBankDetails ? (
+              <div>
+                <span className="font-black uppercase tracking-wide text-black block border-b border-black pb-1.5 text-[11px]">
+                  Bank Details for NEFT / RTGS / Online Transfer:
+                </span>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 font-mono text-black text-xs pt-2">
+                  {bankName && <div><span className="font-sans text-gray-600 text-[10px] block">Bank Name:</span> <strong>{bankName}</strong></div>}
+                  {accountNumber && <div><span className="font-sans text-gray-600 text-[10px] block">Account No:</span> <strong>{accountNumber}</strong></div>}
+                  {ifscCode && <div><span className="font-sans text-gray-600 text-[10px] block">IFSC Code:</span> <strong>{ifscCode}</strong></div>}
+                  {(branchName || upiId) && <div><span className="font-sans text-gray-600 text-[10px] block">Branch / UPI:</span> <strong>{branchName} {upiId ? `(${upiId})` : ''}</strong></div>}
+                </div>
               </div>
-              <table className="w-full text-xs text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-black bg-white font-black text-black">
-                    <th className="py-1.5 px-2.5 text-center border-r border-black">GST Rate</th>
-                    <th className="py-1.5 px-2.5 text-right border-r border-black">Taxable Amount</th>
-                    <th className="py-1.5 px-2.5 text-right">GST Tax Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-black font-mono text-black">
-                  {gstBreakdownList.map((g) => (
-                    <tr key={g.rate} className="border-b border-black">
-                      <td className="py-1.5 px-2.5 text-center font-bold border-r border-black">{g.rate}%</td>
-                      <td className="py-1.5 px-2.5 text-right border-r border-black">₹{g.taxable.toFixed(2)}</td>
-                      <td className="py-1.5 px-2.5 text-right font-black">₹{g.totalGst.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Bank Details Box */}
-            <div className="border-2 border-black p-2.5 text-xs bg-white space-y-1">
-              <span className="font-black uppercase tracking-wide text-black block border-b border-black pb-1 text-[11px]">
-                Bank Details for NEFT / RTGS / Online Transfer:
-              </span>
-              <div className="grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-black text-xs pt-0.5">
-                <div><span className="font-sans text-gray-600 text-[10px] block">Bank Name:</span> <strong>{bankName}</strong></div>
-                <div><span className="font-sans text-gray-600 text-[10px] block">Account No:</span> <strong>{accountNumber}</strong></div>
-                <div><span className="font-sans text-gray-600 text-[10px] block">IFSC Code:</span> <strong>{ifscCode}</strong></div>
-                <div><span className="font-sans text-gray-600 text-[10px] block">Branch / UPI:</span> <strong>{branchName} {upiId ? `(${upiId})` : ''}</strong></div>
+            ) : (
+              <div>
+                <span className="font-black uppercase tracking-wide text-black block border-b border-black pb-1.5 text-[11px]">
+                  Terms &amp; Payment Notes:
+                </span>
+                <p className="text-xs text-gray-800 pt-2 font-medium leading-relaxed">
+                  Thank you for your business! Bank details for NEFT/RTGS payments can be added anytime via the <strong>Bank Details</strong> menu.
+                </p>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column: Total Calculations Box */}
