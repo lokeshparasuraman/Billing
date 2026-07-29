@@ -19,20 +19,9 @@ const queryClient = new QueryClient({
   },
 });
 
-/* Helper component inside Router to handle reload redirection & unsaved warning */
+/* Helper component inside Router to handle reload unsaved warning */
 const AppNavigationHandler: React.FC = () => {
-  const navigate = useNavigate();
   const { rows } = useBillingStore();
-  const initialChecked = React.useRef(false);
-
-  useEffect(() => {
-    if (!initialChecked.current) {
-      initialChecked.current = true;
-      if (window.location.pathname !== '/') {
-        navigate('/', { replace: true });
-      }
-    }
-  }, [navigate]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
