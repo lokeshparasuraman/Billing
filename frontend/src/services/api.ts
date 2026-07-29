@@ -419,7 +419,6 @@ export const fetchStoreSettings = async (): Promise<any> => {
 };
 
 export const updateStoreSettingsApi = async (details: any): Promise<any> => {
-  localStorage.setItem('store_details', JSON.stringify(details));
   try {
     const response = await api.put('/store', details);
     if (response.data) {
@@ -427,7 +426,24 @@ export const updateStoreSettingsApi = async (details: any): Promise<any> => {
       return response.data;
     }
   } catch (e) {
-    console.warn('Could not save store settings to backend API, saved to localStorage');
+    console.warn('Could not save store settings to backend API, falling back to localStorage only');
+    localStorage.setItem('store_details', JSON.stringify(details));
   }
   return details;
+};
+
+/**
+ * Dedicated API call for saving bank details.
+ * Unlike updateStoreSettingsApi, this ALWAYS awaits the API and THROWS on failure.
+ * Never writes to localStorage until the API confirms the data is valid.
+ */
+export const saveBankDetailsApi = async (bankDetails: {
+  bankName: string;
+  accountNumber: string;
+  ifscCode: string;
+  branchName: string;
+  upiId?: string;
+}): Promise<any> => {
+  const response = await api.put('/store', bankDetails);
+  return response.data;
 };

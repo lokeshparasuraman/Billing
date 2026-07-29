@@ -5,8 +5,7 @@ import { useThemeMode } from '../../context/ThemeContext';
 import { useBillingStore } from '../../store/useBillingStore';
 import { useAuth } from '../../context/AuthContext';
 import { BrandLogo } from './BrandLogo';
-
-
+import { saveBankDetailsApi } from '../../services/api';
 
 interface NavbarProps {
   onOpenShortcuts?: () => void;
@@ -61,57 +60,84 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
     const branchName = bankForm.branchName.trim();
     const upiId = bankForm.upiId.trim().toLowerCase();
 
-    // Strict Validation 1: Bank Name length
+    // ── CLIENT-SIDE VALIDATION (mirror of backend) ──────────────────────────
     if (!bankName || bankName.length < 3) {
       setBankFormError('Bank Name must be at least 3 characters long.');
       return;
     }
 
-    // Strict Validation 2: Account Number strictly numeric & length check (9 to 18 numbers)
-    if (!accountNumber || !/^\d+$/.test(accountNumber)) {
-      setBankFormError('Account Number must contain ONLY numbers (0-9). Letters or special characters are not allowed.');
+    // Account Number: ONLY digits, 9-18 chars
+    if (!accountNumber) {
+      setBankFormError('Account Number is required.');
+      return;
+    }
+    if (!/^\d+$/.test(accountNumber)) {
+      setBankFormError('Account Number must contain ONLY numbers (0–9). Letters or special characters are NOT allowed.');
       return;
     }
     if (accountNumber.length < 9 || accountNumber.length > 18) {
-      setBankFormError(`Account Number length is invalid (${accountNumber.length} digits). Standard Indian bank account numbers must be between 9 and 18 digits long.`);
+      setBankFormError(`Account Number is ${accountNumber.length} digit(s) — must be between 9 and 18 digits (standard Indian bank account).`);
       return;
     }
 
-    // Strict Validation 3: IFSC Code format (11 characters: 4 letters + 0 + 6 alphanumeric)
-    if (!ifscCode || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode)) {
-      setBankFormError("Invalid IFSC Code format. Must be exactly 11 characters starting with 4 letters, then '0', followed by 6 letters or numbers (e.g. SBIN0001234).");
+    // IFSC: 4 letters + 0 + 6 alphanumeric = 11 chars total
+    if (!ifscCode) {
+      setBankFormError('IFSC Code is required.');
+      return;
+    }
+    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode)) {
+      setBankFormError(
+        'Invalid IFSC Code. Must be exactly 11 characters: 4 letters + "0" + 6 letters/numbers (e.g. SBIN0001234).'
+      );
       return;
     }
 
-    // Strict Validation 4: Branch Name length
+    // Branch Name: at least 3 characters
     if (!branchName || branchName.length < 3) {
       setBankFormError('Branch Name must be at least 3 characters long.');
       return;
     }
 
-    // Strict Validation 5: Optional UPI ID format
+    // UPI ID: optional but validated if filled
     if (upiId && !/^[a-zA-Z0-9.\-_]+@[a-zA-Z0-9.\-_]+$/.test(upiId)) {
-      setBankFormError('Invalid UPI ID format (e.g. owshika@sbi).');
+      setBankFormError('Invalid UPI ID format. Example: owshika@sbi or 9876543210@paytm');
       return;
     }
+    // ── END CLIENT-SIDE VALIDATION ───────────────────────────────────────────
 
     setIsSavingBank(true);
     try {
-      await setStoreDetails({
+      // ── Call API FIRST — never write to localStorage/store until API says OK ──
+      const confirmed = await saveBankDetailsApi({
         bankName: bankName.toUpperCase(),
         accountNumber,
         ifscCode,
         branchName,
         upiId,
       });
+
+      // API succeeded: now update local Zustand state + localStorage
+      setStoreDetails({
+        bankName: confirmed.bankName ?? bankName.toUpperCase(),
+        accountNumber: confirmed.accountNumber ?? accountNumber,
+        ifscCode: confirmed.ifscCode ?? ifscCode,
+        branchName: confirmed.branchName ?? branchName,
+        upiId: confirmed.upiId ?? upiId,
+      });
+
       setBankSaveSuccess(true);
       setTimeout(() => {
         setIsBankModalOpen(false);
         setBankSaveSuccess(false);
       }, 1200);
     } catch (err: any) {
-      console.error('Failed to save bank details:', err);
-      setBankFormError(err?.response?.data?.error || err?.message || 'Failed to save bank details.');
+      // API rejected the data — show the backend's exact error message
+      const serverMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to save bank details. Please check all fields and try again.';
+      setBankFormError(`❌ ${serverMsg}`);
     } finally {
       setIsSavingBank(false);
     }
