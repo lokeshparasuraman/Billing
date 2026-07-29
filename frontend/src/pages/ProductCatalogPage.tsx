@@ -10,7 +10,7 @@ export const ProductCatalogPage: React.FC = () => {
     inv_cardBg: cardBg, inv_cardBorder: cardBorder, inv_cardDivide: cardDivide,
     inv_textStrong: textStrong, inv_textMuted: textMuted,
     inv_inputBg: inputBg, inv_inputBorder: inputBorder,
-    accent: accentText
+    accentText, btnPrimaryBg, btnPrimaryText, btnPrimaryHover
   } = useThemeTokens();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -159,10 +159,10 @@ export const ProductCatalogPage: React.FC = () => {
             <button
               type="button"
               onClick={handleOpenAddModal}
-              style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
-              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-black flex items-center justify-center space-x-2 active:scale-[0.98] transition-all flex-shrink-0 border-0 shadow-sm"
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+              style={{ backgroundColor: btnPrimaryBg, color: btnPrimaryText }}
+              className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-black flex items-center justify-center space-x-2 active:scale-[0.98] transition-all flex-shrink-0 border-0 shadow-sm cursor-pointer"
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryHover; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryBg; }}
             >
               <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>Add New Product</span>
@@ -180,8 +180,20 @@ export const ProductCatalogPage: React.FC = () => {
               Loading product database...
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="p-16 text-center text-base sm:text-lg font-semibold" style={{ color: textMuted }}>
-              No products found in catalog. Click <strong className="font-extrabold underline decoration-2 underline-offset-4" style={{ color: accentText }}>"Add New Product"</strong> to populate your store inventory.
+            <div className="p-12 sm:p-16 text-center text-sm sm:text-base font-medium flex flex-col items-center justify-center gap-3" style={{ color: textMuted }}>
+              <span>No products found in catalog.</span>
+              <button
+                type="button"
+                onClick={handleOpenAddModal}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 border-0 cursor-pointer"
+                style={{ backgroundColor: btnPrimaryBg, color: btnPrimaryText }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryHover; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryBg; }}
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add New Product</span>
+              </button>
+              <span className="text-xs font-normal" style={{ color: textMuted }}>Click above to populate your store inventory.</span>
             </div>
           ) : (
             <>

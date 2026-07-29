@@ -91,6 +91,7 @@ export interface SavedInvoice {
   createdAt: string;
   items: Array<{
     id: string;
+    productId?: string;
     partNumber: string;
     productName: string;
     hsn: string;

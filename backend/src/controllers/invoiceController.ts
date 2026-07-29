@@ -225,6 +225,123 @@ export const createInvoice = async (req: AuthenticatedRequest, res: Response) =>
   }
 };
 
+export const updateInvoice = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    const { id } = req.params;
+    const {
+      invoiceNumber,
+      invoiceDate,
+      billType,
+      customerName,
+      customerPhone,
+      customerAddress,
+      paymentMode,
+      transportDetails,
+      items,
+      amountInWords,
+      roundOff: providedRoundOff,
+      grandTotal: providedGrandTotal,
+    } = req.body;
+
+    const existingInv = await prisma.invoice.findFirst({
+      where: { id, userId },
+      include: { items: true },
+    });
+
+    if (!existingInv) {
+      return res.status(404).json({ error: 'Invoice not found' });
+    }
+
+    const finalBillType = (billType || existingInv.billType || 'CUSTOMER').toUpperCase();
+    const finalCustomerName = (customerName || existingInv.customerName || 'Walk-in Customer').trim();
+
+    let calculatedSubtotal = 0;
+    let calculatedDiscountTotal = 0;
+    let calculatedCgstTotal = 0;
+    let calculatedSgstTotal = 0;
+
+    const processedItems = (items || []).map((item: any) => {
+      const qty = Number(item.quantity) || 1;
+      const price = Number(item.price) || 0;
+      const discount = Number(item.discount) || 0;
+      const gstRate = Number(item.gstRate) || 0;
+
+      const rowSubtotal = qty * price;
+      const rowDiscount = discount;
+      const taxable = Math.max(0, rowSubtotal - rowDiscount);
+
+      const gstAmount = (taxable * gstRate) / 100;
+      const total = taxable + gstAmount;
+
+      calculatedSubtotal += rowSubtotal;
+      calculatedDiscountTotal += rowDiscount;
+      calculatedCgstTotal += gstAmount / 2;
+      calculatedSgstTotal += gstAmount / 2;
+
+      return {
+        partNumber: item.partNumber || 'N/A',
+        productName: item.name || item.productName || 'Item',
+        hsn: item.hsn || 'N/A',
+        unit: item.unit || 'PCS',
+        quantity: qty,
+        price: price,
+        discount: discount,
+        gstRate: gstRate,
+        gstAmount: Number(gstAmount.toFixed(2)),
+        total: Number(total.toFixed(2)),
+        productId: item.productId || undefined,
+      };
+    });
+
+    const netTaxable = Math.max(0, calculatedSubtotal - calculatedDiscountTotal);
+    const totalGst = calculatedCgstTotal + calculatedSgstTotal;
+    const rawGrandTotal = netTaxable + totalGst;
+
+    const roundedGrandTotal = providedGrandTotal !== undefined ? Number(providedGrandTotal) : Math.round(rawGrandTotal);
+    const roundOff = providedRoundOff !== undefined ? Number(providedRoundOff) : Number((roundedGrandTotal - rawGrandTotal).toFixed(2));
+
+    // Delete existing items for this invoice
+    await prisma.invoiceItem.deleteMany({
+      where: { invoiceId: existingInv.id },
+    });
+
+    // Update invoice with new details and items
+    const updatedInvoice = await prisma.invoice.update({
+      where: { id: existingInv.id },
+      data: {
+        invoiceNumber: invoiceNumber || existingInv.invoiceNumber,
+        invoiceDate: invoiceDate ? new Date(invoiceDate) : existingInv.invoiceDate,
+        billType: finalBillType,
+        customerName: finalCustomerName,
+        customerPhone: customerPhone !== undefined ? customerPhone : existingInv.customerPhone,
+        customerAddress: customerAddress !== undefined ? customerAddress : existingInv.customerAddress,
+        paymentMode: paymentMode || existingInv.paymentMode,
+        transportDetails: finalBillType === 'TRANSPORT' && transportDetails ? transportDetails : null,
+        subtotal: Number(calculatedSubtotal.toFixed(2)),
+        discountTotal: Number(calculatedDiscountTotal.toFixed(2)),
+        cgstTotal: Number(calculatedCgstTotal.toFixed(2)),
+        sgstTotal: Number(calculatedSgstTotal.toFixed(2)),
+        igstTotal: 0,
+        roundOff: roundOff,
+        grandTotal: roundedGrandTotal,
+        amountInWords: amountInWords || existingInv.amountInWords,
+        items: {
+          create: processedItems,
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    res.json(updatedInvoice);
+  } catch (error: any) {
+    console.error('Error updating invoice:', error);
+    res.status(500).json({ error: error?.message || 'Failed to update invoice' });
+  }
+};
+
 export const getInvoices = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.userId;

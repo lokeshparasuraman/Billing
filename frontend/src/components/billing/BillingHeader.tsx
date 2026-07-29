@@ -28,7 +28,7 @@ function formatGoogleDateDisplay(dateStr: string): string {
 }
 
 export const BillingHeader: React.FC = () => {
-  const { header, setHeaderField, setTransportField, storeDetails, setStoreDetails } = useBillingStore();
+  const { editingInvoiceId, clearBillingForm, header, setHeaderField, setTransportField, storeDetails, setStoreDetails } = useBillingStore();
   const [isEditingStore, setIsEditingStore] = useState(false);
   const [storeForm, setStoreForm] = useState(storeDetails);
   const [phoneArray, setPhoneArray] = useState<string[]>(['']);
@@ -144,6 +144,23 @@ export const BillingHeader: React.FC = () => {
   const isToday = header.invoiceDate === todayString;
   return (
     <div className="bg-[#f1f5f9] dark:bg-[#051c1a] rounded-2xl border p-4 sm:p-5 space-y-4 shadow-sm" style={{ borderColor: cardBorder }} ref={null as any}>
+
+      {/* ── Editing Mode Notification Banner ── */}
+      {editingInvoiceId && (
+        <div className="flex items-center justify-between p-3 sm:p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-bold shadow-sm">
+          <div className="flex items-center gap-2">
+            <Edit3 className="h-4 w-4 shrink-0 text-amber-500" />
+            <span>Editing Saved Bill <strong>#{header.invoiceNumber}</strong> (Changes will update this bill)</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => clearBillingForm()}
+            className="px-3 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 text-xs font-black transition border border-amber-500/30"
+          >
+            Cancel Editing
+          </button>
+        </div>
+      )}
 
       {/* ── Bill Type Selector Bar (Theme contrast fixed: 100% visible) ── */}
       <div className="flex items-center justify-between flex-wrap gap-3 pb-3.5 border-b border-black/[0.08] dark:border-white/[0.08]">

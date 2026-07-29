@@ -343,6 +343,80 @@ export const createInvoice = async (invoicePayload: any): Promise<SavedInvoice> 
   return localSavedInv;
 };
 
+export const updateInvoice = async (id: string, invoicePayload: any): Promise<SavedInvoice> => {
+  try {
+    const response = await api.put<SavedInvoice>(`/invoices/${id}`, invoicePayload);
+    if (response.data) {
+      const local = localStorage.getItem('cached_invoices');
+      const invoices: SavedInvoice[] = local ? JSON.parse(local) : [];
+      const updated = invoices.map((i) => (i.id === id ? response.data : i));
+      localStorage.setItem('cached_invoices', JSON.stringify(updated));
+      return response.data;
+    }
+  } catch (error: any) {
+    console.warn('Backend API update invoice error, saving to local storage fallback:', error);
+  }
+
+  const items = (invoicePayload.items || []).map((it: any, idx: number) => {
+    const qty = Number(it.quantity || 0);
+    const prc = Number(it.price || 0);
+    const gstRate = Number(it.gstRate || 0);
+    const taxable = qty * prc;
+    const gstAmount = (taxable * gstRate) / 100;
+    const total = taxable + gstAmount;
+    return {
+      id: `item_${Date.now()}_${idx}`,
+      invoiceId: id,
+      partNumber: it.partNumber || 'N/A',
+      productName: it.productName || it.name || 'Service / Product',
+      hsn: it.hsn || 'N/A',
+      unit: it.unit || 'PCS',
+      quantity: qty,
+      price: prc,
+      discount: Number(it.discount || 0),
+      gstRate,
+      gstAmount: Number(gstAmount.toFixed(2)),
+      total: Number(total.toFixed(2)),
+    };
+  });
+
+  const subtotal = items.reduce((acc: number, item: any) => acc + (item.quantity * item.price), 0);
+  const gstTotal = items.reduce((acc: number, item: any) => acc + item.gstAmount, 0);
+  const cgstTotal = gstTotal / 2;
+  const sgstTotal = gstTotal / 2;
+  const rawGrand = subtotal + gstTotal;
+  const grandTotal = Math.round(rawGrand);
+  const roundOff = Number((grandTotal - rawGrand).toFixed(2));
+
+  const updatedInv: SavedInvoice = {
+    id,
+    invoiceNumber: invoicePayload.invoiceNumber,
+    invoiceDate: invoicePayload.invoiceDate || new Date().toISOString(),
+    billType: invoicePayload.billType || 'CUSTOMER',
+    customerName: invoicePayload.customerName || 'Walk-in Customer',
+    customerPhone: invoicePayload.customerPhone || '',
+    customerAddress: invoicePayload.customerAddress || '',
+    paymentMode: invoicePayload.paymentMode || 'CASH',
+    subtotal: Number(subtotal.toFixed(2)),
+    discountTotal: 0,
+    cgstTotal: Number(cgstTotal.toFixed(2)),
+    sgstTotal: Number(sgstTotal.toFixed(2)),
+    igstTotal: 0,
+    roundOff,
+    grandTotal,
+    amountInWords: invoicePayload.amountInWords || undefined,
+    transportDetails: invoicePayload.transportDetails || undefined,
+    items,
+    createdAt: new Date().toISOString(),
+  };
+
+  const local = localStorage.getItem('cached_invoices');
+  const invoices: SavedInvoice[] = local ? JSON.parse(local) : [];
+  const updated = invoices.map((i) => (i.id === id ? updatedInv : i));
+  localStorage.setItem('cached_invoices', JSON.stringify(updated));
+  return updatedInv;
+};
+
 export const fetchInvoices = async (): Promise<SavedInvoice[]> => {
   try {
     const response = await api.get<SavedInvoice[]>(`/invoices`);

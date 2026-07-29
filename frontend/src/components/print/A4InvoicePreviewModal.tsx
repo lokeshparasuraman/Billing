@@ -3,7 +3,8 @@ import { useReactToPrint } from 'react-to-print';
 import html2pdf from 'html2pdf.js';
 import { SavedInvoice } from '../../types/billing';
 import { PrintableInvoice } from './PrintableInvoice';
-import { Printer, X, ZoomIn, ZoomOut, FileText, Download } from 'lucide-react';
+import { Printer, X, ZoomIn, ZoomOut, FileText, Download, Edit3 } from 'lucide-react';
+import { useBillingStore } from '../../store/useBillingStore';
 
 interface A4InvoicePreviewModalProps {
   isOpen: boolean;
@@ -150,8 +151,26 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
             </button>
           </div>
 
-          {/* Action Buttons: Download PDF & Print */}
+          {/* Action Buttons: Edit, Download PDF & Print */}
           <div className="flex items-center gap-1.5 shrink-0 ml-auto sm:ml-0">
+            {invoice && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  useBillingStore.getState().loadInvoiceForEditing(invoice);
+                  if (window.location.pathname !== '/') {
+                    window.location.href = '/';
+                  }
+                }}
+                className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs px-3 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all shadow-sm"
+                title="Edit this saved bill"
+              >
+                <Edit3 className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                <span className="text-[11px]">Edit Bill</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleDownloadPdf}

@@ -1,17 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchInvoices, fetchInvoiceById, deleteInvoice } from '../services/api';
 import { SavedInvoice } from '../types/billing';
 import { formatCurrency } from '../utils/calculations';
-import { Search, FileText, Eye, Trash2, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
+import { Search, FileText, Eye, Trash2, ArrowUpDown, ChevronDown, Check, Edit3 } from 'lucide-react';
 import { A4InvoicePreviewModal } from '../components/print/A4InvoicePreviewModal';
 import { useThemeTokens } from '../hooks/useThemeTokens';
+import { useBillingStore } from '../store/useBillingStore';
 
 export const InvoiceHistoryPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { loadInvoiceForEditing } = useBillingStore();
   const { isDark,
     inv_cardBg: cardBg, inv_cardBorder: cardBorder, inv_cardDivide: cardDivide,
     inv_textStrong: textStrong, inv_textMuted: textMuted,
     inv_inputBg: inputBg, inv_inputBorder: inputBorder,
-    accent: accentText
+    accentText, btnPrimaryBg, btnPrimaryText, btnPrimaryHover
   } = useThemeTokens();
 
   const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
@@ -267,11 +271,23 @@ export const InvoiceHistoryPage: React.FC = () => {
                           <div className="flex items-center justify-center space-x-2">
                             <button
                               type="button"
+                              onClick={() => {
+                                loadInvoiceForEditing(inv);
+                                navigate('/');
+                              }}
+                              className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-full text-xs font-extrabold transition-all border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.98] focus:outline-none"
+                              title={`Edit Invoice ${inv.invoiceNumber}`}
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                              <span>Edit Bill</span>
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => handleOpenInvoice(inv.id)}
-                              style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
-                              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none"
-                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+                              style={{ backgroundColor: btnPrimaryBg, color: btnPrimaryText }}
+                              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none cursor-pointer"
+                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryHover; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryBg; }}
                             >
                               <Eye className="h-3.5 w-3.5" />
                               <span>Preview & Print</span>
@@ -321,11 +337,22 @@ export const InvoiceHistoryPage: React.FC = () => {
                     <div className="flex items-center gap-2 pt-1">
                       <button
                         type="button"
+                        onClick={() => {
+                          loadInvoiceForEditing(inv);
+                          navigate('/');
+                        }}
+                        className="inline-flex items-center justify-center space-x-1 px-3 py-2 rounded-full text-xs font-extrabold transition-all border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.98] focus:outline-none"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleOpenInvoice(inv.id)}
-                        style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
-                        className="flex-1 inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none"
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+                        style={{ backgroundColor: btnPrimaryBg, color: btnPrimaryText }}
+                        className="flex-1 inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-full text-xs font-black transition-all border-0 shadow-sm active:scale-[0.98] focus:outline-none cursor-pointer"
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryHover; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryBg; }}
                       >
                         <Eye className="h-3.5 w-3.5" />
                         <span>Preview & Print</span>

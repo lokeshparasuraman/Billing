@@ -1,20 +1,21 @@
 import React from 'react';
 import { useBillingStore } from '../../store/useBillingStore';
 import { calculateInvoiceSummary, formatCurrency } from '../../utils/calculations';
-import { createInvoice, fetchNextInvoiceNumber } from '../../services/api';
-import { Printer, Save, RefreshCw, AlertCircle, FileSearch } from 'lucide-react';
+import { createInvoice, updateInvoice, fetchNextInvoiceNumber } from '../../services/api';
+import { Printer, Save, RefreshCw, AlertCircle, FileSearch, CheckCircle } from 'lucide-react';
 import { SavedInvoice } from '../../types/billing';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 
 export const CalculationSummary: React.FC = () => {
   const {
-    header, rows, storeDetails, isSaving, setIsSaving,
+    editingInvoiceId, header, rows, storeDetails, isSaving, setIsSaving,
     validationError, setValidationError, setSavedInvoiceForPrint,
     setIsPrintModalOpen, clearBillingForm, resetWithNextInvoiceNumber,
   } = useBillingStore();
   const { isDark,
     inv_cardBg: cardBg, inv_cardBorder: cardBorder, inv_cardDivide: cardDivide,
     inv_textStrong: textStrong, inv_textMuted: textMuted,
+    btnPrimaryBg, btnPrimaryText, btnPrimaryHover,
   } = useThemeTokens();
 
   const subBg = isDark ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)';
@@ -34,14 +35,14 @@ export const CalculationSummary: React.FC = () => {
     if (validItems.length === 0) { setValidationError('Please add at least one valid product to preview.'); return; }
 
     const tempInvoice: SavedInvoice = {
-      id: 'preview_temp',
+      id: editingInvoiceId || 'preview_temp',
       billType: header.billType || 'CUSTOMER',
       transportDetails: header.billType === 'TRANSPORT' ? header.transportDetails : undefined,
       invoiceNumber: header.invoiceNumber || 'INV-PREVIEW',
       invoiceDate: header.invoiceDate || new Date().toISOString(),
-      customerName: storeDetails.storeName || 'Owshika Enterprises',
-      customerPhone: storeDetails.phone || '',
-      customerAddress: storeDetails.address || '',
+      customerName: header.customerName || 'Owshika Enterprises',
+      customerPhone: header.customerPhone || '',
+      customerAddress: header.customerAddress || '',
       paymentMode: header.paymentMode,
       subtotal: summary.subtotal,
       discountTotal: 0,
@@ -97,7 +98,14 @@ export const CalculationSummary: React.FC = () => {
           gstRate: Number(r.gstRate || 0),
         })),
       };
-      const savedInv = await createInvoice(payload);
+
+      let savedInv: SavedInvoice;
+      if (editingInvoiceId) {
+        savedInv = await updateInvoice(editingInvoiceId, payload);
+      } else {
+        savedInv = await createInvoice(payload);
+      }
+
       setSavedInvoiceForPrint(savedInv);
       if (shouldPrint) setIsPrintModalOpen(true);
       try {
@@ -160,19 +168,19 @@ export const CalculationSummary: React.FC = () => {
               <span>Save Only</span>
             </button>
 
-            {/* Primary CTA — lime */}
+            {/* Primary CTA */}
             <button
               type="button"
               disabled={isSaving}
               onClick={() => handleValidateAndSave(true)}
               data-action="save-print"
-              style={{ backgroundColor: '#c9f227', color: '#051c1a' }}
-              className="flex items-center justify-center space-x-2 px-6 py-2.5 rounded-full text-xs sm:text-sm font-black active:scale-[0.98] transition-all border-0 shadow-sm"
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d6f944'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9f227'; }}
+              style={{ backgroundColor: btnPrimaryBg, color: btnPrimaryText }}
+              className="flex items-center justify-center space-x-2 px-6 py-2.5 rounded-full text-xs sm:text-sm font-black active:scale-[0.98] transition-all border-0 shadow-sm cursor-pointer"
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryHover; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = btnPrimaryBg; }}
             >
               <Printer className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span>{isSaving ? 'Saving...' : 'Save & Print Invoice'}</span>
+              <span>{isSaving ? 'Saving...' : editingInvoiceId ? 'Update & Print Invoice' : 'Save & Print Invoice'}</span>
             </button>
           </div>
         </div>

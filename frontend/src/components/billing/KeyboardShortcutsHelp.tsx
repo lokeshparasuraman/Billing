@@ -1,5 +1,6 @@
 import React from 'react';
 import { Keyboard, X } from 'lucide-react';
+import { useThemeTokens } from '../../hooks/useThemeTokens';
 
 interface KeyboardShortcutsHelpProps {
   isOpen: boolean;
@@ -7,16 +8,19 @@ interface KeyboardShortcutsHelpProps {
 }
 
 export const KeyboardShortcutsHelp: React.FC<KeyboardShortcutsHelpProps> = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
+  const {
+    inv_cardBg: modalBg,
+    inv_cardBorder: cardBorder,
+    inv_cardDivide: cardDivide,
+    inv_textStrong: textStrong,
+    inv_textMuted: textMuted,
+    inv_inputBg: itemBg,
+    inv_inputBorder: kbdBg,
+    accent,
+    accentHover,
+  } = useThemeTokens();
 
-  /* Pinelabs rich dark teal green theme tokens */
-  const modalBg    = '#051c1a'; // Dark forest teal green
-  const cardBorder = 'rgba(255,255,255,0.12)';
-  const cardDivide = 'rgba(255,255,255,0.08)';
-  const textStrong = '#ffffff';
-  const textMuted  = 'rgba(255,255,255,0.65)';
-  const itemBg     = 'rgba(255,255,255,0.05)';
-  const kbdBg      = 'rgba(255,255,255,0.10)';
+  if (!isOpen) return null;
 
   const shortcuts = [
     { key: 'Enter', description: 'Moves focus to next field. On last field of row, adds a new row.' },

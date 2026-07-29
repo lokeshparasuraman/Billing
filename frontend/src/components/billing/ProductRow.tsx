@@ -221,15 +221,22 @@ export const ProductRow: React.FC<ProductRowProps> = ({
               0%
             </div>
           ) : (
-            <select value={row.gstRate}
-              onChange={e => onUpdate({ gstRate: parseFloat(e.target.value) })}
-              style={selectStyle}>
-              <option value={0}>0%</option>
-              <option value={5}>5%</option>
-              <option value={12}>12%</option>
-              <option value={18}>18%</option>
-              <option value={28}>28%</option>
-            </select>
+            <div className="relative flex items-center">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="any"
+                value={row.gstRate === undefined || row.gstRate === null ? '' : row.gstRate}
+                onChange={e => {
+                  const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                  onUpdate({ gstRate: isNaN(val) ? 0 : Math.max(0, Math.min(100, val)) });
+                }}
+                placeholder="18"
+                style={{ ...inputStyle, textAlign: 'right', paddingRight: '22px' }}
+              />
+              <span className="absolute right-2 text-xs font-bold pointer-events-none" style={{ color: txtMuted }}>%</span>
+            </div>
           )}
         </div>
         <div className="text-center">
@@ -359,15 +366,22 @@ export const ProductRow: React.FC<ProductRowProps> = ({
             0% (No GST)
           </div>
         ) : (
-          <select value={row.gstRate}
-            onChange={e => onUpdate({ gstRate: parseFloat(e.target.value) })}
-            style={selectStyle}>
-            <option value={0}>0% GST</option>
-            <option value={5}>5% GST</option>
-            <option value={12}>12% GST</option>
-            <option value={18}>18% GST</option>
-            <option value={28}>28% GST</option>
-          </select>
+          <div className="relative flex items-center">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="any"
+              value={row.gstRate === undefined || row.gstRate === null ? '' : row.gstRate}
+              onChange={e => {
+                const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                onUpdate({ gstRate: isNaN(val) ? 0 : Math.max(0, Math.min(100, val)) });
+              }}
+              placeholder="18"
+              style={{ ...inputStyle, textAlign: 'right', paddingRight: '22px' }}
+            />
+            <span className="absolute right-2 text-xs font-bold pointer-events-none" style={{ color: txtMuted }}>%</span>
+          </div>
         )}
       </td>
 

@@ -43,7 +43,18 @@ function loadStoreDetails(): StoreDetails {
   return defaultStoreDetails;
 }
 
-function createEmptyRow(idSuffix?: number): InvoiceItemRow {
+function loadLastUsedGstRate(): number {
+  try {
+    const saved = localStorage.getItem('owshika_last_gst');
+    if (saved !== null && saved !== undefined && saved !== '') {
+      const parsed = parseFloat(saved);
+      if (!isNaN(parsed) && parsed >= 0) return parsed;
+    }
+  } catch (e) {}
+  return 18;
+}
+
+function createEmptyRow(idSuffix?: number, defaultGstRate: number = 18): InvoiceItemRow {
   return {
     rowId: `row_${Date.now()}_${idSuffix || Math.floor(Math.random() * 1000)}`,
     productId: '',
@@ -54,7 +65,7 @@ function createEmptyRow(idSuffix?: number): InvoiceItemRow {
     quantity: 1,
     price: '',
     discount: 0,
-    gstRate: 18,
+    gstRate: defaultGstRate,
     gstAmount: 0,
     taxableAmount: 0,
     total: 0,
@@ -62,6 +73,8 @@ function createEmptyRow(idSuffix?: number): InvoiceItemRow {
 }
 
 interface BillingState {
+  editingInvoiceId: string | null;
+  lastUsedGstRate: number;
   header: InvoiceHeaderDetails;
   storeDetails: StoreDetails;
   rows: InvoiceItemRow[];
@@ -90,6 +103,8 @@ interface BillingState {
   setIsSaving: (saving: boolean) => void;
   clearBillingForm: () => void;
   resetWithNextInvoiceNumber: (nextNum: string) => void;
+  loadInvoiceForEditing: (invoice: SavedInvoice) => void;
+  setLastUsedGstRate: (gstRate: number) => void;
 }
 
 const initialHeader: InvoiceHeaderDetails = {
@@ -109,9 +124,11 @@ const initialHeader: InvoiceHeaderDetails = {
 };
 
 export const useBillingStore = create<BillingState>((set, get) => ({
+  editingInvoiceId: null,
+  lastUsedGstRate: loadLastUsedGstRate(),
   header: initialHeader,
   storeDetails: loadStoreDetails(),
-  rows: [createEmptyRow(1)],
+  rows: [createEmptyRow(1, loadLastUsedGstRate())],
   activeRowIndex: 0,
   activeCellField: 'partNumber',
   isSaving: false,
@@ -172,7 +189,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
 
   addRow: () => {
     set((state) => {
-      const newRows = [...state.rows, createEmptyRow(state.rows.length + 1)];
+      const newRows = [...state.rows, createEmptyRow(state.rows.length + 1, state.lastUsedGstRate)];
       return {
         rows: newRows,
         activeRowIndex: newRows.length - 1,
@@ -233,7 +250,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
         quantity: 1,
         price: price !== undefined ? price : '',
         discount: 0,
-        gstRate: 0,
+        gstRate: state.lastUsedGstRate || 0,
         gstAmount: 0,
         taxableAmount: 0,
         total: 0,
@@ -263,7 +280,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
     set((state) => {
       if (state.rows.length <= 1) {
         return {
-          rows: [createEmptyRow(1)],
+          rows: [createEmptyRow(1, state.lastUsedGstRate)],
           activeRowIndex: 0,
         };
       }
@@ -278,16 +295,32 @@ export const useBillingStore = create<BillingState>((set, get) => ({
 
   updateRow: (index: number, updates: Partial<InvoiceItemRow>) => {
     set((state) => {
+      let nextGst = state.lastUsedGstRate;
+      if (updates.gstRate !== undefined && !isNaN(Number(updates.gstRate)) && Number(updates.gstRate) >= 0) {
+        nextGst = Number(updates.gstRate);
+        try {
+          localStorage.setItem('owshika_last_gst', String(nextGst));
+        } catch (e) {}
+      }
+
       const updatedRows = [...state.rows];
       const targetRow = { ...updatedRows[index], ...updates };
       const recalculated = calculateRowTotals(targetRow);
       updatedRows[index] = recalculated;
-      return { rows: updatedRows };
+      return { rows: updatedRows, lastUsedGstRate: nextGst };
     });
   },
 
   selectProductForRow: (index: number, product: Product) => {
     set((state) => {
+      let nextGst = state.lastUsedGstRate;
+      if (product.gst !== undefined && !isNaN(Number(product.gst)) && Number(product.gst) >= 0) {
+        nextGst = Number(product.gst);
+        try {
+          localStorage.setItem('owshika_last_gst', String(nextGst));
+        } catch (e) {}
+      }
+
       const updatedRows = [...state.rows];
       const rowToFill: InvoiceItemRow = {
         ...updatedRows[index],
@@ -302,7 +335,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
         discount: updatedRows[index].discount || 0,
       };
       updatedRows[index] = calculateRowTotals(rowToFill);
-      return { rows: updatedRows };
+      return { rows: updatedRows, lastUsedGstRate: nextGst };
     });
   },
 
@@ -320,6 +353,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
 
   clearBillingForm: () => {
     set((state) => ({
+      editingInvoiceId: null,
       header: {
         ...initialHeader,
         invoiceDate: new Date().toISOString().split('T')[0],
@@ -328,7 +362,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
           fromLocation: state.storeDetails.address || defaultStoreDetails.address,
         },
       },
-      rows: [createEmptyRow(1)],
+      rows: [createEmptyRow(1, state.lastUsedGstRate)],
       activeRowIndex: 0,
       activeCellField: 'partNumber',
       validationError: null,
@@ -337,6 +371,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
 
   resetWithNextInvoiceNumber: (nextNum: string) => {
     set((state) => ({
+      editingInvoiceId: null,
       header: {
         ...initialHeader,
         invoiceNumber: nextNum,
@@ -346,10 +381,65 @@ export const useBillingStore = create<BillingState>((set, get) => ({
           fromLocation: state.storeDetails.address || defaultStoreDetails.address,
         },
       },
-      rows: [createEmptyRow(1)],
+      rows: [createEmptyRow(1, state.lastUsedGstRate)],
       activeRowIndex: 0,
       activeCellField: 'partNumber',
       validationError: null,
     }));
+  },
+
+  loadInvoiceForEditing: (invoice: SavedInvoice) => {
+    const loadedRows: InvoiceItemRow[] = (invoice.items || []).map((item, idx) => {
+      const row: InvoiceItemRow = {
+        rowId: `row_${Date.now()}_edit_${idx}`,
+        productId: item.productId || '',
+        partNumber: item.partNumber || 'N/A',
+        name: item.productName || 'Item',
+        hsn: item.hsn || 'N/A',
+        unit: item.unit || 'PCS',
+        quantity: item.quantity || 1,
+        price: item.price !== undefined ? item.price : '',
+        discount: item.discount || 0,
+        gstRate: item.gstRate !== undefined ? item.gstRate : 18,
+        gstAmount: item.gstAmount || 0,
+        taxableAmount: (item.quantity || 1) * (item.price || 0) - (item.discount || 0),
+        total: item.total || 0,
+      };
+      return calculateRowTotals(row);
+    });
+
+    const storeAddress = get().storeDetails.address || defaultStoreDetails.address;
+
+    set({
+      editingInvoiceId: invoice.id,
+      header: {
+        billType: (invoice.billType as any) || 'CUSTOMER',
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceDate: invoice.invoiceDate ? invoice.invoiceDate.split('T')[0] : new Date().toISOString().split('T')[0],
+        customerName: invoice.customerName || 'Walk-in Customer',
+        customerPhone: invoice.customerPhone || '',
+        customerAddress: invoice.customerAddress || '',
+        paymentMode: (invoice.paymentMode as any) || 'CASH',
+        transportDetails: invoice.transportDetails || {
+          fromLocation: storeAddress,
+          toLocation: '',
+          vehicleNumber: '',
+          transporterName: '',
+        },
+      },
+      rows: loadedRows.length > 0 ? loadedRows : [createEmptyRow(1, get().lastUsedGstRate)],
+      activeRowIndex: 0,
+      activeCellField: 'partNumber',
+      validationError: null,
+    });
+  },
+
+  setLastUsedGstRate: (gstRate: number) => {
+    if (!isNaN(gstRate) && gstRate >= 0) {
+      try {
+        localStorage.setItem('owshika_last_gst', String(gstRate));
+      } catch (e) {}
+      set({ lastUsedGstRate: gstRate });
+    }
   },
 }));
