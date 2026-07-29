@@ -1,7 +1,7 @@
 import React from 'react';
 import { SavedInvoice } from '../../types/billing';
 import { formatCurrency, numberToWordsIndian } from '../../utils/calculations';
-import { useBillingStore, sanitizeStoreAddress } from '../../store/useBillingStore';
+import { useBillingStore } from '../../store/useBillingStore';
 import '../../styles/print.css';
 
 interface PrintableInvoiceProps {
@@ -28,7 +28,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
   const ownerName = store?.ownerName || 'C.Perumal';
   const email = store?.email || 'owshikaentt@gmail.com';
   const gstin = store?.gstin || '33BAEPP2449B1Z3';
-  const address = sanitizeStoreAddress(store?.address);
+  const address = store?.address || '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
   const phone = store?.phone || '+91 9445662637';
   const bankName = store?.bankName || '';
   const accountNumber = store?.accountNumber || '';

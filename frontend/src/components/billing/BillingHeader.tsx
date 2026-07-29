@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useBillingStore, sanitizeStoreAddress } from '../../store/useBillingStore';
+import { useBillingStore } from '../../store/useBillingStore';
 import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { PaymentMode } from '../../types/billing';
 import {
@@ -253,7 +253,7 @@ export const BillingHeader: React.FC = () => {
                 </div>
                 <div className="sm:col-span-2 flex items-start space-x-2 mt-0.5" style={{ color: cardMuted }}>
                   <MapPin className="h-4 w-4 shrink-0 mt-0.5" style={{ color: cardMuted }} />
-                  <span className="font-medium leading-relaxed">{sanitizeStoreAddress(storeDetails.address)}</span>
+                  <span className="font-medium leading-relaxed">{storeDetails.address}</span>
                 </div>
               </div>
             </>

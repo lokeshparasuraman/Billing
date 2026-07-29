@@ -482,9 +482,6 @@ export const fetchStoreSettings = async (): Promise<any> => {
   try {
     const response = await api.get('/store');
     if (response.data && response.data.storeName) {
-      if (response.data.address && response.data.address.includes('Kothumai Mill')) {
-        response.data.address = '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
-      }
       localStorage.setItem('store_details', JSON.stringify(response.data));
       return response.data;
     }
@@ -492,15 +489,7 @@ export const fetchStoreSettings = async (): Promise<any> => {
     console.warn('Could not fetch store settings from API, using localStorage fallback');
   }
   const local = localStorage.getItem('store_details');
-  if (local) {
-    const parsed = JSON.parse(local);
-    if (parsed && parsed.address && parsed.address.includes('Kothumai Mill')) {
-      parsed.address = '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
-      localStorage.setItem('store_details', JSON.stringify(parsed));
-    }
-    return parsed;
-  }
-  return null;
+  return local ? JSON.parse(local) : null;
 };
 
 export const updateStoreSettingsApi = async (details: any): Promise<any> => {

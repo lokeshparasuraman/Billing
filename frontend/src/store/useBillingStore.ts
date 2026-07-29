@@ -17,22 +17,13 @@ export interface StoreDetails {
   upiId?: string;
 }
 
-export const DEFAULT_STORE_ADDRESS = '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
-
-export function sanitizeStoreAddress(addr?: string): string {
-  if (!addr || addr.includes('Kothumai Mill')) {
-    return DEFAULT_STORE_ADDRESS;
-  }
-  return addr;
-}
-
 const defaultStoreDetails: StoreDetails = {
   storeName: 'OWSHIKA ENTERPRISES',
   ownerName: 'C.Perumal',
   email: 'owshikaentt@gmail.com',
   gstin: '33BAEPP2449B1Z3',
   phone: '+91 9445662637',
-  address: DEFAULT_STORE_ADDRESS,
+  address: '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701',
   bankName: '',
   accountNumber: '',
   ifscCode: '',
@@ -44,13 +35,7 @@ function loadStoreDetails(): StoreDetails {
   try {
     const saved = localStorage.getItem('store_details');
     if (saved) {
-      const parsed = JSON.parse(saved);
-      const details = { ...defaultStoreDetails, ...parsed };
-      details.address = sanitizeStoreAddress(details.address);
-      try {
-        localStorage.setItem('store_details', JSON.stringify(details));
-      } catch (e) {}
-      return details;
+      return { ...defaultStoreDetails, ...JSON.parse(saved) };
     }
   } catch (e) {
     console.warn('Failed to load store details from localStorage');
@@ -175,7 +160,6 @@ export const useBillingStore = create<BillingState>((set, get) => ({
   setStoreDetails: (updates) => {
     set((state) => {
       const updated = { ...state.storeDetails, ...updates };
-      updated.address = sanitizeStoreAddress(updated.address);
       try {
         localStorage.setItem('store_details', JSON.stringify(updated));
         updateStoreSettingsApi(updated).catch(() => {});
@@ -185,7 +169,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
 
       // Automatically update transport fromLocation to match newly updated shop address
       const currentFrom = state.header.transportDetails?.fromLocation;
-      const isDefaultOrOld = !currentFrom || currentFrom === state.storeDetails.address || currentFrom.includes('Kothumai Mill') || currentFrom === 'Peenya, Bengaluru';
+      const isDefaultOrOld = !currentFrom || currentFrom === state.storeDetails.address || currentFrom === 'Peenya, Bengaluru';
       const newFrom = isDefaultOrOld && updated.address ? updated.address : currentFrom;
 
       return {
@@ -194,7 +178,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
           ...state.header,
           transportDetails: {
             ...state.header.transportDetails,
-            fromLocation: sanitizeStoreAddress(newFrom || updated.address),
+            fromLocation: newFrom || updated.address,
           },
         },
       };
