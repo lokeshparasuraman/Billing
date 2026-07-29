@@ -1123,10 +1123,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 </label>
                 <input
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   value={bankForm.accountNumber}
                   onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value.replace(/\D/g, '').slice(0, 18) })}
-                  placeholder="e.g. 41234567890 (9 to 18 digits)"
+                  onKeyDown={(e) => {
+                    // Prevent non-numeric keypresses except navigation/editing keys
+                    if (
+                      !/[0-9]/.test(e.key) &&
+                      !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'].includes(e.key) &&
+                      !(e.ctrlKey || e.metaKey)
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
+                  placeholder="e.g. 41234567890 (9 to 18 numbers)"
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -1198,8 +1210,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 <input
                   type="text"
                   value={bankForm.upiId}
-                  onChange={(e) => setBankForm({ ...bankForm, upiId: e.target.value })}
-                  placeholder="e.g. owshika@sbi"
+                  onChange={(e) => setBankForm({ ...bankForm, upiId: e.target.value.replace(/[^a-zA-Z0-9.\-_@]/g, '').toLowerCase() })}
+                  placeholder="e.g. owshika@sbi or 9445662637@paytm"
                   style={{
                     width: '100%',
                     padding: '10px 12px',
