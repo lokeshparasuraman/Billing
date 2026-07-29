@@ -391,36 +391,38 @@ export const deleteInvoice = async (req: AuthenticatedRequest, res: Response) =>
       return res.status(404).json({ error: 'Invoice not found or unauthorized' });
     }
 
-    await prisma.invoiceItem.deleteMany({
-      where: { invoiceId: existingInv.id },
-    });
-
-    await prisma.invoice.delete({
-      where: { id: existingInv.id },
-    });
-
-    const year = new Date().getFullYear();
-    const remainingInvoices = await prisma.invoice.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'asc' },
-      select: { id: true, invoiceNumber: true },
-    });
-
-    for (const inv of remainingInvoices) {
-      await prisma.invoice.update({
-        where: { id: inv.id },
-        data: { invoiceNumber: `${inv.invoiceNumber}_TEMP_${inv.id}` },
+    await prisma.$transaction(async (tx) => {
+      await tx.invoiceItem.deleteMany({
+        where: { invoiceId: existingInv.id },
       });
-    }
 
-    for (let i = 0; i < remainingInvoices.length; i++) {
-      const inv = remainingInvoices[i];
-      const newInvNum = `OE-${year}-${String(i + 1).padStart(4, '0')}`;
-      await prisma.invoice.update({
-        where: { id: inv.id },
-        data: { invoiceNumber: newInvNum },
+      await tx.invoice.delete({
+        where: { id: existingInv.id },
       });
-    }
+
+      const year = new Date().getFullYear();
+      const remainingInvoices = await tx.invoice.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'asc' },
+        select: { id: true, invoiceNumber: true },
+      });
+
+      for (const inv of remainingInvoices) {
+        await tx.invoice.update({
+          where: { id: inv.id },
+          data: { invoiceNumber: `${inv.invoiceNumber}_TEMP_${inv.id}` },
+        });
+      }
+
+      for (let i = 0; i < remainingInvoices.length; i++) {
+        const inv = remainingInvoices[i];
+        const newInvNum = `OE-${year}-${String(i + 1).padStart(4, '0')}`;
+        await tx.invoice.update({
+          where: { id: inv.id },
+          data: { invoiceNumber: newInvNum },
+        });
+      }
+    });
 
     res.json({ message: 'Invoice deleted successfully' });
   } catch (error: any) {
