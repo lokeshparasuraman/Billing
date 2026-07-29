@@ -39,9 +39,34 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
       const opt = {
         margin: [4, 4, 4, 4],
         filename: `${invoiceNumberOnly}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        image: { type: 'jpeg', quality: 1.0 },
+        html2canvas: {
+          scale: 4, // 300+ DPI ultra-sharp resolution for unbroken text even at 500% zoom
+          useCORS: true,
+          logging: false,
+          letterRendering: true,
+          allowTaint: true,
+          scrollY: 0,
+          scrollX: 0,
+          windowWidth: 1200,
+          onclone: (clonedDoc: Document) => {
+            // Reset parent scale transforms in cloned DOM so html2canvas captures full 100% resolution
+            const container = clonedDoc.querySelector('.print-invoice-wrapper') as HTMLElement;
+            if (container) {
+              container.style.transform = 'none';
+              container.style.zoom = '1';
+              container.style.width = '794px';
+            }
+            const allElements = clonedDoc.querySelectorAll('*');
+            allElements.forEach((el) => {
+              const htmlEl = el as HTMLElement;
+              if (htmlEl && htmlEl.style && htmlEl.style.transform && htmlEl.style.transform.includes('scale')) {
+                htmlEl.style.transform = 'none';
+              }
+            });
+          }
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
       };
 
       await (html2pdf as any)().set(opt).from(printRef.current).save();
