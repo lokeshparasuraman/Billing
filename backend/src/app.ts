@@ -33,8 +33,9 @@ app.get('/api/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API Routes
+// API Routes (Mounted at both /api and / to handle proxies that strip or keep /api prefix)
 app.use('/api', routes);
+app.use('/', routes);
 
 // Serve built frontend static files if available on disk (Render, Local LAN, etc.)
 if (!process.env.VERCEL) {

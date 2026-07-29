@@ -8,5 +8,7 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/me', authMiddleware, getMe);
 router.delete('/account', authMiddleware, deleteAccount);
+router.post('/account/delete', authMiddleware, deleteAccount);
+router.post('/account', authMiddleware, deleteAccount);
 
 export default router;

@@ -56,7 +56,12 @@ export const getMeApi = async (): Promise<User> => {
 };
 
 export const deleteAccountApi = async (): Promise<void> => {
-  await api.delete('/auth/account');
+  try {
+    await api.delete('/auth/account');
+  } catch (error: any) {
+    // If HTTP DELETE is blocked by host/proxy (or returns 404/405), fallback to POST
+    await api.post('/auth/account/delete');
+  }
 };
 
 export const searchProducts = async (query: string): Promise<Product[]> => {
