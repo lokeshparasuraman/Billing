@@ -333,40 +333,51 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               )}
 
               {user && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', height: '64px', gap: '0' }}>
                   <button
                     type="button"
                     onClick={() => setIsProfileModalOpen(true)}
                     title="View Profile & Account Settings"
+                    className="pine-nav-link"
                     style={{
+                      position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      fontSize: '13px',
+                      gap: '8px',
+                      padding: '0 20px',
+                      height: '64px',
+                      fontSize: '14px',
                       fontWeight: 700,
-                      color: txtPrimary,
-                      background: iconHoverBg,
-                      border: `1px solid ${border}`,
-                      padding: '5px 12px',
-                      borderRadius: '10px',
+                      color: isProfileModalOpen ? txtPrimary : txtMuted,
+                      background: 'none',
+                      border: 'none',
                       cursor: 'pointer',
-                      transition: 'background 0.15s, border-color 0.15s',
+                      letterSpacing: '0em',
+                      transition: 'color 0.15s',
+                      whiteSpace: 'nowrap',
                     }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor = '#c9f227';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor = border;
-                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = txtPrimary; }}
+                    onMouseLeave={e => { if (!isProfileModalOpen) (e.currentTarget as HTMLElement).style.color = txtMuted; }}
                   >
-                    <UserIcon style={{ width: 14, height: 14, color: '#c9f227' }} />
+                    <UserIcon style={{ width: 16, height: 16 }} />
                     <span>{user.name || user.email.split('@')[0]}</span>
+                    <span
+                      className="pine-nav-underline"
+                      style={{
+                        position: 'absolute', bottom: 0, left: '20px', right: '20px',
+                        height: '2px', backgroundColor: txtPrimary,
+                        borderRadius: '2px 2px 0 0',
+                        opacity: isProfileModalOpen ? 1 : 0,
+                        transform: isProfileModalOpen ? 'scaleX(1)' : 'scaleX(0)',
+                        transition: 'opacity 0.18s, transform 0.18s',
+                      }}
+                    />
                   </button>
                   <button
                     type="button"
                     onClick={logout}
                     title="Log Out"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', color: txtMuted, display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s' }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', color: txtMuted, display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s', marginLeft: '4px' }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(239, 68, 68, 0.15)'; el.style.color = '#ef4444'; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'none'; el.style.color = txtMuted; }}
                   >
