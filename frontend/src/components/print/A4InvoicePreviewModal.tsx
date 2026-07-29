@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
+import html2pdf from 'html2pdf.js';
 import { SavedInvoice } from '../../types/billing';
 import { PrintableInvoice } from './PrintableInvoice';
-import { Printer, X, ZoomIn, ZoomOut, Maximize2, FileText, Download, Minimize2 } from 'lucide-react';
+import { Printer, X, ZoomIn, ZoomOut, FileText, Download } from 'lucide-react';
 
 interface A4InvoicePreviewModalProps {
   isOpen: boolean;
@@ -17,60 +18,36 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [autoFitScale, setAutoFitScale] = useState<number>(1);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
   const printRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Format date cleanly for filename (e.g. Bill_OE-2026-0001_28-07-2026)
-  const formattedDate = invoice?.invoiceDate
-    ? new Date(invoice.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/[\/\\]/g, '-')
-    : 'Date';
-  const sanitizeName = invoice?.customerName ? invoice.customerName.trim().replace(/[^a-zA-Z0-9_-]/g, '_') : 'Customer';
-  const pdfFilename = `Bill_${invoice?.invoiceNumber || 'OE'}_${sanitizeName}_${formattedDate}`;
+  // Filename is strictly the invoice number only (e.g. OE-2026-0001)
+  const invoiceNumberOnly = invoice?.invoiceNumber ? invoice.invoiceNumber.trim() : 'INVOICE';
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `${pdfFilename}.pdf`,
+    documentTitle: invoiceNumberOnly,
   });
 
-  const handleDownloadBill = () => {
-    if (!invoice || !printRef.current) return;
+  const handleDownloadPdf = async () => {
+    if (!invoice || !printRef.current || isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
     try {
-      const content = printRef.current.innerHTML;
-      const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${pdfFilename}.pdf</title>
-  <style>
-    @page { size: A4 portrait; margin: 0mm !important; }
-    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; padding: 10mm; margin: 0; }
-  </style>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body onload="window.print()">
-  <div style="max-width: 210mm; margin: 0 auto;">
-    ${content}
-  </div>
-</body>
-</html>`;
+      const opt = {
+        margin: [4, 4, 4, 4],
+        filename: `${invoiceNumberOnly}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
 
-      const blob = new Blob([fullHtml], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${pdfFilename}.pdf.html`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      await (html2pdf as any)().set(opt).from(printRef.current).save();
     } catch (err) {
-      console.error('Failed to download bill:', err);
+      console.error('Failed to download PDF bill:', err);
+    } finally {
+      setIsGeneratingPdf(false);
     }
-  };
-
-  const handlePrintAndSave = () => {
-    handlePrint();
-    handleDownloadBill();
   };
 
   // Calculate dynamic auto-fit scale so A4 sheet (794px width) fits mobile viewport cleanly without horizontal overflow
@@ -173,26 +150,27 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
             </button>
           </div>
 
-          {/* Action Buttons: Download & Print */}
+          {/* Action Buttons: Download PDF & Print */}
           <div className="flex items-center gap-1.5 shrink-0 ml-auto sm:ml-0">
             <button
               type="button"
-              onClick={handleDownloadBill}
-              className="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold text-xs px-3 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all shadow-sm"
-              title="Download HTML file"
+              onClick={handleDownloadPdf}
+              disabled={isGeneratingPdf}
+              className="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 font-bold text-xs px-3.5 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+              title={`Download ${invoiceNumberOnly}.pdf`}
             >
               <Download className="h-3.5 w-3.5 shrink-0" />
-              <span className="hidden xs:inline text-[11px]">Download</span>
+              <span className="text-[11px]">{isGeneratingPdf ? 'Generating PDF...' : 'Download PDF'}</span>
             </button>
 
             <button
               type="button"
-              onClick={handlePrintAndSave}
+              onClick={() => handlePrint()}
               className="bg-[#c9f227] hover:bg-[#d6f944] text-[#051c1a] font-black text-xs px-3.5 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all border-0 shadow-md shadow-[#c9f227]/20"
-              title="Print Bill or Save as PDF"
+              title="Print Invoice"
             >
               <Printer className="h-3.5 w-3.5 shrink-0" />
-              <span>Print / Save PDF</span>
+              <span>Print Bill</span>
             </button>
 
             <button
