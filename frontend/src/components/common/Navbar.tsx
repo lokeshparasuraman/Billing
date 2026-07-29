@@ -259,7 +259,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           borderBottom: `1px solid ${border}`,
         }}
       >
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', boxSizing: 'border-box' }}>
+        <div style={{ width: '100%', padding: '0 20px', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', alignItems: 'center', height: '64px', width: '100%', justifyContent: 'space-between' }}>
 
             {/* LEFT: Brand wordmark */}
@@ -267,12 +267,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               <BrandLogo storeName={storeDetails.storeName} size="md" />
             </a>
 
-            {/* RIGHT GROUP: nav links + controls — neatly aligned to right side */}
+            {/* RIGHT GROUP: nav links + controls — right anchored with zero right corner gap & generous gaps */}
             <div
               className="hidden md:flex"
-              style={{ alignItems: 'center', height: '64px', gap: '0', marginLeft: 'auto' }}
+              style={{ alignItems: 'center', height: '64px', gap: '16px', marginLeft: 'auto' }}
             >
-              {/* Nav links : bold 700, 20px side padding, 14px */}
+              {/* Nav links : bold 700, 16px side padding */}
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -283,7 +283,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
-                      padding: '0 20px',
+                      padding: '0 16px',
                       height: '64px',
                       fontSize: '14px',
                       fontWeight: 700,
@@ -302,7 +302,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     <span
                       className="pine-nav-underline"
                       style={{
-                        position: 'absolute', bottom: 0, left: '20px', right: '20px',
+                        position: 'absolute', bottom: 0, left: '16px', right: '16px',
                         height: '2px', backgroundColor: txtPrimary,
                         borderRadius: '2px 2px 0 0',
                         opacity: isActive ? 1 : 0,
@@ -325,7 +325,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '0 18px',
+                  padding: '0 14px',
                   height: '64px',
                   fontSize: '14px',
                   fontWeight: 700,
@@ -345,7 +345,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 <span
                   className="pine-nav-underline"
                   style={{
-                    position: 'absolute', bottom: 0, left: '18px', right: '18px',
+                    position: 'absolute', bottom: 0, left: '14px', right: '14px',
                     height: '2px', backgroundColor: txtPrimary,
                     borderRadius: '2px 2px 0 0',
                     opacity: isBankModalOpen ? 1 : 0,
@@ -356,41 +356,73 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               </button>
 
               {/* Separator */}
-              <div style={{ width: '1px', height: '20px', backgroundColor: border, margin: '0 12px' }} />
+              <div style={{ width: '1px', height: '20px', backgroundColor: border, margin: '0 4px' }} />
 
-              {/* Clean Icon-Only Theme Toggle (No Text) */}
-              <button
-                type="button" onClick={toggleTheme}
-                title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  border: `1px solid ${border}`,
-                  cursor: 'pointer',
-                  background: isDark ? '#051c1a' : '#c9f227',
-                  color: isDark ? '#ffffff' : '#051c1a',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.18s',
-                  boxShadow: isDark ? '0 0 10px rgba(201,242,39,0.35)' : '0 2px 8px rgba(0,0,0,0.15)',
-                  flexShrink: 0,
-                }}
-              >
-                {isDark ? <Sun style={{ width: 17, height: 17, color: '#c9f227' }} /> : <Moon style={{ width: 17, height: 17, color: '#051c1a' }} />}
-              </button>
-
-              {/* Pine Labs style Font Size Switcher (A- / A+) */}
+              {/* Segmented Sun ☀️ / Moon 🌙 Theme Switcher */}
               <div
                 style={{
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '2px',
-                  padding: '2px 4px',
-                  borderRadius: '10px',
-                  background: isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)',
+                  padding: '3px',
+                  borderRadius: '12px',
+                  backgroundColor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.20)',
                   border: `1px solid ${border}`,
+                  gap: '3px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => { if (isDark) toggleTheme(); }}
+                  title="Light Mode"
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: !isDark ? '#c9f227' : 'transparent',
+                    color: !isDark ? '#051c1a' : (isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)'),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.18s ease-in-out',
+                    boxShadow: !isDark ? '0 2px 8px rgba(0,0,0,0.18)' : 'none',
+                  }}
+                >
+                  <Sun style={{ width: 16, height: 16 }} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { if (!isDark) toggleTheme(); }}
+                  title="Dark Mode"
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: isDark ? '#051c1a' : 'transparent',
+                    color: isDark ? '#c9f227' : (isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)'),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.18s ease-in-out',
+                    boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.25)' : 'none',
+                  }}
+                >
+                  <Moon style={{ width: 16, height: 16 }} />
+                </button>
+              </div>
+
+              {/* Redesigned Font Size Segmented Toggle (A- / A+) */}
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '3px',
+                  borderRadius: '12px',
+                  backgroundColor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.20)',
+                  border: `1px solid ${border}`,
+                  gap: '3px',
                 }}
               >
                 <button
@@ -399,15 +431,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   disabled={fontSize <= MIN_FONT_SIZE}
                   title="Decrease font size"
                   style={{
-                    background: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : 'none',
-                    color: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#ffffff' : '#051c1a') : txtMuted,
+                    padding: '4px 11px',
+                    borderRadius: '8px',
                     border: 'none',
                     cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
+                    backgroundColor: fontSize < DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : 'transparent',
+                    color: fontSize < DEFAULT_FONT_SIZE
+                      ? (isDark ? '#c9f227' : '#051c1a')
+                      : (fontSize <= MIN_FONT_SIZE ? (isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)') : txtPrimary),
                     fontWeight: 800,
                     fontSize: '13px',
-                    transition: 'all 0.15s',
+                    transition: 'all 0.18s ease-in-out',
+                    boxShadow: fontSize < DEFAULT_FONT_SIZE ? '0 2px 8px rgba(0,0,0,0.18)' : 'none',
                   }}
                 >
                   A-
@@ -419,15 +454,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   disabled={fontSize >= MAX_FONT_SIZE}
                   title="Increase font size"
                   style={{
-                    background: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : 'none',
-                    color: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#ffffff' : '#051c1a') : txtMuted,
+                    padding: '4px 11px',
+                    borderRadius: '8px',
                     border: 'none',
                     cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
+                    backgroundColor: fontSize > DEFAULT_FONT_SIZE ? (isDark ? '#051c1a' : '#c9f227') : 'transparent',
+                    color: fontSize > DEFAULT_FONT_SIZE
+                      ? (isDark ? '#c9f227' : '#051c1a')
+                      : (fontSize >= MAX_FONT_SIZE ? (isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)') : txtPrimary),
                     fontWeight: 800,
                     fontSize: '14px',
-                    transition: 'all 0.15s',
+                    transition: 'all 0.18s ease-in-out',
+                    boxShadow: fontSize > DEFAULT_FONT_SIZE ? '0 2px 8px rgba(0,0,0,0.18)' : 'none',
                   }}
                 >
                   A+
@@ -448,7 +486,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               )}
 
               {user && (
-                <div style={{ display: 'flex', alignItems: 'center', height: '64px', gap: '0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', height: '64px', gap: '12px' }}>
                   <button
                     type="button"
                     onClick={() => setIsProfileModalOpen(true)}
@@ -459,7 +497,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
-                      padding: '0 20px',
+                      padding: '0 12px',
                       height: '64px',
                       fontSize: '14px',
                       fontWeight: 700,
@@ -479,7 +517,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     <span
                       className="pine-nav-underline"
                       style={{
-                        position: 'absolute', bottom: 0, left: '20px', right: '20px',
+                        position: 'absolute', bottom: 0, left: '12px', right: '12px',
                         height: '2px', backgroundColor: txtPrimary,
                         borderRadius: '2px 2px 0 0',
                         opacity: isProfileModalOpen ? 1 : 0,
@@ -492,7 +530,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     type="button"
                     onClick={logout}
                     title="Log Out"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', color: txtMuted, display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s', marginLeft: '4px' }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', color: txtMuted, display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s' }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(239, 68, 68, 0.15)'; el.style.color = '#ef4444'; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'none'; el.style.color = txtMuted; }}
                   >
