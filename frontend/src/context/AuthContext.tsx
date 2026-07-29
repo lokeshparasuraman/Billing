@@ -15,35 +15,54 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = 'owshika_auth_token';
+const USER_KEY = 'owshika_user_data';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(() => {
     return typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
   });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem(USER_KEY);
+      if (savedUser) {
+        try {
+          return JSON.parse(savedUser);
+        } catch (e) {
+          // ignore parsing error
+        }
+      }
+    }
+    return null;
+  });
+
+  // Always false initially if user & token are cached, ensuring 0ms instant page render with NO loading screen!
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const initAuth = async () => {
+    const checkAuthInBackground = async () => {
       if (token) {
         setAuthToken(token);
         try {
           const me = await getMeApi();
           setUser(me);
-        } catch (error) {
-          console.warn('Session check failed, clearing invalid token:', error);
-          logout();
+          localStorage.setItem(USER_KEY, JSON.stringify(me));
+        } catch (error: any) {
+          if (error?.response?.status === 401 || error?.response?.status === 403) {
+            console.warn('Session expired or invalid, logging out:', error);
+            logout();
+          }
         }
       }
-      setIsLoading(false);
     };
 
-    initAuth();
+    checkAuthInBackground();
   }, [token]);
 
   const login = async (email: string, password: string) => {
     const data = await loginApi(email, password);
     localStorage.setItem(TOKEN_KEY, data.token);
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
     setAuthToken(data.token);
     setToken(data.token);
     setUser(data.user);
@@ -52,6 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, name?: string) => {
     const data = await registerApi(email, password, name);
     localStorage.setItem(TOKEN_KEY, data.token);
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
     setAuthToken(data.token);
     setToken(data.token);
     setUser(data.user);
@@ -59,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
     setAuthToken(null);
     setToken(null);
     setUser(null);
