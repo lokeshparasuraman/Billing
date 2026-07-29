@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, Menu, X, ChevronRight, Keyboard, LogOut, User as UserIcon, Trash2, AlertTriangle, Landmark } from 'lucide-react';
+import { Sun, Moon, Menu, X, ChevronRight, Keyboard, LogOut, User as UserIcon, Trash2, AlertTriangle, Landmark, Receipt, History as HistoryIcon, Package } from 'lucide-react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useBillingStore } from '../../store/useBillingStore';
 import { useAuth } from '../../context/AuthContext';
@@ -152,9 +152,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   };
 
   const navItems = [
-    { label: 'New Bill', path: '/' },
-    { label: 'History', path: '/history' },
-    { label: 'Products', path: '/products' },
+    { label: 'New Bill', path: '/', icon: Receipt },
+    { label: 'History', path: '/history', icon: HistoryIcon },
+    { label: 'Products', path: '/products', icon: Package },
   ];
 
   /* ─── Theme tokens ─── */
@@ -534,31 +534,65 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           </button>
         </div>
 
-        {/* Nav items — pinelabs style with chevron */}
+        {/* Nav items — with high-contrast theme-matching icons before each item */}
         <div style={{ flex: 1 }}>
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
+            const ItemIcon = item.icon;
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setMobileOpen(false)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px', fontSize: '17px', fontWeight: isActive ? 700 : 600, color: isActive ? txtPrimary : txtMuted, textDecoration: 'none', borderBottom: `1px solid ${divider}`, transition: 'background 0.12s' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px 20px',
+                  fontSize: '17px',
+                  fontWeight: isActive ? 700 : 600,
+                  color: isActive ? txtPrimary : txtMuted,
+                  textDecoration: 'none',
+                  borderBottom: `1px solid ${divider}`,
+                  transition: 'background 0.12s',
+                }}
               >
-                <span>{item.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '10px',
+                      backgroundColor: isActive
+                        ? (isDark ? 'rgba(201,242,39,0.18)' : 'rgba(5,28,26,0.10)')
+                        : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'),
+                      border: `1px solid ${isActive ? (isDark ? 'rgba(201,242,39,0.4)' : 'rgba(5,28,26,0.25)') : border}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: isActive
+                        ? (isDark ? '#c9f227' : '#051c1a')
+                        : (isDark ? '#ffffff' : '#051c1a'),
+                      flexShrink: 0,
+                    }}
+                  >
+                    <ItemIcon style={{ width: 18, height: 18 }} />
+                  </div>
+                  <span>{item.label}</span>
+                </div>
                 <ChevronRight style={{ width: 18, height: 18, color: txtMuted }} />
               </Link>
             );
           })}
 
-          {/* Mobile Bank Details button */}
+          {/* Mobile Bank Details button with theme-matching icon */}
           <div
             onClick={handleOpenBankModal}
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '18px 20px',
+              padding: '16px 20px',
               fontSize: '17px',
               fontWeight: 600,
               color: txtPrimary,
@@ -567,8 +601,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               transition: 'background 0.12s',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Landmark style={{ width: 20, height: 20, color: '#c9f227' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '10px',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                  border: `1px solid ${border}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: isDark ? '#c9f227' : '#051c1a',
+                  flexShrink: 0,
+                }}
+              >
+                <Landmark style={{ width: 18, height: 18 }} />
+              </div>
               <span>Bank Details</span>
             </div>
             <ChevronRight style={{ width: 18, height: 18, color: txtMuted }} />
@@ -593,18 +642,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             >
               <div
                 style={{
-                  width: '34px',
-                  height: '34px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(201,242,39,0.15)',
-                  border: '1.5px solid rgba(201,242,39,0.3)',
+                  backgroundColor: isDark ? 'rgba(201,242,39,0.18)' : 'rgba(5,28,26,0.08)',
+                  border: `1.5px solid ${isDark ? 'rgba(201,242,39,0.35)' : 'rgba(5,28,26,0.2)'}`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  color: isDark ? '#c9f227' : '#051c1a',
                   flexShrink: 0,
                 }}
               >
-                <UserIcon style={{ width: 16, height: 16, color: '#c9f227' }} />
+                <UserIcon style={{ width: 18, height: 18 }} />
               </div>
               <div style={{ overflow: 'hidden' }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: txtPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
