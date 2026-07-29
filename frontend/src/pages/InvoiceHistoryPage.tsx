@@ -65,6 +65,17 @@ export const InvoiceHistoryPage: React.FC = () => {
     }
   };
 
+  const handleEditBill = async (inv: SavedInvoice) => {
+    try {
+      const full = await fetchInvoiceById(inv.id);
+      loadInvoiceForEditing(full);
+    } catch (err) {
+      console.error('Error fetching full invoice for editing:', err);
+      loadInvoiceForEditing(inv);
+    }
+    navigate('/');
+  };
+
   const handleDeleteInvoice = async (id: string, invNum: string) => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete invoice ${invNum} from history?\n\nThis action cannot be undone.`
@@ -271,10 +282,7 @@ export const InvoiceHistoryPage: React.FC = () => {
                           <div className="flex items-center justify-center space-x-2">
                             <button
                               type="button"
-                              onClick={() => {
-                                loadInvoiceForEditing(inv);
-                                navigate('/');
-                              }}
+                              onClick={() => handleEditBill(inv)}
                               className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-full text-xs font-extrabold transition-all border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.98] focus:outline-none"
                               title={`Edit Invoice ${inv.invoiceNumber}`}
                             >
@@ -337,10 +345,7 @@ export const InvoiceHistoryPage: React.FC = () => {
                     <div className="flex items-center gap-2 pt-1">
                       <button
                         type="button"
-                        onClick={() => {
-                          loadInvoiceForEditing(inv);
-                          navigate('/');
-                        }}
+                        onClick={() => handleEditBill(inv)}
                         className="inline-flex items-center justify-center space-x-1 px-3 py-2 rounded-full text-xs font-extrabold transition-all border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.98] focus:outline-none"
                       >
                         <Edit3 className="h-3.5 w-3.5" />

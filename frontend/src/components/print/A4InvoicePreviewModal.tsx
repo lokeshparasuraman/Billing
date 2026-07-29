@@ -5,6 +5,7 @@ import { SavedInvoice } from '../../types/billing';
 import { PrintableInvoice } from './PrintableInvoice';
 import { Printer, X, ZoomIn, ZoomOut, FileText, Download, Edit3 } from 'lucide-react';
 import { useBillingStore } from '../../store/useBillingStore';
+import { fetchInvoiceById } from '../../services/api';
 
 interface A4InvoicePreviewModalProps {
   isOpen: boolean;
@@ -156,9 +157,14 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
             {invoice && (
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   onClose();
-                  useBillingStore.getState().loadInvoiceForEditing(invoice);
+                  try {
+                    const full = await fetchInvoiceById(invoice.id);
+                    useBillingStore.getState().loadInvoiceForEditing(full);
+                  } catch (e) {
+                    useBillingStore.getState().loadInvoiceForEditing(invoice);
+                  }
                   if (window.location.pathname !== '/') {
                     window.location.href = '/';
                   }

@@ -389,20 +389,24 @@ export const useBillingStore = create<BillingState>((set, get) => ({
   },
 
   loadInvoiceForEditing: (invoice: SavedInvoice) => {
-    const loadedRows: InvoiceItemRow[] = (invoice.items || []).map((item, idx) => {
+    const loadedRows: InvoiceItemRow[] = (invoice.items || []).map((item: any, idx) => {
+      const isLabour = item.partNumber === 'LABOUR' || item.itemType === 'LABOUR';
+      const isMisc = item.partNumber === 'MISC-SPARES' || item.itemType === 'SPARES_MISC';
+
       const row: InvoiceItemRow = {
-        rowId: `row_${Date.now()}_edit_${idx}`,
+        rowId: item.id || `row_${Date.now()}_edit_${idx}`,
+        itemType: isLabour ? 'LABOUR' : 'SPARES',
         productId: item.productId || '',
-        partNumber: item.partNumber || 'N/A',
-        name: item.productName || 'Item',
+        partNumber: item.partNumber || (isLabour ? 'LABOUR' : (isMisc ? 'MISC-SPARES' : 'N/A')),
+        name: item.productName || item.name || 'Item',
         hsn: item.hsn || 'N/A',
-        unit: item.unit || 'PCS',
-        quantity: item.quantity || 1,
+        unit: item.unit || (isLabour ? 'JOB' : 'PCS'),
+        quantity: item.quantity !== undefined ? item.quantity : 1,
         price: item.price !== undefined ? item.price : '',
-        discount: item.discount || 0,
+        discount: item.discount !== undefined ? item.discount : 0,
         gstRate: item.gstRate !== undefined ? item.gstRate : 18,
         gstAmount: item.gstAmount || 0,
-        taxableAmount: (item.quantity || 1) * (item.price || 0) - (item.discount || 0),
+        taxableAmount: item.taxableAmount || 0,
         total: item.total || 0,
       };
       return calculateRowTotals(row);
@@ -420,7 +424,12 @@ export const useBillingStore = create<BillingState>((set, get) => ({
         customerPhone: invoice.customerPhone || '',
         customerAddress: invoice.customerAddress || '',
         paymentMode: (invoice.paymentMode as any) || 'CASH',
-        transportDetails: invoice.transportDetails || {
+        transportDetails: invoice.transportDetails ? {
+          fromLocation: invoice.transportDetails.fromLocation || storeAddress,
+          toLocation: invoice.transportDetails.toLocation || '',
+          vehicleNumber: invoice.transportDetails.vehicleNumber || '',
+          transporterName: invoice.transportDetails.transporterName || '',
+        } : {
           fromLocation: storeAddress,
           toLocation: '',
           vehicleNumber: '',
