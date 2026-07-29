@@ -118,7 +118,7 @@ model StoreSetting {
   email         String   @default("owshikaentt@gmail.com")
   gstin         String   @default("33BAEPP2449B1Z3")
   phone         String   @default("+91 9445662637")
-  address       String   @default("4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701")
+  address       String   @default("4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701")
   bankName      String   @default("")
   accountNumber String   @default("")
   ifscCode      String   @default("")

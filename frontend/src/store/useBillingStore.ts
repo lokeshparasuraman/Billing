@@ -23,7 +23,7 @@ const defaultStoreDetails: StoreDetails = {
   email: 'owshikaentt@gmail.com',
   gstin: '33BAEPP2449B1Z3',
   phone: '+91 9445662637',
-  address: '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701',
+  address: '4/783, Roller Flour Mills, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701',
   bankName: '',
   accountNumber: '',
   ifscCode: '',
