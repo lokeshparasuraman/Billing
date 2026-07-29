@@ -1095,7 +1095,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             <form onSubmit={handleSaveBankDetails} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                  Bank Name (Letters Only)
+                  Bank Name
                 </label>
                 <input
                   type="text"
@@ -1103,7 +1103,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   value={bankForm.bankName}
                   onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value.replace(/[^a-zA-Z\s.&'-]/g, '').toUpperCase() })}
                   onKeyDown={(e) => {
-                    // Prevent numeric keys (0-9) from being typed into Bank Name
                     if (/[0-9]/.test(e.key)) {
                       e.preventDefault();
                     }
@@ -1125,7 +1124,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                  Account Number (Numbers Only)
+                  Account Number
                 </label>
                 <input
                   type="text"
@@ -1135,7 +1134,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   value={bankForm.accountNumber}
                   onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value.replace(/\D/g, '').slice(0, 18) })}
                   onKeyDown={(e) => {
-                    // Prevent non-numeric keypresses except navigation/editing keys
                     if (
                       !/[0-9]/.test(e.key) &&
                       !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'].includes(e.key) &&
@@ -1144,7 +1142,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       e.preventDefault();
                     }
                   }}
-                  placeholder="e.g. 41234567890 (9 to 18 numbers)"
+                  placeholder="e.g. 41234567890"
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -1162,7 +1160,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                    IFSC Code (Alphanumeric)
+                    IFSC Code
                   </label>
                   <input
                     type="text"
@@ -1186,7 +1184,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                    Branch Name (Letters &amp; Numbers)
+                    Branch Name
                   </label>
                   <input
                     type="text"
@@ -1211,13 +1209,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                  UPI ID (Optional)
+                  UPI ID
                 </label>
                 <input
                   type="text"
                   value={bankForm.upiId}
                   onChange={(e) => setBankForm({ ...bankForm, upiId: e.target.value.replace(/[^a-zA-Z0-9.\-_@]/g, '').toLowerCase() })}
-                  placeholder="e.g. owshika@sbi or 9445662637@paytm"
+                  placeholder="e.g. owshika@sbi"
                   style={{
                     width: '100%',
                     padding: '10px 12px',
