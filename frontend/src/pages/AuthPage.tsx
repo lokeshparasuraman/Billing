@@ -335,43 +335,44 @@ export const AuthPage: React.FC = () => {
                 onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
                 onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
               />
-              {/* Eye toggle button — Solid Badge to pop out over ANY background/autofill */}
+              {/* Eye toggle button — Google / Microsoft style: borderless, sleek & modern */}
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 title={showPassword ? 'Hide password' : 'Show password'}
                 style={{
                   position: 'absolute',
-                  right: '8px',
+                  right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  backgroundColor: '#051c1a',
-                  border: '1.5px solid #c9f227',
-                  borderRadius: '8px',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
                   cursor: 'pointer',
-                  padding: '5px 7px',
+                  padding: '6px',
+                  borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   zIndex: 30,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                  transition: 'all 0.2s',
+                  transition: 'background-color 0.15s, color 0.15s',
+                  color: showPassword ? '#c9f227' : 'rgba(255, 255, 255, 0.75)',
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLElement;
-                  el.style.backgroundColor = '#c9f227';
-                  el.style.color = '#051c1a';
+                  el.style.backgroundColor = 'rgba(255, 255, 255, 0.12)';
+                  el.style.color = '#c9f227';
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLElement;
-                  el.style.backgroundColor = '#051c1a';
-                  el.style.color = '#c9f227';
+                  el.style.backgroundColor = 'transparent';
+                  el.style.color = showPassword ? '#c9f227' : 'rgba(255, 255, 255, 0.75)';
                 }}
               >
                 {showPassword ? (
-                  <EyeOff style={{ width: 17, height: 17 }} />
+                  <EyeOff style={{ width: 19, height: 19 }} />
                 ) : (
-                  <Eye style={{ width: 17, height: 17 }} />
+                  <Eye style={{ width: 19, height: 19 }} />
                 )}
               </button>
             </div>
