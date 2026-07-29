@@ -24,11 +24,12 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
   const formattedDate = invoice?.invoiceDate
     ? new Date(invoice.invoiceDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/[\/\\]/g, '-')
     : 'Date';
-  const pdfFilename = `Bill_${invoice?.invoiceNumber || 'OE'}_${formattedDate}`;
+  const sanitizeName = invoice?.customerName ? invoice.customerName.trim().replace(/[^a-zA-Z0-9_-]/g, '_') : 'Customer';
+  const pdfFilename = `Bill_${invoice?.invoiceNumber || 'OE'}_${sanitizeName}_${formattedDate}`;
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: pdfFilename,
+    documentTitle: `${pdfFilename}.pdf`,
   });
 
   const handleDownloadBill = () => {
@@ -39,10 +40,10 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
 <html>
 <head>
   <meta charset="utf-8">
-  <title>${pdfFilename}</title>
+  <title>${pdfFilename}.pdf</title>
   <style>
     @page { size: A4 portrait; margin: 0mm !important; }
-    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; padding: 0; margin: 0; }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; padding: 10mm; margin: 0; }
   </style>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -57,7 +58,7 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${pdfFilename}.html`;
+      a.download = `${pdfFilename}.pdf.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -65,6 +66,11 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
     } catch (err) {
       console.error('Failed to download bill:', err);
     }
+  };
+
+  const handlePrintAndSave = () => {
+    handlePrint();
+    handleDownloadBill();
   };
 
   // Calculate dynamic auto-fit scale so A4 sheet (794px width) fits mobile viewport cleanly without horizontal overflow
@@ -181,11 +187,12 @@ export const A4InvoicePreviewModal: React.FC<A4InvoicePreviewModalProps> = ({
 
             <button
               type="button"
-              onClick={() => handlePrint()}
+              onClick={handlePrintAndSave}
               className="bg-[#c9f227] hover:bg-[#d6f944] text-[#051c1a] font-black text-xs px-3.5 py-1.5 rounded-xl flex items-center space-x-1.5 active:scale-95 transition-all border-0 shadow-md shadow-[#c9f227]/20"
+              title="Print Bill or Save as PDF"
             >
               <Printer className="h-3.5 w-3.5 shrink-0" />
-              <span>Print Bill</span>
+              <span>Print / Save PDF</span>
             </button>
 
             <button

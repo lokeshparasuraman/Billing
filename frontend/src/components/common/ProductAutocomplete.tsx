@@ -148,7 +148,7 @@ export const ProductAutocomplete: React.FC<ProductAutocompleteProps> = ({
                 </div>
                 <div style={{ textAlign: 'right', marginLeft: 8, flexShrink: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: 12, fontFamily: 'monospace', color: isHL ? accent : itemNorm }}>₹{product.price.toFixed(2)}</div>
-                  <div style={{ fontSize: 10, color: itemMuted }}>GST {product.gst}% | {product.unit}</div>
+                  <div style={{ fontSize: 10, color: itemMuted }}>GST {product.gst}%</div>
                 </div>
               </li>
             );

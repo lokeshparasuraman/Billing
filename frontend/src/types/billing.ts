@@ -5,7 +5,7 @@ export interface Product {
   hsn: string;
   gst: number;
   price: number;
-  unit: string;
+  unit?: string;
   stock: number;
 }
 
@@ -34,7 +34,7 @@ export interface InvoiceItemRow {
   partNumber: string;
   name: string;
   hsn: string;
-  unit: string;
+  unit?: string;
   quantity: number | '';
   price: number | ''; // Entered unit price (Exclusive or Inclusive depending on taxMode)
   discount: number | ''; // Percentage
