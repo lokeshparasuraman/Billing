@@ -227,15 +227,19 @@ export const ProductRow: React.FC<ProductRowProps> = ({
                 min="0"
                 max="100"
                 step="any"
-                value={row.gstRate === undefined || row.gstRate === null ? '' : row.gstRate}
+                value={row.gstRate === undefined || row.gstRate === null || row.gstRate === 0 ? '' : row.gstRate}
                 onFocus={(e) => e.target.select()}
                 onClick={(e) => (e.target as HTMLInputElement).select()}
                 onChange={e => {
-                  const raw = e.target.value;
-                  const val = raw === '' ? 0 : parseFloat(raw);
-                  onUpdate({ gstRate: isNaN(val) ? 0 : Math.max(0, Math.min(100, val)) });
+                  const cleanRaw = e.target.value.replace(/^0+(?=\d)/, '');
+                  if (cleanRaw === '') {
+                    onUpdate({ gstRate: 0 });
+                  } else {
+                    const val = parseFloat(cleanRaw);
+                    onUpdate({ gstRate: isNaN(val) ? 0 : Math.max(0, Math.min(100, val)) });
+                  }
                 }}
-                placeholder="18"
+                placeholder="0"
                 style={{ ...inputStyle, textAlign: 'right', paddingRight: '22px' }}
               />
               <span className="absolute right-2 text-xs font-bold pointer-events-none" style={{ color: txtMuted }}>%</span>
@@ -375,15 +379,19 @@ export const ProductRow: React.FC<ProductRowProps> = ({
               min="0"
               max="100"
               step="any"
-              value={row.gstRate === undefined || row.gstRate === null ? '' : row.gstRate}
+              value={row.gstRate === undefined || row.gstRate === null || row.gstRate === 0 ? '' : row.gstRate}
               onFocus={(e) => e.target.select()}
               onClick={(e) => (e.target as HTMLInputElement).select()}
               onChange={e => {
-                const raw = e.target.value;
-                const val = raw === '' ? 0 : parseFloat(raw);
-                onUpdate({ gstRate: isNaN(val) ? 0 : Math.max(0, Math.min(100, val)) });
+                const cleanRaw = e.target.value.replace(/^0+(?=\d)/, '');
+                if (cleanRaw === '') {
+                  onUpdate({ gstRate: 0 });
+                } else {
+                  const val = parseFloat(cleanRaw);
+                  onUpdate({ gstRate: isNaN(val) ? 0 : Math.max(0, Math.min(100, val)) });
+                }
               }}
-              placeholder="18"
+              placeholder="0"
               style={{ ...inputStyle, textAlign: 'right', paddingRight: '22px' }}
             />
             <span className="absolute right-2 text-xs font-bold pointer-events-none" style={{ color: txtMuted }}>%</span>
