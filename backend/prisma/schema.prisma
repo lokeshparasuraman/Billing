@@ -61,23 +61,25 @@ model Customer {
 }
 
 model Invoice {
-  id              String   @id @default(uuid())
-  invoiceNumber   String
-  invoiceDate     DateTime @default(now())
-  customerName    String
-  customerPhone   String?
-  customerAddress String?
-  paymentMode     String   @default("CASH")
-  subtotal        Float
-  discountTotal   Float    @default(0)
-  cgstTotal       Float
-  sgstTotal       Float
-  igstTotal       Float    @default(0)
-  roundOff        Float    @default(0)
-  grandTotal      Float
-  amountInWords   String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(uuid())
+  invoiceNumber    String
+  invoiceDate      DateTime @default(now())
+  billType         String   @default("CUSTOMER")
+  customerName     String
+  customerPhone    String?
+  customerAddress  String?
+  paymentMode      String   @default("CASH")
+  transportDetails Json?
+  subtotal         Float
+  discountTotal    Float    @default(0)
+  cgstTotal        Float
+  sgstTotal        Float
+  igstTotal        Float    @default(0)
+  roundOff         Float    @default(0)
+  grandTotal       Float
+  amountInWords    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)

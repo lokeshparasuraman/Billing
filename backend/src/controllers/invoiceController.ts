@@ -36,12 +36,16 @@ export const createInvoice = async (req: AuthenticatedRequest, res: Response) =>
     const {
       invoiceNumber,
       invoiceDate,
+      billType,
       customerName,
       customerPhone,
       customerAddress,
       paymentMode,
+      transportDetails,
       items,
     } = req.body;
+
+    const finalBillType = billType === 'TRANSPORT' ? 'TRANSPORT' : 'CUSTOMER';
 
     const finalCustomerName = (customerName && String(customerName).trim()) || 'Owshika Enterprises';
 
@@ -187,10 +191,12 @@ export const createInvoice = async (req: AuthenticatedRequest, res: Response) =>
         userId,
         invoiceNumber: finalInvNum,
         invoiceDate: invoiceDate ? new Date(invoiceDate) : new Date(),
+        billType: finalBillType,
         customerName: finalCustomerName,
         customerPhone: customerPhone || null,
         customerAddress: customerAddress || null,
         paymentMode: paymentMode || 'CASH',
+        transportDetails: finalBillType === 'TRANSPORT' && transportDetails ? transportDetails : undefined,
         subtotal: Number(calculatedSubtotal.toFixed(2)),
         discountTotal: Number(calculatedDiscountTotal.toFixed(2)),
         cgstTotal: Number(calculatedCgstTotal.toFixed(2)),
@@ -226,9 +232,7 @@ export const getInvoices = async (req: AuthenticatedRequest, res: Response) => {
       where: { userId },
       orderBy: { createdAt: 'desc' },
       include: {
-        _count: {
-          select: { items: true },
-        },
+        items: true,
       },
     });
     res.json(invoices);
