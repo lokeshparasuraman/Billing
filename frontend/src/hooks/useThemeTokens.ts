@@ -21,12 +21,12 @@ export function useThemeTokens() {
   const pageBg      = isDark ? '#051c1a'                   : '#e2e8f0';
 
   /* ── Inverted Card & Surface tokens ─────────────────────────────
-   * Dark Mode  → Off-white card (#ebedf0) with dark text (#051c1a) & dark CTA buttons
+   * Dark Mode  → Warm Beige/Cream card (#F5F5DC) with dark text (#051c1a) & dark CTA buttons
    * Light Mode → Dark teal card (#051c1a) with white text (#ffffff) & lime CTA buttons
    * ─────────────────────────────────────────────────────────────── */
-  const surfaceBg      = isDark ? '#ebedf0'                : '#051c1a';
-  const surface2Bg     = isDark ? '#e2e8f0'                : '#0f2e2b';
-  const cardBorder     = isDark ? 'rgba(0,0,0,0.10)'       : 'rgba(255,255,255,0.12)';
+  const surfaceBg      = isDark ? '#F5F5DC'                : '#051c1a';
+  const surface2Bg     = isDark ? '#e6e6cc'                : '#0f2e2b';
+  const cardBorder     = isDark ? 'rgba(0,0,0,0.12)'       : 'rgba(255,255,255,0.12)';
   const cardDivide     = isDark ? 'rgba(0,0,0,0.08)'       : 'rgba(255,255,255,0.08)';
   const textStrong     = isDark ? '#051c1a'                : '#ffffff';
   const textMuted      = isDark ? 'rgba(5,28,26,0.65)'     : 'rgba(255,255,255,0.65)';
@@ -34,8 +34,8 @@ export function useThemeTokens() {
   const inputBorder    = isDark ? 'rgba(0,0,0,0.15)'       : 'rgba(255,255,255,0.14)';
 
   /* ── Inverted card aliases (used by Billing, Catalog, History, Navbar) ── */
-  const inv_cardBg     = isDark ? '#ebedf0'                : '#051c1a';
-  const inv_cardBorder = isDark ? 'rgba(0,0,0,0.10)'       : 'rgba(255,255,255,0.12)';
+  const inv_cardBg     = isDark ? '#F5F5DC'                : '#051c1a';
+  const inv_cardBorder = isDark ? 'rgba(0,0,0,0.12)'       : 'rgba(255,255,255,0.12)';
   const inv_cardDivide = isDark ? 'rgba(0,0,0,0.08)'       : 'rgba(255,255,255,0.08)';
   const inv_textStrong = isDark ? '#051c1a'                : '#ffffff';
   const inv_textMuted  = isDark ? 'rgba(5,28,26,0.65)'     : 'rgba(255,255,255,0.65)';
@@ -43,7 +43,7 @@ export function useThemeTokens() {
   const inv_inputBorder= isDark ? 'rgba(0,0,0,0.15)'       : 'rgba(255,255,255,0.14)';
 
   /* ── Button & Accent tokens ─────────────────────────────────────
-   * On Off-white card (Dark mode) → Dark Forest Teal button (#051c1a) with White text
+   * On Warm Beige card (Dark mode) → Dark Forest Teal button (#051c1a) with White text
    * On Dark Teal card (Light mode) → Electric Lime button (#c9f227) with Dark Teal text
    * ─────────────────────────────────────────────────────────────── */
   const btnPrimaryBg    = isDark ? '#051c1a'               : '#c9f227';
@@ -56,7 +56,7 @@ export function useThemeTokens() {
 
   /* ── Auth page tokens ──────────────────────────────────────── */
   const authBg          = isDark ? '#051c1a'                   : '#dde3ec';
-  const authCardBg      = isDark ? '#ebedf0'                   : '#051c1a';
+  const authCardBg      = isDark ? '#F5F5DC'                   : '#051c1a';
   const authCardBorder  = isDark ? 'rgba(0,0,0,0.10)'          : 'rgba(255,255,255,0.12)';
   const authCardShadow  = isDark
     ? '0 24px 60px rgba(0,0,0,0.15)'
