@@ -333,34 +333,43 @@ export const AuthPage: React.FC = () => {
                 onFocus={(e) => (e.target.style.borderColor = '#c9f227')}
                 onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
               />
-              {/* Eye toggle button */}
+              {/* Eye toggle button — 100% visible in all modes */}
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 title={showPassword ? 'Hide password' : 'Show password'}
                 style={{
                   position: 'absolute',
-                  right: '12px',
+                  right: '10px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '8px',
                   cursor: 'pointer',
-                  color: showPassword ? '#c9f227' : 'rgba(255,255,255,0.35)',
-                  padding: '4px',
+                  padding: '6px',
                   display: 'flex',
                   alignItems: 'center',
-                  transition: 'color 0.2s',
+                  justifyContent: 'center',
+                  zIndex: 10,
+                  transition: 'all 0.2s',
                 }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#c9f227')}
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.color = showPassword ? '#c9f227' : 'rgba(255,255,255,0.35)')
-                }
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.backgroundColor = 'rgba(201, 242, 39, 0.2)';
+                  el.style.borderColor = '#c9f227';
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                  el.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                }}
               >
-                {showPassword
-                  ? <EyeOff style={{ width: 17, height: 17 }} />
-                  : <Eye style={{ width: 17, height: 17 }} />
-                }
+                {showPassword ? (
+                  <EyeOff style={{ width: 18, height: 18, color: '#c9f227' }} />
+                ) : (
+                  <Eye style={{ width: 18, height: 18, color: '#ffffff' }} />
+                )}
               </button>
             </div>
           </div>
