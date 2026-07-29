@@ -233,19 +233,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   /* ─── Theme tokens — all using inverted card design (billing page style) ─── */
   const {
     isDark,
-    // Navbar bar itself stays neutral (page bg)
-    pageBg, cardBorder, textStrong: txtPrimary, textMuted: txtMuted,
-    // ALL modals, popups, cards → inverted billing card style
     inv_cardBg, inv_cardBorder, inv_cardDivide,
+    inv_textStrong: txtPrimary, inv_textMuted: txtMuted,
     inv_textStrong: mTxt, inv_textMuted: mMuted,
     inv_inputBg: mInputBg, inv_inputBorder: mInputBorder,
     accent,
   } = useThemeTokens();
-  const navBg = isDark ? 'rgba(5,28,26,0.80)' : 'rgba(226,232,240,0.90)';
-  const mobileBg = isDark ? '#051c1a' : '#e2e8f0';
-  const border = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
-  const divider = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
-  const iconHoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const navBg = isDark ? 'rgba(235,237,240,0.92)' : 'rgba(5,28,26,0.92)';
+  const mobileBg = isDark ? '#ebedf0' : '#051c1a';
+  const border = isDark ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.12)';
+  const divider = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+  const iconHoverBg = isDark ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)';
 
   return (
     <>
