@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sun, Moon, Menu, X, ChevronRight, Keyboard, LogOut, User as UserIcon, Trash2, AlertTriangle, Landmark, Receipt, History as HistoryIcon, Package } from 'lucide-react';
 import { useThemeMode } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { useBillingStore } from '../../store/useBillingStore';
 import { useAuth } from '../../context/AuthContext';
 import { BrandLogo } from './BrandLogo';
@@ -13,7 +14,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const location = useLocation();
-  const { mode, toggleTheme } = useThemeMode();
+  const { toggleTheme } = useThemeMode();
   const { rows, clearBillingForm, storeDetails, setStoreDetails } = useBillingStore();
   const { user, logout, deleteAccount } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -229,13 +230,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
     { label: 'Products', path: '/products', icon: Package },
   ];
 
-  /* ─── Theme tokens ─── */
-  const isDark = mode === 'dark';
+  /* ─── Theme tokens — all using inverted card design (billing page style) ─── */
+  const {
+    isDark,
+    // Navbar bar itself stays neutral (page bg)
+    pageBg, cardBorder, textStrong: txtPrimary, textMuted: txtMuted,
+    // ALL modals, popups, cards → inverted billing card style
+    inv_cardBg, inv_cardBorder, inv_cardDivide,
+    inv_textStrong: mTxt, inv_textMuted: mMuted,
+    inv_inputBg: mInputBg, inv_inputBorder: mInputBorder,
+    accent,
+  } = useThemeTokens();
   const navBg = isDark ? 'rgba(5,28,26,0.80)' : 'rgba(226,232,240,0.90)';
   const mobileBg = isDark ? '#051c1a' : '#e2e8f0';
   const border = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
-  const txtPrimary = isDark ? '#ffffff' : '#051c1a';
-  const txtMuted = isDark ? 'rgba(255,255,255,0.60)' : 'rgba(5,28,26,0.55)';
   const divider = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
   const iconHoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
 
@@ -405,8 +413,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 >
                   <div
                     style={{
-                      backgroundColor: isDark ? '#0a2421' : '#051c1a',
-                      border: '1px solid rgba(255,255,255,0.12)',
+                      backgroundColor: inv_cardBg,
+                      border: `1px solid ${inv_cardBorder}`,
                       borderRadius: '12px',
                       padding: '4px 6px',
                       display: 'flex',
@@ -422,12 +430,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       disabled={fontSize <= MIN_FONT_SIZE}
                       title="Decrease font size (-1px)"
                       style={{
-                        background: 'rgba(255,255,255,0.08)',
+                        background: isDark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.12)',
                         border: 'none',
                         cursor: fontSize <= MIN_FONT_SIZE ? 'not-allowed' : 'pointer',
                         padding: '6px 10px',
                         borderRadius: '8px',
-                        color: fontSize <= MIN_FONT_SIZE ? 'rgba(255,255,255,0.3)' : '#ffffff',
+                        color: fontSize <= MIN_FONT_SIZE ? mMuted : mTxt,
                         fontWeight: 800,
                         fontSize: '13px',
                         transition: 'all 0.12s',
@@ -446,7 +454,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                         cursor: 'pointer',
                         padding: '4px 8px',
                         borderRadius: '6px',
-                        color: fontSize === DEFAULT_FONT_SIZE ? '#c9f227' : 'rgba(255,255,255,0.85)',
+                        color: fontSize === DEFAULT_FONT_SIZE ? '#c9f227' : mTxt,
                         fontWeight: 800,
                         fontSize: '12px',
                         fontFamily: 'monospace',
@@ -462,12 +470,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       disabled={fontSize >= MAX_FONT_SIZE}
                       title="Increase font size (+1px)"
                       style={{
-                        background: 'rgba(255,255,255,0.08)',
+                        background: isDark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.12)',
                         border: 'none',
                         cursor: fontSize >= MAX_FONT_SIZE ? 'not-allowed' : 'pointer',
                         padding: '6px 10px',
                         borderRadius: '8px',
-                        color: fontSize >= MAX_FONT_SIZE ? 'rgba(255,255,255,0.3)' : '#ffffff',
+                        color: fontSize >= MAX_FONT_SIZE ? mMuted : mTxt,
                         fontWeight: 800,
                         fontSize: '15px',
                         transition: 'all 0.12s',
@@ -868,9 +876,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           <div
             className="relative w-full max-w-md rounded-2xl p-6 shadow-2xl overflow-hidden animate-fadeIn"
             style={{
-              backgroundColor: isDark ? '#0a2421' : '#f1f5f9',
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
-              color: txtPrimary,
+              backgroundColor: inv_cardBg,
+              border: `1px solid ${inv_cardBorder}`,
+              color: mTxt,
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -893,8 +901,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   <UserIcon style={{ width: 20, height: 20 }} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>User Profile</h3>
-                  <p style={{ margin: 0, fontSize: '12px', color: txtMuted }}>Account details & settings</p>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: mTxt }}>User Profile</h3>
+                  <p style={{ margin: 0, fontSize: '12px', color: mMuted }}>Account details & settings</p>
                 </div>
               </div>
               <button
@@ -903,7 +911,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   setIsProfileModalOpen(false);
                   setIsConfirmDelete(false);
                 }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: txtMuted }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: mMuted }}
               >
                 <X style={{ width: 20, height: 20 }} />
               </button>
@@ -912,8 +920,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             {/* Profile Info Cards */}
             <div
               style={{
-                backgroundColor: isDark ? 'rgba(5,28,26,0.6)' : 'rgba(0,0,0,0.03)',
-                border: `1px solid ${border}`,
+                backgroundColor: isDark ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.08)',
+                border: `1px solid ${inv_cardDivide}`,
                 borderRadius: '14px',
                 padding: '16px',
                 marginBottom: '20px',
@@ -923,21 +931,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               }}
             >
               <div>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Full Name / Owner
                 </span>
-                <div style={{ fontSize: '14px', fontWeight: 700, marginTop: '2px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, marginTop: '2px', color: mTxt }}>
                   {user.name || 'N/A'}
                 </div>
               </div>
 
-              <div style={{ height: '1px', backgroundColor: border }} />
+              <div style={{ height: '1px', backgroundColor: inv_cardDivide }} />
 
               <div>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Email Address
                 </span>
-                <div style={{ fontSize: '14px', fontWeight: 600, marginTop: '2px', wordBreak: 'break-all' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, marginTop: '2px', wordBreak: 'break-all', color: mTxt }}>
                   {user.email}
                 </div>
               </div>
@@ -975,7 +983,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   <AlertTriangle style={{ width: 18, height: 18 }} />
                   <span>Delete Account Permanently?</span>
                 </div>
-                <p style={{ fontSize: '12px', color: txtMuted, margin: '0 0 14px', lineHeight: 1.4 }}>
+                <p style={{ fontSize: '12px', color: mMuted, margin: '0 0 14px', lineHeight: 1.4 }}>
                   This will permanently delete your account, saved products, and invoices. This action cannot be undone.
                 </p>
                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -987,9 +995,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       flex: 1,
                       padding: '10px',
                       borderRadius: '10px',
-                      border: `1px solid ${border}`,
-                      backgroundColor: 'transparent',
-                      color: txtPrimary,
+                      border: `1px solid ${inv_cardDivide}`,
+                      backgroundColor: isDark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.12)',
+                      color: mTxt,
                       fontWeight: 700,
                       fontSize: '13px',
                       cursor: 'pointer',
@@ -1075,9 +1083,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           <div
             className="relative w-full max-w-md rounded-2xl p-5 sm:p-6 shadow-2xl overflow-hidden my-auto animate-fadeIn"
             style={{
-              backgroundColor: isDark ? '#0a2421' : '#f1f5f9',
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
-              color: txtPrimary,
+              backgroundColor: inv_cardBg,
+              border: `1px solid ${inv_cardBorder}`,
+              color: mTxt,
               maxHeight: '90vh',
               overflowY: 'auto',
               overflowX: 'hidden',
@@ -1110,7 +1118,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               <button
                 type="button"
                 onClick={() => setIsBankModalOpen(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: txtMuted }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: mMuted }}
               >
                 <X style={{ width: 20, height: 20 }} />
               </button>
@@ -1119,7 +1127,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
             {/* Form */}
             <form onSubmit={handleSaveBankDetails} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                   Bank Name
                 </label>
                 <input
@@ -1132,9 +1140,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     width: '100%',
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    border: `1px solid ${border}`,
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                    color: txtPrimary,
+                    border: `1px solid ${mInputBorder}`,
+                    backgroundColor: mInputBg,
+                    color: mTxt,
                     fontSize: '13px',
                     fontWeight: 600,
                     boxSizing: 'border-box',
@@ -1143,7 +1151,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                   Account Number (Numbers Only)
                 </label>
                 <input
@@ -1156,9 +1164,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     width: '100%',
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    border: `1px solid ${border}`,
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                    color: txtPrimary,
+                    border: `1px solid ${mInputBorder}`,
+                    backgroundColor: mInputBg,
+                    color: mTxt,
                     fontSize: '13px',
                     fontWeight: 600,
                     boxSizing: 'border-box',
@@ -1168,7 +1176,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                     IFSC Code
                   </label>
                   <input
@@ -1181,9 +1189,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       width: '100%',
                       padding: '10px 12px',
                       borderRadius: '10px',
-                      border: `1px solid ${border}`,
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                      color: txtPrimary,
+                      border: `1px solid ${mInputBorder}`,
+                      backgroundColor: mInputBg,
+                      color: mTxt,
                       fontSize: '13px',
                       fontWeight: 600,
                       boxSizing: 'border-box',
@@ -1192,7 +1200,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                     Branch Name
                   </label>
                   <input
@@ -1205,9 +1213,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       width: '100%',
                       padding: '10px 12px',
                       borderRadius: '10px',
-                      border: `1px solid ${border}`,
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                      color: txtPrimary,
+                      border: `1px solid ${mInputBorder}`,
+                      backgroundColor: mInputBg,
+                      color: mTxt,
                       fontSize: '13px',
                       fontWeight: 600,
                       boxSizing: 'border-box',
@@ -1217,7 +1225,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: mMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                   UPI ID (Optional)
                 </label>
                 <input
@@ -1229,9 +1237,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     width: '100%',
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    border: `1px solid ${border}`,
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                    color: txtPrimary,
+                    border: `1px solid ${mInputBorder}`,
+                    backgroundColor: mInputBg,
+                    color: mTxt,
                     fontSize: '13px',
                     fontWeight: 600,
                     boxSizing: 'border-box',

@@ -7,7 +7,12 @@ import { A4InvoicePreviewModal } from '../components/print/A4InvoicePreviewModal
 import { useThemeTokens } from '../hooks/useThemeTokens';
 
 export const InvoiceHistoryPage: React.FC = () => {
-  const { isDark, surfaceBg: cardBg, cardBorder, cardDivide, textStrong, textMuted, inputBg, inputBorder, accentText } = useThemeTokens();
+  const { isDark,
+    inv_cardBg: cardBg, inv_cardBorder: cardBorder, inv_cardDivide: cardDivide,
+    inv_textStrong: textStrong, inv_textMuted: textMuted,
+    inv_inputBg: inputBg, inv_inputBorder: inputBorder,
+    accent: accentText
+  } = useThemeTokens();
 
   const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

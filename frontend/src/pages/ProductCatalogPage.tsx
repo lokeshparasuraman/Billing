@@ -6,7 +6,12 @@ import { Package, Search, Plus, X, Trash2 } from 'lucide-react';
 import { useThemeTokens } from '../hooks/useThemeTokens';
 
 export const ProductCatalogPage: React.FC = () => {
-  const { isDark, surfaceBg: cardBg, cardBorder, cardDivide, textStrong, textMuted, inputBg, inputBorder, accentText } = useThemeTokens();
+  const { isDark,
+    inv_cardBg: cardBg, inv_cardBorder: cardBorder, inv_cardDivide: cardDivide,
+    inv_textStrong: textStrong, inv_textMuted: textMuted,
+    inv_inputBg: inputBg, inv_inputBorder: inputBorder,
+    accent: accentText
+  } = useThemeTokens();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

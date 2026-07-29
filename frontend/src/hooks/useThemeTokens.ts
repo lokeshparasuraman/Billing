@@ -53,29 +53,30 @@ export function useThemeTokens() {
   const inv_inputBg    = isDark ? 'rgba(0,0,0,0.04)'           : 'rgba(255,255,255,0.06)';
   const inv_inputBorder= isDark ? 'rgba(0,0,0,0.08)'           : 'rgba(255,255,255,0.08)';
 
-  /* ── Auth page tokens ────────────────────────────────────────── */
-  // Auth page always uses a distinct premium background regardless of mode
+  /* ── Auth page tokens ──────────────────────────────────────── */
+  // Auth page ALSO uses the inverted card (dark teal in light, near-white in dark)
+  // so it is visually consistent with the rest of the app.
   const authBg          = isDark ? '#051c1a'                   : '#dde3ec';
-  const authCardBg      = isDark ? '#0a2421'                   : '#f1f5f9';
-  const authCardBorder  = isDark ? 'rgba(255,255,255,0.09)'    : 'rgba(0,0,0,0.10)';
+  const authCardBg      = isDark ? '#ebedf0'                   : '#051c1a';   // ← inverted billing card
+  const authCardBorder  = isDark ? 'rgba(0,0,0,0.08)'          : 'rgba(255,255,255,0.12)';
   const authCardShadow  = isDark
-    ? '0 24px 60px rgba(0,0,0,0.50)'
-    : '0 24px 60px rgba(0,0,0,0.12)';
-  const authText        = isDark ? '#ffffff'                   : '#051c1a';
-  const authMuted       = isDark ? 'rgba(255,255,255,0.50)'    : 'rgba(5,28,26,0.55)';
-  const authIconColor   = isDark ? '#c9f227'                   : '#2d7a1f';
-  const authInputBg     = isDark ? 'rgba(5,28,26,0.70)'        : 'rgba(0,0,0,0.05)';
-  const authInputBorder = isDark ? 'rgba(255,255,255,0.12)'    : 'rgba(0,0,0,0.15)';
-  const authInputText   = isDark ? '#ffffff'                   : '#051c1a';
-  const authInputPlaceholder = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(5,28,26,0.35)';
-  const authLabelColor  = isDark ? 'rgba(255,255,255,0.60)'    : 'rgba(5,28,26,0.65)';
-  const authEyeColor    = isDark ? 'rgba(255,255,255,0.75)'    : 'rgba(5,28,26,0.55)';
-  const authGlowColor1  = isDark ? 'rgba(201,242,39,0.07)'     : 'rgba(201,242,39,0.06)';
-  const authGlowColor2  = isDark ? 'rgba(10,56,50,0.6)'        : 'rgba(5,28,26,0.08)';
-  const authToggleBg    = isDark ? 'rgba(5,28,26,0.85)'        : 'rgba(0,0,0,0.06)';
-  const authToggleBorder= isDark ? 'rgba(255,255,255,0.08)'    : 'rgba(0,0,0,0.10)';
-  const authTabInactive = isDark ? 'rgba(255,255,255,0.55)'    : 'rgba(5,28,26,0.45)';
-  const authFooterText  = isDark ? 'rgba(255,255,255,0.30)'    : 'rgba(5,28,26,0.35)';
+    ? '0 24px 60px rgba(0,0,0,0.15)'
+    : '0 24px 60px rgba(0,0,0,0.50)';
+  const authText        = isDark ? '#051c1a'                   : '#ffffff';   // text inside inverted card
+  const authMuted       = isDark ? 'rgba(5,28,26,0.60)'        : 'rgba(255,255,255,0.65)';
+  const authIconColor   = isDark ? '#2d7a1f'                   : '#c9f227';   // lime on dark card, teal on light card
+  const authInputBg     = isDark ? 'rgba(0,0,0,0.05)'          : 'rgba(255,255,255,0.06)';
+  const authInputBorder = isDark ? 'rgba(0,0,0,0.15)'          : 'rgba(255,255,255,0.18)';
+  const authInputText   = isDark ? '#051c1a'                   : '#ffffff';
+  const authInputPlaceholder = isDark ? 'rgba(5,28,26,0.35)'  : 'rgba(255,255,255,0.35)';
+  const authLabelColor  = isDark ? 'rgba(5,28,26,0.60)'        : 'rgba(255,255,255,0.65)';
+  const authEyeColor    = isDark ? 'rgba(5,28,26,0.55)'        : 'rgba(255,255,255,0.75)';
+  const authGlowColor1  = isDark ? 'rgba(201,242,39,0.06)'     : 'rgba(201,242,39,0.07)';
+  const authGlowColor2  = isDark ? 'rgba(5,28,26,0.08)'        : 'rgba(10,56,50,0.6)';
+  const authToggleBg    = isDark ? 'rgba(0,0,0,0.08)'          : 'rgba(5,28,26,0.85)';
+  const authToggleBorder= isDark ? 'rgba(0,0,0,0.12)'          : 'rgba(255,255,255,0.08)';
+  const authTabInactive = isDark ? 'rgba(5,28,26,0.45)'        : 'rgba(255,255,255,0.55)';
+  const authFooterText  = isDark ? 'rgba(5,28,26,0.35)'        : 'rgba(255,255,255,0.30)';
 
   return {
     isDark,
