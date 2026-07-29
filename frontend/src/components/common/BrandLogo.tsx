@@ -34,9 +34,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     primaryColor   = '#051c1a';
     secondaryColor = 'rgba(5,28,26,0.55)';
   } else {
-    /* auto: dark mode → white; light mode → dark teal (like "pine labs" on pinelabs.com) */
-    primaryColor   = mode === 'dark' ? '#ffffff'             : '#051c1a';
-    secondaryColor = mode === 'dark' ? 'rgba(255,255,255,0.65)' : 'rgba(5,28,26,0.55)';
+    /* auto: dark mode (off-white card/navbar) → dark teal #051c1a; light mode (dark teal card/navbar) → white #ffffff */
+    primaryColor   = mode === 'dark' ? '#051c1a'                : '#ffffff';
+    secondaryColor = mode === 'dark' ? 'rgba(5,28,26,0.65)'     : 'rgba(255,255,255,0.65)';
   }
 
   return (
