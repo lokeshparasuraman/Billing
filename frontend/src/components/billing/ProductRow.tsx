@@ -228,8 +228,11 @@ export const ProductRow: React.FC<ProductRowProps> = ({
                 max="100"
                 step="any"
                 value={row.gstRate === undefined || row.gstRate === null ? '' : row.gstRate}
+                onFocus={(e) => e.target.select()}
+                onClick={(e) => (e.target as HTMLInputElement).select()}
                 onChange={e => {
-                  const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                  const raw = e.target.value;
+                  const val = raw === '' ? 0 : parseFloat(raw);
                   onUpdate({ gstRate: isNaN(val) ? 0 : Math.max(0, Math.min(100, val)) });
                 }}
                 placeholder="18"
@@ -373,8 +376,11 @@ export const ProductRow: React.FC<ProductRowProps> = ({
               max="100"
               step="any"
               value={row.gstRate === undefined || row.gstRate === null ? '' : row.gstRate}
+              onFocus={(e) => e.target.select()}
+              onClick={(e) => (e.target as HTMLInputElement).select()}
               onChange={e => {
-                const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                const raw = e.target.value;
+                const val = raw === '' ? 0 : parseFloat(raw);
                 onUpdate({ gstRate: isNaN(val) ? 0 : Math.max(0, Math.min(100, val)) });
               }}
               placeholder="18"
