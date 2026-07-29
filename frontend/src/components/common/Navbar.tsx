@@ -239,7 +239,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
     inv_inputBg: mInputBg, inv_inputBorder: mInputBorder,
     accent,
   } = useThemeTokens();
-  const navBg = isDark ? 'rgba(245,245,220,0.95)' : 'rgba(5,28,26,0.92)';
+  const navBg = isDark ? 'rgba(245,245,220,0.60)' : 'rgba(5,28,26,0.65)';
   const mobileBg = isDark ? '#F5F5DC' : '#051c1a';
   const border = isDark ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.12)';
   const divider = isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
@@ -248,29 +248,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   return (
     <>
       {/* ══════════════════════════════
-          MAIN NAVBAR — sticky, frosted
+          MAIN NAVBAR — sticky, high transparency frosted glass
           ══════════════════════════════ */}
       <nav
         className="no-print fixed top-0 left-0 right-0 w-full z-50"
         style={{
           backgroundColor: navBg,
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           borderBottom: `1px solid ${border}`,
         }}
       >
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', height: '64px', gap: '0' }}>
+        <div style={{ width: '100%', padding: '0 16px', boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', alignItems: 'center', height: '64px', width: '100%', justifyContent: 'space-between' }}>
 
             {/* LEFT: Brand wordmark */}
-            <a href="/" onClick={handleLogoClick} style={{ textDecoration: 'none', flexShrink: 0, marginRight: 'auto' }}>
+            <a href="/" onClick={handleLogoClick} style={{ textDecoration: 'none', flexShrink: 0 }}>
               <BrandLogo storeName={storeDetails.storeName} size="md" />
             </a>
 
-            {/* RIGHT GROUP: nav links + controls — hidden on mobile, flex on md+ */}
+            {/* RIGHT GROUP: nav links + controls — placed directly at far right corner */}
             <div
               className="hidden md:flex"
-              style={{ alignItems: 'center', height: '64px', gap: '0' }}
+              style={{ alignItems: 'center', height: '64px', gap: '0', marginLeft: 'auto' }}
             >
               {/* Nav links : bold 700, 24px side padding, 14px */}
               {navItems.map((item) => {
@@ -283,7 +283,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                       position: 'relative',
                       display: 'flex',
                       alignItems: 'center',
-                      padding: '0 24px',
+                      padding: '0 20px',
                       height: '64px',
                       fontSize: '14px',
                       fontWeight: 700,
@@ -302,7 +302,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                     <span
                       className="pine-nav-underline"
                       style={{
-                        position: 'absolute', bottom: 0, left: '24px', right: '24px',
+                        position: 'absolute', bottom: 0, left: '20px', right: '20px',
                         height: '2px', backgroundColor: txtPrimary,
                         borderRadius: '2px 2px 0 0',
                         opacity: isActive ? 1 : 0,
@@ -325,7 +325,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '0 20px',
+                  padding: '0 18px',
                   height: '64px',
                   fontSize: '14px',
                   fontWeight: 700,
@@ -345,7 +345,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 <span
                   className="pine-nav-underline"
                   style={{
-                    position: 'absolute', bottom: 0, left: '20px', right: '20px',
+                    position: 'absolute', bottom: 0, left: '18px', right: '18px',
                     height: '2px', backgroundColor: txtPrimary,
                     borderRadius: '2px 2px 0 0',
                     opacity: isBankModalOpen ? 1 : 0,
@@ -356,17 +356,39 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               </button>
 
               {/* Separator */}
-              <div style={{ width: '1px', height: '20px', backgroundColor: border, margin: '0 16px' }} />
+              <div style={{ width: '1px', height: '20px', backgroundColor: border, margin: '0 12px' }} />
 
-              {/* Theme toggle */}
+              {/* Theme toggle — lighted in dark mode */}
               <button
                 type="button" onClick={toggleTheme}
                 title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', color: txtMuted, display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s' }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = iconHoverBg; el.style.color = txtPrimary; }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'none'; el.style.color = txtMuted; }}
+                style={{
+                  background: isDark ? 'rgba(5,28,26,0.12)' : 'rgba(255,255,255,0.12)',
+                  border: `1px solid ${border}`,
+                  cursor: 'pointer',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  color: txtPrimary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  transition: 'all 0.15s',
+                  boxShadow: isDark ? '0 0 10px rgba(201,242,39,0.3)' : 'none',
+                }}
               >
-                {isDark ? <Sun style={{ width: 18, height: 18 }} /> : <Moon style={{ width: 18, height: 18 }} />}
+                {isDark ? (
+                  <>
+                    <Moon style={{ width: 16, height: 16, color: '#051c1a' }} />
+                    <span style={{ color: '#051c1a' }}>Dark</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun style={{ width: 16, height: 16, color: '#ffffff' }} />
+                    <span style={{ color: '#ffffff' }}>Light</span>
+                  </>
+                )}
               </button>
 
               {/* Pine Labs style Font Size Switcher (A- / A+) */}
