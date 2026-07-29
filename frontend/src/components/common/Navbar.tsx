@@ -18,7 +18,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const { rows, clearBillingForm, storeDetails, setStoreDetails } = useBillingStore();
   const { user, logout, deleteAccount } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [fontHover, setFontHover] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isConfirmDelete, setIsConfirmDelete] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);

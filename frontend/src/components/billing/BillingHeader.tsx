@@ -5,7 +5,7 @@ import { PaymentMode } from '../../types/billing';
 import {
   Calendar as CalendarIcon, Hash, CreditCard, Banknote, QrCode, ShieldAlert,
   MapPin, FileCheck, Phone, Clock, ChevronLeft, ChevronRight, Edit3, Check, Building, Plus, Trash2,
-  Truck, User, Navigation, Package, Mail
+  Truck, User, Mail
 } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 

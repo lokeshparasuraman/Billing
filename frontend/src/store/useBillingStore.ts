@@ -370,35 +370,23 @@ export const useBillingStore = create<BillingState>((set, get) => ({
   },
 
   resetWithNextInvoiceNumber: (nextNum: string) => {
-    set((state) => ({
-      editingInvoiceId: null,
-      header: {
-        ...initialHeader,
-        invoiceNumber: nextNum,
-        invoiceDate: new Date().toISOString().split('T')[0],
-        transportDetails: {
-          ...initialHeader.transportDetails,
-          fromLocation: state.storeDetails.address || defaultStoreDetails.address,
-        },
-      },
-      rows: [createEmptyRow(1, state.lastUsedGstRate)],
-      activeRowIndex: 0,
-      activeCellField: 'partNumber',
-      validationError: null,
-    }));
+    get().clearBillingForm();
+    if (nextNum) {
+      get().setHeaderField('invoiceNumber', nextNum);
+    }
   },
 
   loadInvoiceForEditing: (invoice: SavedInvoice) => {
-    const loadedRows: InvoiceItemRow[] = (invoice.items || []).map((item: any, idx) => {
-      const isLabour = item.partNumber === 'LABOUR' || item.itemType === 'LABOUR';
-      const isMisc = item.partNumber === 'MISC-SPARES' || item.itemType === 'SPARES_MISC';
+    const loadedRows: InvoiceItemRow[] = (invoice.items || []).map((item, idx) => {
+      const isLabour = item.partNumber === 'LABOUR' || (item as any).itemType === 'LABOUR';
+      const isMisc = item.partNumber === 'MISC-SPARES' || (item as any).itemType === 'SPARES_MISC';
 
       const row: InvoiceItemRow = {
-        rowId: item.id || `row_${Date.now()}_edit_${idx}`,
+        rowId: (item as any).id || `row_${Date.now()}_edit_${idx}`,
         itemType: isLabour ? 'LABOUR' : 'SPARES',
-        productId: item.productId || '',
+        productId: (item as any).productId || '',
         partNumber: item.partNumber || (isLabour ? 'LABOUR' : (isMisc ? 'MISC-SPARES' : 'N/A')),
-        name: item.productName || item.name || 'Item',
+        name: (item as any).productName || (item as any).name || 'Item',
         hsn: item.hsn || 'N/A',
         unit: item.unit || (isLabour ? 'JOB' : 'PCS'),
         quantity: item.quantity !== undefined ? item.quantity : 1,
@@ -406,7 +394,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
         discount: item.discount !== undefined ? item.discount : 0,
         gstRate: item.gstRate !== undefined ? item.gstRate : 18,
         gstAmount: item.gstAmount || 0,
-        taxableAmount: item.taxableAmount || 0,
+        taxableAmount: (item as any).taxableAmount || 0,
         total: item.total || 0,
       };
       return calculateRowTotals(row);
