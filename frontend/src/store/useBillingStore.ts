@@ -10,6 +10,11 @@ export interface StoreDetails {
   gstin: string;
   phone: string;
   address: string;
+  bankName?: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  branchName?: string;
+  upiId?: string;
 }
 
 const defaultStoreDetails: StoreDetails = {
@@ -19,6 +24,11 @@ const defaultStoreDetails: StoreDetails = {
   gstin: '33BAEPP2449B1Z3',
   phone: '+91 9445662637',
   address: '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701',
+  bankName: 'STATE BANK OF INDIA',
+  accountNumber: '41234567890',
+  ifscCode: 'SBIN0001234',
+  branchName: 'Dharmapuri Main Branch',
+  upiId: 'owshika@sbi',
 };
 
 function loadStoreDetails(): StoreDetails {

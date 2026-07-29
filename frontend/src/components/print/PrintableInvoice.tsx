@@ -30,6 +30,11 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
   const gstin = store?.gstin || '33BAEPP2449B1Z3';
   const address = store?.address || '4/783, Kothumai Mill, Near New Bus Stand, Salem Main Road, Dharmapuri - 636701';
   const phone = store?.phone || '+91 9445662637';
+  const bankName = store?.bankName || 'STATE BANK OF INDIA';
+  const accountNumber = store?.accountNumber || '41234567890';
+  const ifscCode = store?.ifscCode || 'SBIN0001234';
+  const branchName = store?.branchName || 'Dharmapuri Main Branch';
+  const upiId = store?.upiId || 'owshika@sbi';
 
   // Dynamically compute Place of Supply state from GSTIN prefix
   const gstStateMap: Record<string, string> = {
@@ -241,10 +246,10 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
                 Bank Details for NEFT / RTGS / Online Transfer:
               </span>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-black text-xs pt-0.5">
-                <div><span className="font-sans text-gray-600 text-[10px] block">Bank Name:</span> <strong>HDFC Bank Ltd</strong></div>
-                <div><span className="font-sans text-gray-600 text-[10px] block">Account No:</span> <strong>50200012345678</strong></div>
-                <div><span className="font-sans text-gray-600 text-[10px] block">IFSC Code:</span> <strong>HDFC0000123</strong></div>
-                <div><span className="font-sans text-gray-600 text-[10px] block">Branch:</span> <strong>Dharmapuri Main Branch</strong></div>
+                <div><span className="font-sans text-gray-600 text-[10px] block">Bank Name:</span> <strong>{bankName}</strong></div>
+                <div><span className="font-sans text-gray-600 text-[10px] block">Account No:</span> <strong>{accountNumber}</strong></div>
+                <div><span className="font-sans text-gray-600 text-[10px] block">IFSC Code:</span> <strong>{ifscCode}</strong></div>
+                <div><span className="font-sans text-gray-600 text-[10px] block">Branch / UPI:</span> <strong>{branchName} {upiId ? `(${upiId})` : ''}</strong></div>
               </div>
             </div>
           </div>

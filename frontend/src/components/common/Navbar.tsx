@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, Menu, X, ChevronRight, Keyboard, LogOut, User as UserIcon, Trash2, AlertTriangle } from 'lucide-react';
+import { Sun, Moon, Menu, X, ChevronRight, Keyboard, LogOut, User as UserIcon, Trash2, AlertTriangle, Landmark } from 'lucide-react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useBillingStore } from '../../store/useBillingStore';
 import { useAuth } from '../../context/AuthContext';
@@ -15,7 +15,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const location = useLocation();
   const { mode, toggleTheme } = useThemeMode();
-  const { rows, clearBillingForm, storeDetails } = useBillingStore();
+  const { rows, clearBillingForm, storeDetails, setStoreDetails } = useBillingStore();
   const { user, logout, deleteAccount } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [fontHover, setFontHover] = useState(false);
@@ -23,6 +23,53 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const [isConfirmDelete, setIsConfirmDelete] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null);
+
+  /* ─── Bank details modal state & handlers ─── */
+  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
+  const [bankForm, setBankForm] = useState({
+    bankName: '',
+    accountNumber: '',
+    ifscCode: '',
+    branchName: '',
+    upiId: '',
+  });
+  const [isSavingBank, setIsSavingBank] = useState(false);
+  const [bankSaveSuccess, setBankSaveSuccess] = useState(false);
+
+  const handleOpenBankModal = () => {
+    setBankForm({
+      bankName: storeDetails.bankName || 'STATE BANK OF INDIA',
+      accountNumber: storeDetails.accountNumber || '41234567890',
+      ifscCode: storeDetails.ifscCode || 'SBIN0001234',
+      branchName: storeDetails.branchName || 'Dharmapuri Main Branch',
+      upiId: storeDetails.upiId || 'owshika@sbi',
+    });
+    setBankSaveSuccess(false);
+    setIsBankModalOpen(true);
+  };
+
+  const handleSaveBankDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingBank(true);
+    try {
+      await setStoreDetails({
+        bankName: bankForm.bankName.trim().toUpperCase(),
+        accountNumber: bankForm.accountNumber.trim(),
+        ifscCode: bankForm.ifscCode.trim().toUpperCase(),
+        branchName: bankForm.branchName.trim(),
+        upiId: bankForm.upiId.trim().toLowerCase(),
+      });
+      setBankSaveSuccess(true);
+      setTimeout(() => {
+        setIsBankModalOpen(false);
+        setBankSaveSuccess(false);
+      }, 1000);
+    } catch (err) {
+      console.error('Failed to save bank details:', err);
+    } finally {
+      setIsSavingBank(false);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     setDeletingAccount(true);
@@ -69,9 +116,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
     setFontSize(DEFAULT_FONT_SIZE);
   };
 
-  /* ─── Scroll lock when mobile menu drawer or profile modal is opened ─── */
+  /* ─── Scroll lock when mobile menu drawer, profile modal, or bank modal is opened ─── */
   useEffect(() => {
-    if (mobileOpen || isProfileModalOpen) {
+    if (mobileOpen || isProfileModalOpen || isBankModalOpen) {
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
       document.documentElement.style.overflow = 'hidden';
@@ -85,7 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
       document.body.style.touchAction = '';
       document.documentElement.style.overflow = '';
     };
-  }, [mobileOpen, isProfileModalOpen]);
+  }, [mobileOpen, isProfileModalOpen, isBankModalOpen]);
 
 
 
@@ -188,6 +235,47 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                   </Link>
                 );
               })}
+
+              {/* Bank Details button */}
+              <button
+                type="button"
+                onClick={handleOpenBankModal}
+                title="Edit Bank Details & UPI"
+                className="pine-nav-link"
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '0 20px',
+                  height: '64px',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: isBankModalOpen ? txtPrimary : txtMuted,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  letterSpacing: '0em',
+                  transition: 'color 0.15s',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = txtPrimary; }}
+                onMouseLeave={e => { if (!isBankModalOpen) (e.currentTarget as HTMLElement).style.color = txtMuted; }}
+              >
+                <Landmark style={{ width: 16, height: 16 }} />
+                <span>Bank Details</span>
+                <span
+                  className="pine-nav-underline"
+                  style={{
+                    position: 'absolute', bottom: 0, left: '20px', right: '20px',
+                    height: '2px', backgroundColor: txtPrimary,
+                    borderRadius: '2px 2px 0 0',
+                    opacity: isBankModalOpen ? 1 : 0,
+                    transform: isBankModalOpen ? 'scaleX(1)' : 'scaleX(0)',
+                    transition: 'opacity 0.18s, transform 0.18s',
+                  }}
+                />
+              </button>
 
               {/* Separator */}
               <div style={{ width: '1px', height: '20px', backgroundColor: border, margin: '0 16px' }} />
@@ -462,6 +550,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
               </Link>
             );
           })}
+
+          {/* Mobile Bank Details button */}
+          <div
+            onClick={handleOpenBankModal}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '18px 20px',
+              fontSize: '17px',
+              fontWeight: 600,
+              color: txtPrimary,
+              cursor: 'pointer',
+              borderBottom: `1px solid ${divider}`,
+              transition: 'background 0.12s',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Landmark style={{ width: 20, height: 20, color: '#c9f227' }} />
+              <span>Bank Details</span>
+            </div>
+            <ChevronRight style={{ width: 18, height: 18, color: txtMuted }} />
+          </div>
         </div>
 
         {/* User info + Logout — shown when logged in */}
@@ -825,6 +936,216 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════
+          BANK DETAILS EDITOR MODAL
+          ══════════════════════════════ */}
+      {isBankModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto"
+          style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', touchAction: 'none' }}
+          onClick={() => setIsBankModalOpen(false)}
+          onTouchMove={(e) => e.preventDefault()}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl p-5 sm:p-6 shadow-2xl overflow-hidden my-auto animate-fadeIn"
+            style={{
+              backgroundColor: isDark ? '#0a2421' : '#ffffff',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
+              color: txtPrimary,
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              overflowX: 'hidden',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(201,242,39,0.15)',
+                    border: '1.5px solid rgba(201,242,39,0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#c9f227',
+                  }}
+                >
+                  <Landmark style={{ width: 20, height: 20 }} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>Bank Details & UPI</h3>
+                  <p style={{ margin: 0, fontSize: '12px', color: txtMuted }}>Stored in database for A4 Invoices</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBankModalOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: txtMuted }}
+              >
+                <X style={{ width: 20, height: 20 }} />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSaveBankDetails} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                  Bank Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.bankName}
+                  onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })}
+                  placeholder="e.g. STATE BANK OF INDIA"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    border: `1px solid ${border}`,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                    color: txtPrimary,
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                  Account Number
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.accountNumber}
+                  onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value })}
+                  placeholder="e.g. 41234567890"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    border: `1px solid ${border}`,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                    color: txtPrimary,
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                    IFSC Code
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={bankForm.ifscCode}
+                    onChange={(e) => setBankForm({ ...bankForm, ifscCode: e.target.value.toUpperCase() })}
+                    placeholder="e.g. SBIN0001234"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      border: `1px solid ${border}`,
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                      color: txtPrimary,
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                    Branch Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={bankForm.branchName}
+                    onChange={(e) => setBankForm({ ...bankForm, branchName: e.target.value })}
+                    placeholder="e.g. Dharmapuri Branch"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      border: `1px solid ${border}`,
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                      color: txtPrimary,
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: txtMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                  UPI ID (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={bankForm.upiId}
+                  onChange={(e) => setBankForm({ ...bankForm, upiId: e.target.value })}
+                  placeholder="e.g. owshika@sbi"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    border: `1px solid ${border}`,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                    color: txtPrimary,
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              {bankSaveSuccess && (
+                <div style={{ padding: '10px', backgroundColor: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '10px', color: '#4ade80', fontSize: '12px', textAlign: 'center', fontWeight: 700 }}>
+                  ✓ Bank Details Saved to Database!
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSavingBank}
+                style={{
+                  marginTop: '6px',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  backgroundColor: '#c9f227',
+                  color: '#051c1a',
+                  fontWeight: 800,
+                  fontSize: '14px',
+                  cursor: isSavingBank ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(201,242,39,0.25)',
+                }}
+              >
+                {isSavingBank ? 'Saving...' : 'Save Bank Details'}
+              </button>
+            </form>
           </div>
         </div>
       )}
