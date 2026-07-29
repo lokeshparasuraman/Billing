@@ -5,6 +5,7 @@ import { SavedInvoice } from '../types/billing';
 import { formatCurrency } from '../utils/calculations';
 import { Search, FileText, Eye, Trash2, ArrowUpDown, ChevronDown, Check, Edit3 } from 'lucide-react';
 import { A4InvoicePreviewModal } from '../components/print/A4InvoicePreviewModal';
+import { ConfirmDeleteModal } from '../components/common/ConfirmDeleteModal';
 import { useThemeTokens } from '../hooks/useThemeTokens';
 import { useBillingStore } from '../store/useBillingStore';
 
@@ -24,6 +25,8 @@ export const InvoiceHistoryPage: React.FC = () => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<SavedInvoice | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<{ id: string; invNum: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -76,18 +79,21 @@ export const InvoiceHistoryPage: React.FC = () => {
     navigate('/');
   };
 
-  const handleDeleteInvoice = async (id: string, invNum: string) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete invoice ${invNum} from history?\n\nThis action cannot be undone.`
-    );
-    if (!confirmDelete) return;
+  const handleDeleteInvoice = (id: string, invNum: string) => {
+    setInvoiceToDelete({ id, invNum });
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!invoiceToDelete) return;
+    setIsDeleting(true);
     try {
-      await deleteInvoice(id);
+      await deleteInvoice(invoiceToDelete.id);
       await loadInvoices();
     } catch (err) {
       console.error('Failed to delete invoice:', err);
-      alert('Failed to delete invoice from history.');
+    } finally {
+      setIsDeleting(false);
+      setInvoiceToDelete(null);
     }
   };
 
@@ -384,6 +390,18 @@ export const InvoiceHistoryPage: React.FC = () => {
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         invoice={selectedInvoice}
+      />
+
+      {/* Styled In-App Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!invoiceToDelete}
+        title="Delete Invoice?"
+        message="Are you sure you want to delete this invoice from history?"
+        itemName={invoiceToDelete?.invNum}
+        confirmText="Delete Invoice"
+        isDeleting={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setInvoiceToDelete(null)}
       />
     </div>
   );

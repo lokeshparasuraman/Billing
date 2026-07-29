@@ -6,6 +6,7 @@ import { useThemeTokens } from '../../hooks/useThemeTokens';
 import { useBillingStore } from '../../store/useBillingStore';
 import { useAuth } from '../../context/AuthContext';
 import { BrandLogo } from './BrandLogo';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { saveBankDetailsApi } from '../../services/api';
 
 interface NavbarProps {
@@ -22,6 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
   const [isConfirmDelete, setIsConfirmDelete] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   /* ─── Bank details modal state & handlers ─── */
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
@@ -211,9 +213,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
       (r) => (r.name && r.name.trim() !== '') || (r.partNumber && r.partNumber.trim() !== '')
     );
     if (hasEnteredProducts) {
-      const ok = window.confirm('Warning: You have unsaved products.\n\nDiscard and reload?');
-      if (!ok) return;
+      setIsResetConfirmOpen(true);
+      return;
     }
+    executeResetForm();
+  };
+
+  const executeResetForm = () => {
     clearBillingForm();
     if (location.pathname === '/') window.location.reload();
     else window.location.href = '/';
@@ -1264,6 +1270,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           </div>
         </div>
       )}
+
+      {/* Styled In-App Confirm Reset Modal */}
+      <ConfirmDeleteModal
+        isOpen={isResetConfirmOpen}
+        title="Discard Unsaved Invoice?"
+        message="You have items entered in the current billing form. Are you sure you want to discard them and reset?"
+        confirmText="Discard & Reset"
+        cancelText="Keep Editing"
+        onConfirm={() => {
+          setIsResetConfirmOpen(false);
+          executeResetForm();
+        }}
+        onCancel={() => setIsResetConfirmOpen(false)}
+      />
     </>
   );
 };

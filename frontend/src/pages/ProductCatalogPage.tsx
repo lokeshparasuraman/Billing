@@ -4,6 +4,7 @@ import { Product } from '../types/billing';
 import { sanitizePriceInput, handlePriceKeyDown } from '../utils/calculations';
 import { Package, Search, Plus, X, Trash2 } from 'lucide-react';
 import { useThemeTokens } from '../hooks/useThemeTokens';
+import { ConfirmDeleteModal } from '../components/common/ConfirmDeleteModal';
 
 export const ProductCatalogPage: React.FC = () => {
   const { isDark,
@@ -18,6 +19,8 @@ export const ProductCatalogPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isDeletingProduct, setIsDeletingProduct] = useState(false);
 
   // New product form state
   const [newProd, setNewProd] = useState({
@@ -67,18 +70,21 @@ export const ProductCatalogPage: React.FC = () => {
     }
   };
 
-  const handleDeleteProduct = async (id: string, name: string) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete product '${name}' from catalog?`
-    );
-    if (!confirmDelete) return;
+  const handleDeleteProduct = (id: string, name: string) => {
+    setProductToDelete({ id, name });
+  };
 
+  const handleConfirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    setIsDeletingProduct(true);
     try {
-      await deleteProduct(id);
+      await deleteProduct(productToDelete.id);
       loadCatalog();
     } catch (err) {
       console.error(err);
-      alert('Failed to delete product.');
+    } finally {
+      setIsDeletingProduct(false);
+      setProductToDelete(null);
     }
   };
 
@@ -410,6 +416,18 @@ export const ProductCatalogPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Styled In-App Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!productToDelete}
+        title="Delete Product?"
+        message="Are you sure you want to delete this product from the catalog?"
+        itemName={productToDelete?.name}
+        confirmText="Delete Product"
+        isDeleting={isDeletingProduct}
+        onConfirm={handleConfirmDeleteProduct}
+        onCancel={() => setProductToDelete(null)}
+      />
     </div>
   );
 };
