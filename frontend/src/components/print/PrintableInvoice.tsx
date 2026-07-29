@@ -61,7 +61,7 @@ export const PrintableInvoice: React.FC<PrintableInvoiceProps> = ({ invoice }) =
               {storeName}
             </h1>
             <p className="text-xs font-bold text-gray-800 uppercase tracking-wide">
-              Driver Seats Dealer Seating&amp;Spares
+              Driver Seat Dealer Seating &amp; Spares
             </p>
             <p className="text-xs text-black font-medium leading-snug">
               {address}

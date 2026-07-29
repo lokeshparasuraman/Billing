@@ -10,7 +10,7 @@ export const ProductCatalogPage: React.FC = () => {
   const isDark = mode === 'dark';
 
   /* Theme tokens matching home page card design */
-  const cardBg     = isDark ? '#0a2421' : '#ffffff';
+  const cardBg     = isDark ? '#0a2421' : '#f1f5f9';
   const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.10)';
   const cardDivide = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
   const textStrong = isDark ? '#ffffff' : '#051c1a';

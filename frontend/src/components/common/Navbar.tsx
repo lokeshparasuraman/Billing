@@ -159,8 +159,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
 
   /* ─── Theme tokens ─── */
   const isDark = mode === 'dark';
-  const navBg = isDark ? 'rgba(5,28,26,0.80)' : 'rgba(255,255,255,0.85)';
-  const mobileBg = isDark ? '#051c1a' : '#ffffff';
+  const navBg = isDark ? 'rgba(5,28,26,0.80)' : 'rgba(226,232,240,0.90)';
+  const mobileBg = isDark ? '#051c1a' : '#e2e8f0';
   const border = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
   const txtPrimary = isDark ? '#ffffff' : '#051c1a';
   const txtMuted = isDark ? 'rgba(255,255,255,0.60)' : 'rgba(5,28,26,0.55)';
@@ -746,7 +746,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           <div
             className="relative w-full max-w-md rounded-2xl p-6 shadow-2xl overflow-hidden animate-fadeIn"
             style={{
-              backgroundColor: isDark ? '#0a2421' : '#ffffff',
+              backgroundColor: isDark ? '#0a2421' : '#f1f5f9',
               border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
               color: txtPrimary,
             }}
@@ -953,7 +953,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
           <div
             className="relative w-full max-w-md rounded-2xl p-5 sm:p-6 shadow-2xl overflow-hidden my-auto animate-fadeIn"
             style={{
-              backgroundColor: isDark ? '#0a2421' : '#ffffff',
+              backgroundColor: isDark ? '#0a2421' : '#f1f5f9',
               border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
               color: txtPrimary,
               maxHeight: '90vh',

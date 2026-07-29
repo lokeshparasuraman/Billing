@@ -153,7 +153,7 @@ export const BillingHeader: React.FC = () => {
   const cardMutedStyle = { color: cardMuted };
 
   return (
-    <div className="bg-white dark:bg-[#051c1a] rounded-2xl border p-4 sm:p-5 space-y-4 shadow-sm" style={{ borderColor: cardBorder }} ref={null as any}>
+    <div className="bg-[#f1f5f9] dark:bg-[#051c1a] rounded-2xl border p-4 sm:p-5 space-y-4 shadow-sm" style={{ borderColor: cardBorder }} ref={null as any}>
 
       {/* ── Bill Type Selector Bar (Theme contrast fixed: 100% visible) ── */}
       <div className="flex items-center justify-between flex-wrap gap-3 pb-3.5 border-b border-black/[0.08] dark:border-white/[0.08]">
