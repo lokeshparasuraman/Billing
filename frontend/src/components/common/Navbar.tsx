@@ -159,19 +159,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenShortcuts }) => {
     }
   };
 
-  /* ─── Font size state persisted to localStorage ─── */
+  /* ─── Font size state — resets to DEFAULT (16px) on page reload ─── */
   const MIN_FONT_SIZE = 12;
   const MAX_FONT_SIZE = 26;
   const DEFAULT_FONT_SIZE = 16;
 
-  const [fontSize, setFontSize] = useState<number>(() => {
-    const saved = localStorage.getItem('pine_font_size');
-    return saved ? parseInt(saved, 10) : DEFAULT_FONT_SIZE;
-  });
+  const [fontSize, setFontSize] = useState<number>(DEFAULT_FONT_SIZE);
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontSize}px`;
-    localStorage.setItem('pine_font_size', String(fontSize));
   }, [fontSize]);
 
   const handleDecreaseFont = (e?: React.MouseEvent) => {
